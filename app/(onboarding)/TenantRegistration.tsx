@@ -1,0 +1,81 @@
+
+import { Alert, Keyboard, KeyboardAvoidingView, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native'
+import React, { useState } from 'react'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import Glass from 'components/glassmorph'
+import InputField from 'components/input-field'
+import Button from 'components/button'
+import Logo from 'components/logo'
+import { router } from 'expo-router'
+
+export default function TenantRegistration({email}) {
+  const [name, setName] = useState('')
+  const [address, setAddress] = useState('')
+  const [age, setAge] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [isEmpty, setIsEmpty] = useState(false)
+
+  const handleNameChange = (text) =>{ setName(text); setIsEmpty(false);}
+  const handleAddressChange =  (text) => setAddress(text);
+  const handleAgeChange = (num) => setAge(num);
+  const handlePhoneNumberChange = (num) => setPhoneNumber(num);
+
+  // NOTE: REMOVED THE EMAIL DUE TO UNDEFINED ERROR
+  const handleSubmission = async () => {
+    const fields = [name, address, age, phoneNumber];
+    for (const field of fields) {
+      if (field.trim() === '') {
+        setIsEmpty(true)
+        Alert.alert('Please complete all fields');
+        return; 
+      } else {
+        router.replace("/(tabs)/")
+      }
+    }
+  }
+  return (
+      <SafeAreaView className='flex-1'>
+        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <KeyboardAvoidingView className='container flex-1 justify-center items-center'>
+            <>
+              <Logo />
+              <View className='mb-5 w-80'>
+                <Glass>
+                  <Text className='text-2xl font-semibold'>COMPLETE YOUR PROFILE INFORMATION</Text>
+                  <Text>Please complete your profile for the best user experience.</Text>
+                </Glass>
+              </View>
+              <View className='flex gap-y-4'>
+                <View>
+                  <InputField value={name} onChangeText={handleNameChange} placeholder={'Name: (ex. Juan De La Cruz)'} isPassword={false} isNumeric={""} isError={isEmpty}/>
+                </View>
+
+              <View>
+                <InputField value={address} onChangeText={handleAddressChange} placeholder={'Address (ex. Barangay, Municipality, Province)'} isPassword={false} isNumeric={""} isError={isEmpty}/>
+              </View>
+
+              <View>
+                <InputField value={email} onChangeText={email} placeholder={"Email"} isPassword={false} isNumeric={""} isError={isEmpty}/>
+              </View>
+
+              <View>
+                <InputField value={age} onChangeText={handleAgeChange} placeholder={"Age"} isPassword={false} isNumeric={"numeric"} isError={isEmpty}/>
+              </View>
+
+              <View>
+                <InputField value={phoneNumber} onChangeText={handlePhoneNumberChange} placeholder={"Phone number"} isPassword={false} isNumeric={"numeric"} isError={isEmpty}/>
+              </View>
+
+              </View>
+                <View className='mt-10'>
+                <Button text={"CONFIRM"} onPress={handleSubmission} />
+              </View>
+            </>
+          
+         </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
+      </SafeAreaView>
+    );
+}
+
+const styles = StyleSheet.create({})
