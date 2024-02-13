@@ -1,24 +1,11 @@
+import { View } from 'react-native';
 
-    import { Text, View } from "react-native";
-
-
-import EditScreenInfo from "../../components/edit-screen-info";
+import { Link } from 'expo-router';
 
 export default function TabOneScreen() {
-  
-        return (
-			<View className={styles.container}>
-				<Text className={styles.title}>Tab One</Text>
-				<View className={styles.separator} />
-				<EditScreenInfo path="app/(tabs)/index.tsx" />
-			</View>
-		);
-    
+  return (
+    <View className="flex-1 justify-center items-center">
+      <Link href={"/(onboarding)/Usertype"} >Not registered yet? Click here</Link>
+    </View>
+  );
 }
-
-
-    const styles = {
-		container: `items-center flex-1 justify-center`,
-		separator: `h-[1px] my-7 w-4/5 bg-gray-200`,
-		title: `text-xl font-bold`
-	};
