@@ -7,18 +7,19 @@ export default function InputField({
   onChangeText,
   isPassword,
   isNumeric,
-  isError,
+  isEditable
 }) {
   
   return (
     <TextInput
+      editable={isEditable}
       clearTextOnFocus
       value={value}
       keyboardType={isNumeric ? 'numeric' : 'default'}
       placeholder={placeholder}
       secureTextEntry={isPassword}
       onChangeText={onChangeText}
-      className={isError ? 'p-3 pl-5 border-red-500 focus:border-red-700 border rounded-md w-80 text-sm' : 'p-3 pl-5 border-gray-200 focus:border-gray-400 border rounded-md w-80 text-sm'}
+      className='p-3 pl-5 border-gray-200 focus:border-gray-400 border rounded-md w-80 text-sm'
     />
   );
 }
