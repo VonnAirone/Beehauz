@@ -1,11 +1,34 @@
-import { Stack } from 'expo-router';
+import { AuthProvider, useAuth } from '@/utils/AuthProvider';
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { Slot, Stack } from 'expo-router';
+import { useColorScheme } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export const unstable_settings = {
-  initialRouteName: '(auth)',
+  initialRouteName: '(tabs)',
 };
 
 export default function RootLayout() {
+
   return (
-    <Stack screenOptions={{headerShown: false}}/>
+    <AuthProvider>
+      <RootLayoutNav />
+    </AuthProvider>
   );
 }
+
+function RootLayoutNav() {
+  const colorScheme = useColorScheme();
+  const { session, authInitialized } = useAuth();
+
+  if (!authInitialized && !session?.user) return null;
+
+  return (
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <SafeAreaProvider>
+        <Stack screenOptions={{headerShown: false}}/>
+      </SafeAreaProvider>
+    </ThemeProvider>
+  );
+}
+

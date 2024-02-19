@@ -40,7 +40,7 @@ export default function Usertype() {
 
             <View className='w-80 border border-gray-200 rounded-md overflow-hidden'>
                 <Pressable 
-                onPress={() => router.push("/(onboarding)/TenantRegistration")}
+                onPress={() => router.push("/(onboarding)/OwnerRegistration")}
                 className='p-5 h-40 rounded-md flex-row items-center justify-between' 
                 android_ripple={{color: '#FCA311'}}>
                     <View>

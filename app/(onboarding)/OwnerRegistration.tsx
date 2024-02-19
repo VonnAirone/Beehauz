@@ -11,18 +11,14 @@ import { router } from 'expo-router'
 export default function TenantRegistration({email}) {
   const [name, setName] = useState('')
   const [address, setAddress] = useState('')
-  const [age, setAge] = useState('')
-  const [phoneNumber, setPhoneNumber] = useState('')
   const [isEmpty, setIsEmpty] = useState(false)
 
   const handleNameChange = (text) =>{ setName(text); setIsEmpty(false);}
   const handleAddressChange =  (text) => setAddress(text);
-  const handleAgeChange = (num) => setAge(num);
-  const handlePhoneNumberChange = (num) => setPhoneNumber(num);
 
   // NOTE: REMOVED THE EMAIL DUE TO UNDEFINED ERROR
   const handleSubmission = async () => {
-    const fields = [name, address, age, phoneNumber];
+    const fields = [name, address];
     let isEmpty = false;
   
     for (const field of fields) {
@@ -44,16 +40,16 @@ export default function TenantRegistration({email}) {
   return (
       <SafeAreaView className='flex-1'>
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <KeyboardAvoidingView className='container flex-1 justify-center items-center'>
+        <KeyboardAvoidingView className='container flex-1 top-36 items-center'>
             <>
-              <View className='w-80 mx-auto items-center'>
-                <Logo/>
+              <View className='w-80 mx-auto items-start'>
+                <Logo />
               </View>
               
               <View className='mb-5 w-80'>
                 <Glass>
-                  <Text className='text-2xl font-semibold text-center mb-2'>COMPLETE YOUR PROFILE INFORMATION</Text>
-                  <Text className='text-center'>Please complete your profile for the best user experience.</Text>
+                  <Text className='text-2xl font-semibold'>COMPLETE YOUR PROFILE INFORMATION</Text>
+                  <Text>Please complete your profile for the best user experience.</Text>
                 </Glass>
               </View>
               <View className='flex gap-y-4'>
@@ -86,25 +82,6 @@ export default function TenantRegistration({email}) {
                 isEditable={false}/>
               </View>
 
-              <View>
-                <InputField 
-                value={age} 
-                onChangeText={handleAgeChange} 
-                placeholder={"Age"} 
-                isPassword={false} 
-                isNumeric={"numeric"} 
-                isEditable={true}/>
-              </View>
-
-              <View>
-                <InputField 
-                value={phoneNumber} 
-                onChangeText={handlePhoneNumberChange} 
-                placeholder={"Phone number"} 
-                isPassword={false} 
-                isNumeric={"numeric"} 
-                isEditable={true}/>
-              </View>
 
               </View>
                 <View className='mt-10'>

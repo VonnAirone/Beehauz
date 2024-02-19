@@ -1,4 +1,4 @@
-import { Text, View, TextInput, Pressable, Image, KeyboardAvoidingView, Alert } from 'react-native';
+import { Text, View, TextInput, Pressable, Image, KeyboardAvoidingView, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import React, { useState } from 'react';
 import { Link, router } from 'expo-router';
 import Button from 'components/button';
@@ -120,14 +120,15 @@ export default function Login() {
       Alert.alert('Error logging in', error.message)
     } finally {
       setLoading(false)
-      router.replace('/(tabs)/')
+      router.replace('/(tenant)/(tabs)/one')
     }
   }
   
 
   return (
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
     <KeyboardAvoidingView className='container flex-1 justify-center'>
-      {/* <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}> */}
+      
         <View className='items-center flex-col gap-5'>
           {/* App Logo */}
           <View className='mb-5 flex flex-row items-center w-80 justify-center'>
@@ -148,13 +149,13 @@ export default function Login() {
 
               placeholderTextColor={(isEmailEmpty && email.trim() === '') ? 'red' : email.includes('@gmail.com') ? 'green': 'black'}
               
-              className={`p-3 pl-5 border-black border rounded-sm w-80 focus:border-yellow-500 ${
-                isEmailEmpty && email.trim() === '' ? 'border-red-500' : email.includes('@gmail.com') ? 'border-green-500' : ''
+              className={`p-3 pl-5 border border-gray-200 focus:border-gray-400 rounded-sm w-80 ${
+                isEmailEmpty && email.trim() === '' ? 'border-red-500' : email.includes('@gmail.com') ? 'border-gray-400' : ''
               }`}
               onChangeText={handleEmailChange} />
 
             {/* Feedback for Email */}
-            <Text className={isEmailEmpty && email.trim() === '' ? 'ml-5 mt-1 text-red-500 text-xs' : email.trim() !== '' && !email.includes('@gmail.com') ? 'ml-5 mt-1 text-yellow-500 text-xs' : 'hidden'}>
+            <Text className={isEmailEmpty && email.trim() === '' ? 'ml-5 mt-1 text-red-500 text-xs' : email.trim() !== '' && !email.includes('@gmail.com') ? 'ml-5 mt-1 text-gray-500 text-xs' : 'hidden'}>
               {email.trim() !== '' && !email.includes('@gmail.com') ? 'Please use a valid email.' : 'Your email is required for signing in.'}
             </Text>
 
@@ -169,21 +170,21 @@ export default function Login() {
               value={password}
               placeholder='Enter your password'
               placeholderTextColor={(isPasswordEmpty && password.trim() === '') ? 'red' : 'black'}
-              className={`p-3 pl-5 border-black border rounded-sm w-80 focus:border-yellow-500 ${
-                isPasswordEmpty && password.trim() === '' ? 'border-red-500' : password.trim() === '' ? '' : 'border-green-500'
+              className={`p-3 pl-5 border border-gray-200 focus:border-gray-400 rounded-sm w-80 ${
+                isPasswordEmpty && password.trim() === '' ? 'border-red-500' : password.trim() === '' ? '' : 'border-gray-400'
               }`}
               onChangeText={handlePasswordChange}
               secureTextEntry />
 
             {/* Feedback for Password */}
-            <View className='mb-5'>
-              <Text className={isPasswordEmpty && password.trim() === '' ? 'ml-5 mt-1 text-red-500 text-xs' : 'hidden'}>
+            <View className='mb-10'>
+              <Text className={isPasswordEmpty && password.trim() === '' ? 'absolute ml-5 mt-1 text-gray-500 text-xs' : 'hidden'}>
                 Your password is required for signing in.
               </Text>
 
               {!isNotRegistered && (
                 <Pressable>
-                  <Link className='text-right w-80 mt-1 right-3 absolute' href={'/(auth)/ForgotPassword'}>Forgot Password?</Link>
+                  <Link className='text-right w-80 mt-1 right-1 absolute' href={'/(auth)/ForgotPassword'}>Forgot Password?</Link>
                 </Pressable>
               )}
  
@@ -225,7 +226,8 @@ export default function Login() {
           <TermsAndPolicies/>
 
         </View>
-      {/* </TouchableWithoutFeedback> */}
-    </KeyboardAvoidingView>
+      
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }
