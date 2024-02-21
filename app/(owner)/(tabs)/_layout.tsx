@@ -1,28 +1,26 @@
-import { Ionicons } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link, Tabs } from 'expo-router';
 import { Pressable, StyleSheet } from 'react-native';
 
 function TabBarIcon(props: {
-  name: React.ComponentProps<typeof Ionicons>['name'];
+  name: React.ComponentProps<typeof FontAwesome>['name'];
   color: string;
 }) {
-  return <Ionicons size={28} style={styles.tabBarIcon} {...props}/>;
+  return <FontAwesome size={28} style={styles.tabBarIcon} {...props} />;
 }
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarLabel:() => {return null},
         headerShown: false,
         tabBarActiveTintColor: 'black',
       }}>
       <Tabs.Screen
-        name="home"
+        name="one"
         options={{
           title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="home-outline" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
           headerRight: () => (
             <Link href="/modal" asChild>
               <Pressable>
@@ -40,31 +38,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="messages"
+        name="two"
         options={{
-          title: 'Messages',
-          tabBarIcon: ({ color }) => <TabBarIcon name="chatbox-outline" color={color} />,
-        }}
-      />
-        <Tabs.Screen
-        name="map"
-        options={{
-          title: 'Map',
-          tabBarIcon: ({ color }) => <TabBarIcon name="location-outline" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="notifications"
-        options={{
-          title: 'Notifications',
-          tabBarIcon: ({ color }) => <TabBarIcon name="notifications-outline" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="account"
-        options={{
-          title: 'Account',
-          tabBarIcon: ({ color }) => <TabBarIcon name="person-circle-outline" color={color} />,
+          title: 'Tab Two',
+          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
       />
     </Tabs>
