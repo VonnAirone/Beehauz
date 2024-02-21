@@ -33,7 +33,7 @@ export default function TenantRegistration({email}) {
     if (isEmpty) {
       return;
     } else {
-      router.replace("/(tabs)/one");
+      router.replace("/(owner)/(tabs)/one");
     }
   }
   

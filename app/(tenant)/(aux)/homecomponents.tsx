@@ -1,4 +1,5 @@
 import { handlePropertyClick } from "@/api/ViewCount";
+import { supabase } from "@/utils/supabase";
 import { router } from "expo-router";
 import React from "react";
 import { FlatList as RNFlatList, Pressable, View, Text } from "react-native";

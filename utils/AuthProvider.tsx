@@ -37,7 +37,7 @@ export function AuthProvider({ children }: Props) {
     ) {
       router.replace('/(auth)/');
     } else if (session?.user && inAuthGroup) {
-      router.replace('/(tenant)/(tabs)/one');
+      router.replace('/(tenant)/(tabs)/home');
     }
   }, [session, segments, authInitialized, navigationState?.key]);
 
@@ -75,7 +75,7 @@ export function AuthProvider({ children }: Props) {
       // Check if the session is initialized and the user is authenticated.
       if (session?.user) {
         setAuthInitialized(true);
-        router.replace('/(tenant)/(tabs)/one');
+        router.replace('/(tenant)/(tabs)/home');
       } else {
         setAuthInitialized(true);
       }

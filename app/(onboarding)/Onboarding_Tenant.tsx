@@ -5,7 +5,7 @@ import LottieView from 'lottie-react-native'
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
-const MyPager = () => {
+const OnboardingTenant = () => {
   const animation = useRef(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [showText, setShowText] = useState(true)
@@ -81,4 +81,4 @@ const MyPager = () => {
   );
 };
 
-export default MyPager;
+export default OnboardingTenant;

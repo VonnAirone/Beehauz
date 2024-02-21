@@ -120,7 +120,7 @@ export default function Login() {
       Alert.alert('Error logging in', error.message)
     } finally {
       setLoading(false)
-      router.replace('/(tenant)/(tabs)/one')
+      router.replace('/(tenant)/(tabs)/home')
     }
   }
   
