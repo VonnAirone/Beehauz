@@ -40,15 +40,15 @@ export default function TenantRegistration({email}) {
   return (
       <SafeAreaView className='flex-1'>
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <KeyboardAvoidingView className='container flex-1 top-36 items-center'>
+        <KeyboardAvoidingView className='container flex-1 top-28 items-center'>
             <>
-              <View className='w-80 mx-auto items-start'>
+              <View className='w-80 mx-auto items-center'>
                 <Logo />
               </View>
               
               <View className='mb-5 w-80'>
                 <Glass>
-                  <Text className='text-2xl font-semibold'>COMPLETE YOUR PROFILE INFORMATION</Text>
+                  <Text className='text-2xl font-semibold text-center mb-2'>COMPLETE YOUR PROFILE INFORMATION</Text>
                   <Text>Please complete your profile for the best user experience.</Text>
                 </Glass>
               </View>
@@ -84,7 +84,7 @@ export default function TenantRegistration({email}) {
 
 
               </View>
-                <View className='mt-10'>
+                <View className='mt-10 absolute bottom-48 '>
                 <Button text={"CONFIRM"} onPress={handleSubmission} />
               </View>
             </>
