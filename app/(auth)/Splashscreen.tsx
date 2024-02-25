@@ -9,15 +9,17 @@ export default function Splashscreen() {
   return (
     <View className='flex-1  bg-yellow-500'>
       <Animated.View className='top-96' entering={BounceIn.duration(1000)} exiting={BounceOut.springify()}>
-        <View className='flex-row items-center align-middle p-2 justify-center' >
+        <Pressable 
+        onPress={() => router.push('/Usertype')}
+        className='flex-row items-center align-middle p-2 justify-center' >
           <Image className='w-20 h-20' source={require("@/assets/images/icon.png")}/>
           <Text className='text-5xl font-bold top-1'>BEEHAUZ</Text>
-        </View>
-        <View className='items-center'>
-          <Pressable className='w-24 items-center p-2' onPress={() => router.push("/(onboarding)/TenantRegistration")}>
-            <Text>Enter</Text>
+        </Pressable>
+        {/* <View className='items-center'>
+          <Pressable className='w-40 items-center p-2 bg-slate-200 rounded-md' onPress={() => router.push("/Usertype")}>
+            <Text className='text-xl'>Enter</Text>
           </Pressable>
-        </View>
+        </View> */}
 
       </Animated.View>
 
@@ -25,5 +27,3 @@ export default function Splashscreen() {
     </View>
   )
 }
-
-const styles = StyleSheet.create({})

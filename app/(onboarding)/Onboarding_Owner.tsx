@@ -63,7 +63,7 @@ export default function Onboarding_Owner() {
       
       <View className="mt-10">
         <Pressable
-          onPress={isLastPage ? () => router.push('/(onboarding)/OwnerRegistration') : () => {}}
+          onPress={isLastPage ? () => router.push('/(auth)/ProfileCompletion') : () => {}}
           className={`w-80 mx-auto py-3 rounded-md ${
             isLastPage ? 'bg-yellow-500' : 'bg-gray-200'
           }`}

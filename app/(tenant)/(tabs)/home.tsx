@@ -2,6 +2,7 @@ import { fetchPopularNowList } from '@/api/DataFetching';
 import { NearbyMe, PopularNow, Services } from '@/app/(tenant)/(aux)/homecomponents';
 import Logo from '@/components/logo';
 import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View, Text, TextInput, Image, ScrollView } from 'react-native'; // Rename the component to avoid conflict
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -43,6 +44,7 @@ const services = [
 
 
 export default function HomePage() {
+  const { usertype } = useLocalSearchParams();
   const [data, setData] = useState<DataItem[]>([]);
   const [loading, setLoading] = useState(true);
 

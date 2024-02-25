@@ -35,7 +35,7 @@ export function AuthProvider({ children }: Props) {
       !session?.user &&
       !inAuthGroup
     ) {
-      router.replace('/(auth)/');
+      router.replace('/(auth)/Login');
     } else if (session?.user && inAuthGroup) {
       router.replace('/(tenant)/(tabs)/home');
     }
