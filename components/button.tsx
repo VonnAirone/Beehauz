@@ -4,7 +4,7 @@ import React from 'react'
 export default function Button({text, onPress}) {
   return (
     <View className='rounded-sm overflow-hidden'>
-        <Pressable onPress={onPress} android_ripple={{color: '#ffa233'}} className='bg-black w-80 rounded-sm'>
+        <Pressable onPress={onPress} android_ripple={{color: '#ffa233'}} className='bg-black w-80 rounded-md'>
             <Text className='text-white text-center text-2xl p-3 tracking-wide'>{text}</Text>
         </Pressable>
     </View>

@@ -1,14 +1,17 @@
 
-import { Alert, Keyboard, KeyboardAvoidingView, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native'
-import React, { useState } from 'react'
+import { Alert, Keyboard, KeyboardAvoidingView, Pressable, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Glass from 'components/glassmorph'
 import InputField from 'components/input-field'
 import Button from 'components/button'
 import Logo from 'components/logo'
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
+import { supabase } from '@/utils/supabase'
 
 export default function TenantRegistration({email}) {
+  let { usertype } = useLocalSearchParams()
   const [name, setName] = useState('')
   const [address, setAddress] = useState('')
   const [age, setAge] = useState('')
@@ -37,18 +40,36 @@ export default function TenantRegistration({email}) {
     if (isEmpty) {
       return;
     } else {
-      router.replace("/(tenant)/(tabs)/home");
+      // Check if the user is authenticated before navigating
+      const user = supabase.auth.getUser();
+      console.log(user)
+  
+      if (user) {
+        // User is authenticated, navigate to tenant page
+        router.replace("/(tenant)/(tabs)/home");
+      } else {
+        // User is not authenticated, you may want to handle this case (e.g., show an alert)
+        Alert.alert('Authentication Error', 'Please log in first.');
+      }
     }
   }
   
+  
   return (
-      <SafeAreaView className='flex-1'>
-        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <KeyboardAvoidingView className='container flex-1 top-28 items-center'>
+    <KeyboardAvoidingView className='flex-1 justify-center items-center'>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        
             <>
-              <View className='w-80 mx-auto items-center'>
+              <View className='absolute top-10'>
                 <Logo/>
               </View>
+
+              <Pressable 
+              onPress={() => router.back()}
+              className='flex-row absolute top-5 left-10 items-center'>
+                <Ionicons name='chevron-back-outline' size={20}/>
+                <Text className='text-lg ml-1'>Back</Text>
+              </Pressable>
               
               <View className='mb-5 w-80'>
                 <Glass>
@@ -107,14 +128,13 @@ export default function TenantRegistration({email}) {
               </View>
 
               </View>
-                <View className='mt-10 absolute bottom-48 '>
+                <View className='mt-10'>
                 <Button text={"CONFIRM"} onPress={handleSubmission} />
               </View>
             </>
-          
-         </KeyboardAvoidingView>
-        </TouchableWithoutFeedback>
-      </SafeAreaView>
+         </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    
     );
 }
 

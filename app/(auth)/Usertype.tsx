@@ -1,15 +1,25 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Logo from '@/components/logo'
 import { router } from 'expo-router'
+import { Ionicons } from '@expo/vector-icons'
 
 export default function Usertype() {
   return (
-    <SafeAreaView className='flex-1 items-center'>
-        <View className='flex-col items-center mt-24 mb-20'>
-            <View><Logo/></View>
-            
+    <SafeAreaView className='flex-1 items-center relative bg-white'>
+            <View className='absolute top-10'>
+                <Logo/>
+            </View>
+
+            <Pressable 
+              onPress={() => router.back()}
+              className='flex-row absolute top-5 left-10 items-center'>
+                <Ionicons name='chevron-back-outline' size={20}/>
+                <Text className='text-lg ml-1'>Back</Text>
+              </Pressable>
+        
+        <View className='flex-col items-center mt-20 mb-20'>
             <Text className='text-3xl my-2'>
             Type of Account
             </Text>
@@ -19,10 +29,12 @@ export default function Usertype() {
             </Text>
         </View>
         
+        {/* router.push({pathname: "/(tenant)/(screens)/BHDetails", params: {propertyID: propertyID}}) */}
+        
         <View className='gap-10'>
         <View className='w-80 border border-gray-200 rounded-md overflow-hidden'>
                 <Pressable 
-                onPress={() =>  router.push("/(onboarding)/TenantRegistration")}
+                onPress={() =>  router.push({pathname: "/(auth)/ProfileCompletion", params: {usertype: 'Tenant'}})}
                 className='p-5 h-40 rounded-md flex-row items-center justify-between' 
                 android_ripple={{color: '#FCA311'}}>
                     <View>
@@ -40,7 +52,7 @@ export default function Usertype() {
 
             <View className='w-80 border border-gray-200 rounded-md overflow-hidden'>
                 <Pressable 
-                onPress={() => router.push("/(onboarding)/OwnerRegistration")}
+                onPress={() =>  router.push({pathname: "/(auth)/ProfileCompletion", params: {usertype: 'Owner'}})}
                 className='p-5 h-40 rounded-md flex-row items-center justify-between' 
                 android_ripple={{color: '#FCA311'}}>
                     <View>
