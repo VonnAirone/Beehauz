@@ -58,3 +58,7 @@ export async function fetchFilteredProperties(filterCriteria) {
     return null;
   }
 }
+
+export async function getImages () {
+  
+}

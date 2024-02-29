@@ -1,11 +1,11 @@
-import { Text, View, Pressable, Image, Alert, TouchableWithoutFeedback, Keyboard, SafeAreaView, KeyboardAvoidingView } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { Link, router } from 'expo-router';
+import { Text, View, Pressable, Alert, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView } from 'react-native';
+import React, { useState } from 'react';
+import { router } from 'expo-router';
 import Button from 'components/button';
 import { supabase } from 'utils/supabase';
 import TermsAndPolicies from '../(aux)/Terms and Policies';
 import { Ionicons } from '@expo/vector-icons';
-import { CheckEmail, TextInputField } from '../(tenant)/(aux)/logincomponent';
+import { CheckEmail, Logo, TextInputField } from '../(tenant)/(aux)/logincomponent';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -43,11 +43,6 @@ export default function Login() {
     setIsFormEmpty(false)
   };
 
-  const closeModal = () => {
-    setShowModal(false)
-  }
-
-
   const validateEmail = () => {
     const isValidEmailFormat = email.includes('@gmail.com');
   
@@ -55,24 +50,6 @@ export default function Login() {
     return isValidEmailFormat;
   };
   
-  async function forgetPassword() {
-    setAction('forgetPassword')
-    setShowModal(true)
-    // setLoading(true);
-    // const { error } = await supabase.auth.resetPasswordForEmail(
-    //   email,
-    //   {
-    //     redirectTo: "exp://192.168.1.140:8081/--/changepassword"
-    //   }
-    // );
-    // if (!error) {
-    //   setLoading(false);
-    //   setShowModal(true)
-    // } else {
-    //   setLoading(false);
-    //   alert(error.message);
-    // }
-  }
   
 
   const handleSubmission = async () => {
@@ -161,66 +138,64 @@ export default function Login() {
   // })
 
   return (
-    <KeyboardAvoidingView className='flex-1 justify-center relative'>
+    <KeyboardAvoidingView>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <>
+      <View className='justify-center items-center relative bg-white h-full'>
       
         <View className='z-10 items-center'>
+
             {showModal && (
               <View className='absolute top-40'>
-                <CheckEmail email={email} actionType={action} closeModal={() => setShowModal(false)}/>
+                <Pressable 
+                  onPress={() => setShowModal(false)}
+                  className='absolute right-3 top-3 z-20'>
+                  <Ionicons name='close' size={20}/>
+                </Pressable>
+
+                <CheckEmail email={email} actionType={action}/>
               </View>
             )}
         </View>
 
-        <View className={`items-center flex-col gap-2 z-0 ${showModal && 'opacity-40'}`}>
-          {/* App Logo */}
-          <View className='mb-5 flex flex-row items-center w-80 justify-center'>
-            <View>
-              <Image className='w-20 h-20' style={{ resizeMode: 'contain' }} source={require("@/assets/images/icon.png")} />
-            </View>
-            <View>
-              <Text className='text-5xl'>BEEHAUZ</Text>
-            </View>
-          </View>
+        <View className={`justify-center items-center z-0 ${showModal && 'opacity-40'}`}>
+
+          <Logo/>
 
           <View>
             <TextInputField 
-            isEditable={!showModal}
-            label={"Email"} 
-            value={email} 
-            placeholder={"example@gmail.com"} 
-            isPassword={false} 
-            isRevealed={false} 
-            onChangeText={handleEmailChange} 
-            onPressReveal={() => {}} 
-            feedbackText={
-              isEmailInvalid ? 'Must be a valid email account.' :
-              isEmailEmpty ? 'Your email is required for signing in.' : ''
-            }/>
+                isEditable={!showModal}
+                label={"Email"}
+                value={email}
+                placeholder={"example@gmail.com"}
+                isPassword={false}
+                isRevealed={false}
+                onChangeText={handleEmailChange}
+                onPressReveal={() => { } }
+                feedbackText={isEmailInvalid ? 'Must be a valid email account.' :
+                  isEmailEmpty ? 'Your email is required for signing in.' : ''} defaultFeedback={undefined}/>
                        
           </View>
 
           
-          <View className='mb-5'>
+          <View className='mb-10'>
             <TextInputField 
-            isEditable={!showModal}
-            label={"Password"} 
-            value={password} 
-            placeholder={"Enter your password"} 
-            isPassword={true} 
-            isRevealed={isRevealed} 
-            onChangeText={handlePasswordChange} 
-            onPressReveal={() => setIsRevealed(!isRevealed)} 
-            feedbackText={isPasswordEmpty && password.trim() === '' ? 'Your password is required for signing in.' : ''}/>
+                isEditable={!showModal}
+                label={"Password"}
+                value={password}
+                placeholder={"Enter your password"}
+                isPassword={true}
+                isRevealed={isRevealed}
+                onChangeText={handlePasswordChange}
+                onPressReveal={() => setIsRevealed(!isRevealed)}
+                feedbackText={isPasswordEmpty && password.trim() === '' ? 'Your password is required for signing in.' : ''} defaultFeedback={undefined}/>
 
-            <View>
+            <View className='absolute -bottom-2'>
               {!isNotRegistered ? (
-                <Pressable onPress={forgetPassword}>
-                    <Text className='text-right w-80 mt-1 right-1'>Forgot Password?</Text>
+                <Pressable onPress={() => setShowModal(!showModal)}>
+                    <Text className='text-right w-80 right-1'>Forgot Password?</Text>
                 </Pressable>
               ) : (
-                <Text className='text-right mt-1 right-1'></Text>
+                <Text className='text-right bottom- right-1'></Text>
               )}
             </View>
 
@@ -275,7 +250,7 @@ export default function Login() {
         </View>
 
 
-        </>
+        </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
