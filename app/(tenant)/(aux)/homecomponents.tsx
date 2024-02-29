@@ -1,7 +1,7 @@
+import { downloadImage } from "@/api/ImageFetching";
 import { handlePropertyClick } from "@/api/ViewCount";
-import { supabase } from "@/utils/supabase";
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FlatList as RNFlatList, Pressable, View, Text } from "react-native";
 
 type DataItem = {
@@ -21,20 +21,18 @@ type DataItem = {
       await handlePropertyClick(propertyID);
     } catch (error) {
       console.error('Error handling property click:', error);
-    } finally {
-      console.log(propertyID)
-    }
+    } 
    router.push({pathname: "/(tenant)/(screens)/BHDetails", params: {propertyID: propertyID}})
   };
 
-  export function PopularNow({ data }: PropertyProps) {
+  export function PopularNow({ data, image }: { data: DataItem[], image: string }) {
     const renderItem = ({ item, index }: { item: DataItem; index: number }) => (
       <View className='overflow-hidden'>
         <Pressable 
         onPress={() => handleCardPress(item.property_id)}>
           <View className='p-2'>
             <View className='border rounded-md border-gray-200 flex w-40 h-36 p-5 m-auto'>
-              
+              {image}
             </View>
             
             <View className='mt-2'>

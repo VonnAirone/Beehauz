@@ -1,4 +1,5 @@
-import { fetchPopularNowList } from '@/api/DataFetching';
+import { fetchPopularNowList, fetchPropertyDetailsData } from '@/api/DataFetching';
+import { downloadImage } from '@/api/ImageFetching';
 import { NearbyMe, PopularNow, Services } from '@/app/(tenant)/(aux)/homecomponents';
 import Logo from '@/components/logo';
 import { Ionicons } from '@expo/vector-icons';
@@ -45,21 +46,21 @@ const services = [
 
 export default function HomePage() {
   const { usertype } = useLocalSearchParams();
-  const [data, setData] = useState<DataItem[]>([]);
+  const [PopularList, setPopularList] = useState<DataItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [propertyImage, setPropertyImage] = useState<DataItem[]>([])
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const fetchedData = await fetchPopularNowList();
-        setData(fetchedData);
+        const PopularList = await fetchPopularNowList();
+        setPopularList(PopularList);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     }
-
     fetchData();
   }, []);
 
@@ -97,14 +98,15 @@ export default function HomePage() {
         <View className='mt-10'>
           <Text className='font-semibold text-xl ml-8'>POPULAR NOW</Text>
           <PopularNow 
-          data={data} 
+          image={undefined}
+          data={PopularList} 
           //this is where you put the router.push()
           />
         </View>
 
         <View className='mt-10'>
           <Text className='font-semibold text-xl ml-8'>NEARBY ME</Text>
-          <NearbyMe data={data}/>
+          <NearbyMe data={PopularList}/>
         </View>
 
         <View className='mt-10'>

@@ -1,19 +1,33 @@
 // TextInputField.js
-import React from 'react';
-import { Text, TextInput, View, Pressable, Image, Linking, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { Text, TextInput, View, Pressable, Image, Linking, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { supabase } from '@/utils/supabase';
 
-export function TextInputField({ label, value, placeholder, isPassword, isRevealed, onChangeText, onPressReveal, feedbackText, isEditable }) {
+export function Logo () {
+  return (
+    <View className='mb-5 flex flex-row items-center w-80 justify-center'>
+      <View>
+        <Image className='w-20 h-20' style={{ resizeMode: 'contain' }} source={require("@/assets/images/icon.png")} />
+      </View>
+      <View>
+        <Text className='text-5xl'>BEEHAUZ</Text>
+      </View>
+    </View>
+  )
+}
+
+export function TextInputField({ label, value, placeholder, isPassword, isRevealed, onChangeText, onPressReveal, feedbackText, isEditable, defaultFeedback }) {
   return (
     <View>
       <Text className='p-2'>{label}</Text>
-      <View className='relative justify-center'>
+      <View className='justify-center'>
         <TextInput
           editable={isEditable}
           value={value}
           placeholder={placeholder}
           placeholderTextColor={feedbackText ? 'red' : 'gray'}
-          className={`p-3 pl-5 border border-gray-200 focus:border-gray-400 rounded-sm w-80 ${
+          className={`p-3 pl-5 border border-gray-200 focus:border-gray-400 rounded-md w-80 ${
             feedbackText ? 'border-red-500' : value.trim() === '' ? '' : 'border-gray-400'
           }`}
           onChangeText={onChangeText}
@@ -30,11 +44,13 @@ export function TextInputField({ label, value, placeholder, isPassword, isReveal
       </View>
 
       
-        <View className='h-4'>
-        {feedbackText && (
-          <Text className='ml-5 mt-1 text-red-500 text-xs'>
-            {feedbackText} 
-          </Text>
+        <View>
+        {feedbackText ? (
+          <Text className='ml-5 text-red-500 text-xs'>{feedbackText}</Text>
+        ): (
+        <Text className='ml-5 text-xs text-gray-500'>
+          {defaultFeedback}
+        </Text>
         )}
         </View>
       
@@ -54,58 +70,97 @@ export function Button({ onPress, text, loading }) {
 }
 
 
-export function CheckEmail({ email, actionType, closeModal }) {
+export function CheckEmail({ email, actionType }) {
+  
   const openEmail = async () => {
-    let emailUrl = `mailto:${email}`;
+    console.log('onpress')
+    if (actionType != 'confirmation') {
+      forgotPassword()
+    } else {
+      let emailUrl = `mailto:${email}`;
     
-    if (Platform.OS === 'android') {
-      emailUrl = 'intent://compose/#Intent;package=com.google.android.gm;scheme=mailto;end';
+      if (Platform.OS === 'android') {
+        emailUrl = 'intent://compose/#Intent;package=com.google.android.gm;scheme=mailto;end';
+      }
+  
+      try {
+        const supported = await Linking.canOpenURL(emailUrl);
+        if (supported) {
+          await Linking.openURL(emailUrl);
+        } else {
+          console.error('Opening email not supported');
+        }
+      } catch (error) {
+        console.error(error);
+      }
     }
+  };
+
+  const [userEmail, setUserEmail] = useState('')
+  const [isEmailEmpty, setIsEmailEmpty] = useState(false)
+
+  const forgotPassword = async () => {
 
     try {
-      const supported = await Linking.canOpenURL(emailUrl);
-      if (supported) {
-        await Linking.openURL(emailUrl);
+      if (userEmail.trim() === '') {
+        setIsEmailEmpty(true);
       } else {
-        console.error('Opening email not supported');
+        setIsEmailEmpty(false)
+        // redirect link is missing
+        const { error } = await supabase.auth.resetPasswordForEmail(userEmail, { redirectTo: '' });
+  
+        if (error) {
+          Alert.alert('Error resetting password', error.message);
+        }
       }
     } catch (error) {
-      console.error(error);
+      Alert.alert('Error message:', error.message);
     }
   };
 
   return (
     <View>    
-      <Pressable 
-      onPress={() => closeModal()}
-      className='absolute right-3 top-3 z-10'>
-        <Ionicons name='close'/>
-      </Pressable>
+
       <View className='absolute -top-24 items-center left-2 w-full z-10'>
         {actionType == 'confirmation' ? (<Image source={require("@/assets/checkemailicon.png")} />) : (<Image source={require("@/assets/forgotpasswordicon.png")} />)}
         
       </View>
 
-      <View className='z-0 h-60 w-96 px-8 bg-white shadow-2xl justify-center rounded-md'>
-        <Text className='text-center text-base mt-10'>
+      <View className='z-0 w-96 px-8 bg-white shadow-2xl border border-gray-200 justify-center rounded-md'>
+        <Text className='text-center text-base mt-16'>
           {actionType === 'confirmation'
             ? 'Hi there! Welcome to Beehauz! To boost your experience, we would like to ask you to confirm your email associated with your account.'
             : 'Forgot your password? No worries! We can help you reset it. Please check your email for further instructions.'}
         </Text>
 
-        <Text className='text-center mt-5'>You've registered {email} as your email account.</Text>
+        <Text className='text-center mt-5 text-xs'>You've registered {email} as your email account.</Text>
 
-        {actionType === '' ? ( 
-        <View className='w-60 mx-auto rounded-md overflow-hidden border border-gray-200 mt-2'>
+        {actionType === 'confirmation' ? ( 
+        <View className='w-60 mx-auto rounded-md overflow-hidden border border-gray-200 mt-2 mb-10'>
           <Pressable
             onPress={openEmail}
             android_ripple={{ color: '#FCA311' }}
-            className='p-3'>
+            className='p-4'>
             <Text className='text-center'>CHECK EMAIL</Text>
           </Pressable>
         </View>) : (
           <View>
-            <TextInput className='w-60 mx-auto rounded-md overflow-hidden border border-gray-200 mt-2 p-3' placeholder='Enter email address'/>
+            <View className='flex flex-row items-center mt-2'>
+              <TextInput 
+              value={userEmail} 
+              onChangeText={(text) => {setUserEmail(text), setIsEmailEmpty(false)}}
+              className={`mx-auto w-60 rounded-md overflow-hidden border border-gray-200 p-3 ${isEmailEmpty ? 'border-red-300' : 'border-gray-300'}`} placeholder='Enter email address'/>
+              <Pressable
+              onPress={openEmail} 
+              className='w-10 items-center'>
+                <Ionicons name='send' size={32}/>
+              </Pressable>
+            </View>
+
+            <View className='mb-10 ml-5 mt-1'>
+              {isEmailEmpty && (<Text className='text-gray-500 text-xs'>Please enter an email address</Text>)}
+            </View>
+            
           </View>
         )}
 

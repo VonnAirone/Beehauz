@@ -1,14 +1,15 @@
-import { Alert, Pressable, Text, View, Image } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, memo, useRef } from 'react';
+import { Text, View, Image, FlatList, Dimensions, ActivityIndicator, Pressable } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchPropertyDetailsData } from '@/api/DataFetching';
-import { supabase } from '@/utils/supabase';
-import * as ImagePicker from 'expo-image-picker';
-import { Ionicons } from '@expo/vector-icons';
-import { FileObject } from '@supabase/storage-js'
 import { useAuth } from '@/utils/AuthProvider';
-import { FlatList } from 'react-native-reanimated/lib/typescript/Animated';
+import { downloadImage, loadImages } from '@/api/ImageFetching';
+import BackButton from '@/components/back-button';
+import { Ionicons } from '@expo/vector-icons';
+import Reviews from '@/components/reviews';
+
+const screenWidth = Dimensions.get('window').width;
 
 interface DataItem {
   property_id: string;
@@ -17,154 +18,110 @@ interface DataItem {
   view_count: number;
 }
 
-export default function BHDetails() {
-  let { propertyID } = useLocalSearchParams();
-  const [data, setData] = useState<DataItem | null>(null);
-  const userID = useAuth().session?.user.id
-  const [path, setPath] = useState('')
-  const [images, setImages] = useState<FileObject[]>([])
-  const [loading, setLoading] = useState(true);
-
-  async function fetchAndSetData() {
-    try {
-      const fetchedData = await fetchPropertyDetailsData(propertyID.toString());
-      setData(fetchedData);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const Images = ({ item }: { item: FileObject }) => {
-    const [image, setImage] = useState<string | null>(null);
-  
-    useEffect(() => {
-      const downloadImage = async () => {
-        try {
-          const { data } = await supabase.storage
-            .from('images')
-            .download(`property_images/${propertyID}/${item.name}`);
-  
-          if (data) {
-            const fr = new FileReader();
-            fr.readAsDataURL(data!);
-            fr.onload = () => {
-              setImage(fr.result as string);
-            };
-          } else {
-            console.log("no data");
-          }
-        } catch (error) {
-          console.error('Error downloading image:', error.message);
-        }
-      };
-  
-      downloadImage();
-    }, [propertyID, item.name]);
-  
-    return (
-      <View>
-        {image && <Image className='h-20 w-20' source={{ uri: image }} />}
-      </View>
-    );
-  };
-  
-  
-  const loadImages = async () => {
-    try {
-      const { data } = await supabase.storage.from('images').list(`property_images/${propertyID.toString()}`)
-      if (data) {
-        setImages(data)
-      } else {
-        console.log("No data")
-      }
-    } catch (error) {
-      console.error('Error loading images:', error.message)
-    }
-  }
+// Memoized Image Component
+const Images = memo(({ item } : {item : any}) => {
+  const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchAndSetData();
-    loadImages();
-  }, [propertyID]);
+    downloadImage(item.propertyID, item.name, setImage);
+  }, [item.propertyID, item.name]);
 
-
-  async function uploadImage(propertyID: string) {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsMultipleSelection: false,
-        allowsEditing: true,
-        quality: 1,
-        exif: false,
-      });
-
-      if (result.canceled || !result.assets || result.assets.length === 0) {
-        console.log('User cancelled image picker.');
-        return;
-      }
-
-      const image = result.assets[0];
-
-      if (!image.uri) {
-        throw new Error('No image uri!');
-      }
-
-      const arraybuffer = await fetch(image.uri).then((res) => res.arrayBuffer());
-
-      const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg';
-      const newPath = `${Date.now()}.${fileExt}`;
-
-      const { data, error: uploadError } = await supabase.storage
-        .from('images')
-        .upload(`property_images/${propertyID}/${newPath}`, arraybuffer, {
-          contentType: image.mimeType ?? 'image/jpeg',
-        });
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      console.log("Image uploaded successfully. Path:", newPath);
-      setPath(path)
-    } catch (error) {
-      if (error instanceof Error) {
-        Alert.alert(error.message);
-      } else {
-        throw error;
-      }
-    }
+  if (!image) {
+    return (
+      <View 
+      className='w-screen h-72'>
+      {/* // style={{ width: screenWidth, height: 200, alignItems: 'center', justifyContent: 'center' }}> */}
+        <ActivityIndicator size="large" />
+      </View>
+    );
   }
 
   return (
-    <SafeAreaView className='flex-1'>
-      {loading ? (
+    <Image
+      className='w-screen h-72'
+      source={{ uri: image }}
+      resizeMode="cover"
+    />
+  );
+});
+
+export default function BHDetails() {
+  let { propertyID } = useLocalSearchParams();
+  const [data, setData] = useState<DataItem | null>(null);
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const hasFetched = useRef(false);
+
+  useEffect(() => {
+    if (!hasFetched.current) {
+    async function fetchData() {
+      setLoading(true);
+      try {
+        const fetchedData = await fetchPropertyDetailsData(propertyID.toString());
+        setData(fetchedData);
+        await loadImages(propertyID, setImages);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }}, [propertyID]);
+
+  return (
+    <SafeAreaView style={{ flex: 1 }}>
+      {/* {loading ? (
         <Text>Loading...</Text>
-      ) : (
-        <>
-        <View className='flex-row'>
-          {images.map((image, index) => (
-            <View key={index}>
-              <Images
-                item={image}
+      ) : ( */}
+        <View>
+          <BackButton/>
+          {images.length > 0 ? (
+            <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+              data={images}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item }) => <Images item={{...item, propertyID}} />}
+              initialNumToRender={4}
+              maxToRenderPerBatch={5}
+              windowSize={7}
+            />
+          ) : (
+            <View style={{ width: screenWidth, height: 200, alignItems: 'center', justifyContent: 'center' }}>
+              <Image
+                style={{ width: screenWidth, height: 200 }}
+                source={require("@/assets/images/no-image-placeholder.png")}
+                resizeMode="cover"
               />
             </View>
+          )}
+          <View className='p-5'>
+            <View className='flex-row justify-between'>
+              <View>
+                <Text className='text-4xl font-semibold'>{data?.property_name}</Text>
+                
+                {/* LOCATION IS MISSING */}
+                <View className='flex-row items-center'>
+                  <Ionicons name='location-outline' size={20} color={'#FF8B00'}/>
+                  <Text className='text-base'>Catungan 1, Sibalom, Antique</Text>
+                </View>
+              </View>
 
-          ))}
-        </View>
-          <Text>{data?.property_name}</Text>
-          <Text>{data?.view_count}</Text>
-          <Text>{data?.price}</Text>
-        </>
-      )}
+              <View className='w-24'>
+                <Pressable className='border border-yellow p-3 rounded-md'>
+                  <Text className='text-center text-lg'>{data?.price}</Text>
+                </Pressable>
+              </View>
+              
+            </View>
 
-      <Pressable onPress={() => uploadImage(propertyID.toString())}>
-        <View className='flex-row items-center border border-gray-200 p-3'>
-          <Text style={{ fontSize: 16, marginRight: 2 }}>Upload</Text>
-          <Ionicons name='cloud-upload-outline' />
+            <View>
+              <Reviews/>
+            </View>
+          </View>
         </View>
-      </Pressable>
+      {/* )} */}
     </SafeAreaView>
   );
 }
