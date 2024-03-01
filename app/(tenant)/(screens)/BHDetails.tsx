@@ -1,13 +1,12 @@
 import React, { useEffect, useState, memo, useRef } from 'react';
-import { Text, View, Image, FlatList, Dimensions, ActivityIndicator, Pressable } from 'react-native';
+import { Text, View, Image, FlatList, Dimensions, ActivityIndicator, ScrollView, Pressable } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchPropertyDetailsData } from '@/api/DataFetching';
-import { useAuth } from '@/utils/AuthProvider';
 import { downloadImage, loadImages } from '@/api/ImageFetching';
 import BackButton from '@/components/back-button';
 import { Ionicons } from '@expo/vector-icons';
-import Reviews from '@/components/reviews';
+import { Amenities, AmenitiesModal, BottomBar, Reviews } from '../(aux)/detailscomponent';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -30,7 +29,6 @@ const Images = memo(({ item } : {item : any}) => {
     return (
       <View 
       className='w-screen h-72'>
-      {/* // style={{ width: screenWidth, height: 200, alignItems: 'center', justifyContent: 'center' }}> */}
         <ActivityIndicator size="large" />
       </View>
     );
@@ -50,7 +48,9 @@ export default function BHDetails() {
   const [data, setData] = useState<DataItem | null>(null);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showAmenitiesModal, setShowAmenitiesModal] = useState(true);
   const hasFetched = useRef(false);
+
 
   useEffect(() => {
     if (!hasFetched.current) {
@@ -74,7 +74,15 @@ export default function BHDetails() {
       {/* {loading ? (
         <Text>Loading...</Text>
       ) : ( */}
-        <View>
+      
+            {showAmenitiesModal && (
+            <View className='absolute z-10 h-full w-full items-center justify-center'>
+              <AmenitiesModal hideModal={() => setShowAmenitiesModal(false)}/>
+            </View>
+           )}
+        
+                
+        <View className={`${showAmenitiesModal ? 'opacity-20' : ''}`}>
           <BackButton/>
           {images.length > 0 ? (
             <FlatList
@@ -96,32 +104,57 @@ export default function BHDetails() {
               />
             </View>
           )}
-          <View className='p-5'>
-            <View className='flex-row justify-between'>
-              <View>
-                <Text className='text-4xl font-semibold'>{data?.property_name}</Text>
-                
-                {/* LOCATION IS MISSING */}
-                <View className='flex-row items-center'>
-                  <Ionicons name='location-outline' size={20} color={'#FF8B00'}/>
-                  <Text className='text-base'>Catungan 1, Sibalom, Antique</Text>
-                </View>
-              </View>
-
-              <View className='w-24'>
-                <Pressable className='border border-yellow p-3 rounded-md'>
-                  <Text className='text-center text-lg'>{data?.price}</Text>
-                </Pressable>
-              </View>
-              
-            </View>
+          <View className='mx-5 mt-5'>
 
             <View>
+              <Text className='text-4xl font-semibold'>{data?.property_name}</Text>
+            </View>
+            
+              {/* LOCATION IS MISSING */}
+            <View className='flex-row items-center'>
+              <Ionicons name='location-outline' size={15} color={'#FF8B00'}/>
+              <Text className='text-base'>Catungan 1, Sibalom, Antique</Text>
+            </View>
+
+            <View className='mt-1'>
               <Reviews/>
             </View>
+            
+            {/* DESCRIPTION SECTION */}
+            <View className='mt-5'>
+              <View className='flex-row items-center gap-x-1'>
+                <Text className='text-xl font-semibold'>Description</Text>
+                <Pressable 
+                  onPress={() => setShowAmenitiesModal(true)}
+                  className='mt-1'>
+                  <Ionicons name='help-circle-outline'/>
+                </Pressable >
+                
+              </View>
+              <View className='mt-2'>
+                <Text>Discover the perfect blend of comfort and community at Sunset Haven Boarding House. Nestled in a quiet neighborhood, our cozy boarding house offers a home-away-from-home experience for individuals seeking a convenient and communal living space.</Text>
+              </View>
+            </View>
+
+            {/* AENITIES SECTION*/}
+            <View className='mt-5'>
+              <Amenities propertyID={propertyID}/>
+            </View>
+
+            <View className='bg-white rounded-md p-5'>
+              <View>
+                <Text className='text-lg'>Owned by <Text className='font-semibold'>Airone Vonn</Text></Text>
+                <Text className='text-gray-500'>Joined last February 2024</Text>
+              </View>
+            </View>
+
+            {/* <View className='border-t border-gray-300 my-5'></View> */}
+            
           </View>
         </View>
-      {/* )} */}
+
+        <BottomBar price={data?.price}/>
+      {/* )}  */}
     </SafeAreaView>
   );
 }

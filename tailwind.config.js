@@ -4,10 +4,10 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'yellow': '#FF8B00'
+        'yellow': '#FFA233'
       },
       backgroundColor: {
-        'yellow' : '#FF8B00'
+        'yellow' : '#FFA233'
       }
     },
   },

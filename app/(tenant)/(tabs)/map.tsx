@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '@/utils/supabase'
 import * as ImagePicker from 'expo-image-picker'
 import { fetchPropertyListData } from '@/api/DataFetching'
+import { AmenitiesModal } from '../(aux)/detailscomponent'
 
 type DataItem = {
   property_id: string;
