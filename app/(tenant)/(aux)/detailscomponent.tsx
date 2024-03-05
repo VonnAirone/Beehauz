@@ -1,7 +1,8 @@
-import { Pressable, FlatList as RNFlatList, Text, View, Image } from 'react-native'
+import { Pressable, FlatList as RNFlatList, Text, View, Image, Modal } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '@/utils/supabase'
+import { router } from 'expo-router'
 
 export function Reviews() {
   return (
@@ -71,15 +72,9 @@ export function Amenities({propertyID}) {
 
     return (
         <View>
-            <View>
-                <Text className='text-xl font-semibold'>Amenities</Text>
-            </View>
-
             <View className='mt-2'>
                 <Amenity item={amenities}/>
             </View>
-            
-
         </View>
     )
 }
@@ -97,7 +92,9 @@ export function BottomBar ({price}) {
         </View>
 
         <View>
-          <Pressable className=' bg-black w-40 p-3 rounded-md'>
+          <Pressable 
+          onPress={() => router.push('/BookingDetails')}
+          className=' bg-black w-40 p-3 rounded-md'>
             <Text className='text-center text-white text-base font-semibold'>Book now</Text>
           </Pressable>
         </View>
@@ -107,67 +104,116 @@ export function BottomBar ({price}) {
 
 export function AmenitiesModal ({hideModal}) {
   return (
-    <View className='bg-white w-96 rounded-md'>
+    <Modal 
+    transparent={true}
+    animationType='slide'
+    className='transparent w-96 rounded-md flex-1 z-10'>
+      <View className="flex-1 justify-center items-center bg-opacity-50 p-5 ">
+        <View className='bg-white items-center justify-center w-full shadow-2xl shadow-black rounded-md'>
 
-      <View className='absolute right-3 top-3 z-10'>
-        <Pressable onPress={hideModal}>
-          <Ionicons name='close' size={20} color={'white'}/>
-        </Pressable>
-      </View>
+          <View className='h-40 rounded-t-md items-center justify-center bg-yellow w-full'>
+            <Image source={require('assets/help-robot.png')}/>
+            <View className='absolute right-3 top-3'>
+              <Pressable onPress={hideModal}>
+                <Ionicons name='close' size={20} color={'white'}/>
+              </Pressable>
+            </View>
+          </View>
 
-      <View className='bg-yellow w-full h-40 rounded-t-md items-center justify-center'>
-        <Image source={require('assets/help-robot.png')}/>
-      </View>
-
-      <View className='p-5'>
-        <View>
-          <Text className='text-2xl'>What is an <Text className='font-semibold uppercase'>Amenity</Text></Text>
-        </View>
-
-        <View className='mt-2'>
-          <Text className='text-base'>
-          An amenity is a feature or service that enhances the comfort, convenience, or enjoyment of a particular place.
-          </Text>
-        </View>
-
-        <View className='mt-8'>
-          <Text className='font-semibold text-lg'>Examples of Amenities</Text>
-        </View>
-
-        <View className='flex-row flex-wrap gap-x-2 gap-y-2 mt-1'>
-            <View className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
-                <Text className='text-center'>Wifi</Text>
+          <View className='p-5'>
+            <View>
+              <Text className='text-2xl'>What is an <Text className='font-semibold uppercase'>Amenity</Text></Text>
             </View>
 
-            <View className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
-                <Text className='text-center'>Common CR</Text>
+            <View className='mt-2'>
+              <Text className='text-base'>
+              An amenity is a feature or service that enhances the comfort, convenience, or enjoyment of a particular place.
+              </Text>
             </View>
 
-            
-            <View className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
-                <Text className='text-center'>Laundry Area</Text>
+            <View className='mt-8'>
+              <Text className='font-semibold text-lg'>Examples of Amenities</Text>
             </View>
 
-                        
-            <View className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
-                <Text className='text-center'>Kitchen Area</Text>
+            <View className='flex-row flex-wrap gap-x-2 gap-y-2 mt-1'>
+                <View className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
+                    <Text className='text-center'>Wifi</Text>
+                </View>
+
+                <View className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
+                    <Text className='text-center'>Common CR</Text>
+                </View>
+
+                
+                <View className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
+                    <Text className='text-center'>Laundry Area</Text>
+                </View>
+
+                            
+                <View className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
+                    <Text className='text-center'>Kitchen Area</Text>
+                </View>
+
+                                        
+                <View className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
+                    <Text className='text-center'>Rooms</Text>
+                </View>
             </View>
 
-                                    
-            <View className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
-                <Text className='text-center'>Rooms</Text>
+            <View className='mt-10'>
+              <View>
+                <Text className='font-semibold text-lg'>Explore Beehauz</Text>
+                <Text>
+                  To discover more about the exceptional offerings at Beehauz, please visit our official website: Beehauz.com.
+                </Text>
+              </View>
             </View>
-        </View>
-
-        <View className='mt-10'>
-          <View>
-            <Text className='font-semibold text-lg'>Explore Beehauz</Text>
-            <Text>
-              To discover more about the exceptional offerings at Beehauz, please visit our official website: Beehauz.com.
-            </Text>
           </View>
         </View>
+      </View>
+    </Modal>
+  )
+}
+
+export function OwnerInformation() {
+  return (
+    <View className='rounded-md p-5 mt-5'>
+      <View className='flex-row items-center gap-x-3 justify-between'>
+      
+      <View className='flex-row items-center'>
+        <View className='bg-gray-300 h-14 w-14 rounded-full'/>
+        <View className='ml-3'>
+          <Text className='text-lg'>Owned by <Text className='font-semibold'>Airone Vonn</Text></Text>
+          <Text className='text-gray-500'>Joined last February 2024</Text>
+          <Text className='text-gray-500 text-sm'>Response time: within an hour</Text>
+        </View>
+      </View>
+
+      <View className='items-center'>
+        <Ionicons name='shield-checkmark-outline' size={32}/>
+        <Text className='text-xs'>Verified!</Text>
+      </View>
+      
         
+      </View>
+
+      {/* <View className='flex-row gap-x-3 mt-3'>
+        <View className='flex-row items-center border border-gray-300 p-3 justify-center rounded-lg'>
+          <Ionicons name='shield-checkmark' size={20}/>
+          <Text className='ml-1 text-base'>Verified</Text>
+        </View>
+
+        <View className='flex-row items-center border border-gray-300 p-3 justify-center rounded-lg'>
+          <Ionicons name='star-half' size={20}/>
+          <Text className='ml-1 text-base'>116 Reviews</Text>
+        </View>
+      </View> */}
+
+
+      <View className='border border-black rounded-full p-4 mt-3'>
+        <Pressable>
+          <Text className='text-center'>Contact Owner</Text>
+        </Pressable>
       </View>
     </View>
   )

@@ -1,10 +1,9 @@
-import { StyleSheet, Text, View, Pressable, Alert } from 'react-native'
+import { Text, View, Alert, Modal, TouchableOpacity, Image, Pressable } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '@/utils/supabase'
 import * as ImagePicker from 'expo-image-picker'
 import { fetchPropertyListData } from '@/api/DataFetching'
-import { AmenitiesModal } from '../(aux)/detailscomponent'
+import { Ionicons } from '@expo/vector-icons'
 
 type DataItem = {
   property_id: string;
@@ -80,12 +79,7 @@ export default function Map() {
   }
   return (
     <View className='flex-1 justify-center items-center'>
-      <Pressable onPress={uploadAvatar}>
-        <View className='flex-row items-center border border-gray-200 p-3'>
-          <Text className='text-base mr-2'>Upload</Text>
-          <Ionicons name='cloud-upload-outline'/>
-        </View>
-      </Pressable>
+
 
     </View>
   )

@@ -13,6 +13,7 @@
     "@react-native-async-storage/async-storage": "^1.21.0",
     "@react-navigation/native": "^6.1.7",
     "@supabase/supabase-js": "^2.38.4",
+    "axios": "^1.6.7",
     "expo": "~50.0.8",
     "expo-auth-session": "~5.4.0",
     "expo-constants": "~15.4.5",

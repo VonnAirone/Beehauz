@@ -1,12 +1,13 @@
 import React, { useEffect, useState, memo, useRef } from 'react';
-import { Text, View, Image, FlatList, Dimensions, ActivityIndicator, ScrollView, Pressable } from 'react-native';
+import { Text, View, Image, FlatList, Dimensions, ActivityIndicator, ScrollView, Pressable, Modal } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchPropertyDetailsData } from '@/api/DataFetching';
 import { downloadImage, loadImages } from '@/api/ImageFetching';
 import BackButton from '@/components/back-button';
 import { Ionicons } from '@expo/vector-icons';
-import { Amenities, AmenitiesModal, BottomBar, Reviews } from '../(aux)/detailscomponent';
+import { Amenities, AmenitiesModal, BottomBar, OwnerInformation, Reviews } from '../(aux)/detailscomponent';
+import Bookmark from '@/components/bookmarks-button';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -15,9 +16,10 @@ interface DataItem {
   property_name: string;
   price: string;
   view_count: number;
+  description: string;
 }
 
-// Memoized Image Component
+
 const Images = memo(({ item } : {item : any}) => {
   const [image, setImage] = useState<string | null>(null);
 
@@ -28,7 +30,7 @@ const Images = memo(({ item } : {item : any}) => {
   if (!image) {
     return (
       <View 
-      className='w-screen h-72'>
+      className='flex-1'>
         <ActivityIndicator size="large" />
       </View>
     );
@@ -36,7 +38,7 @@ const Images = memo(({ item } : {item : any}) => {
 
   return (
     <Image
-      className='w-screen h-72'
+      className='w-full h-full'
       source={{ uri: image }}
       resizeMode="cover"
     />
@@ -48,9 +50,15 @@ export default function BHDetails() {
   const [data, setData] = useState<DataItem | null>(null);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showAmenitiesModal, setShowAmenitiesModal] = useState(true);
+  const [showAmenitiesModal, setShowAmenitiesModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false)
+  const [selectedImage, setSelectedImage] = useState(null)
   const hasFetched = useRef(false);
 
+  const openImage = (image) => {
+    setSelectedImage(image);
+    setShowImageModal(true)
+  }
 
   useEffect(() => {
     if (!hasFetched.current) {
@@ -70,27 +78,37 @@ export default function BHDetails() {
   }}, [propertyID]);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView className='flex-1 bg-white'>
       {/* {loading ? (
         <Text>Loading...</Text>
       ) : ( */}
-      
+        <ScrollView>
+          <View>
             {showAmenitiesModal && (
-            <View className='absolute z-10 h-full w-full items-center justify-center'>
+            <View className='z-20'>
               <AmenitiesModal hideModal={() => setShowAmenitiesModal(false)}/>
             </View>
            )}
-        
+          </View>
                 
-        <View className={`${showAmenitiesModal ? 'opacity-20' : ''}`}>
-          <BackButton/>
+        <View className={`${showAmenitiesModal ? 'opacity-20 z-0' : ''}`}>
+          <View className='flex-row justify-between'>
+            <BackButton/>
+            <Bookmark/>
+          </View>
+
           {images.length > 0 ? (
             <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
               data={images}
               keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => <Images item={{...item, propertyID}} />}
+              renderItem={({ item }) => 
+              <View className='w-screen h-72'> 
+                <Pressable onPress={() => openImage(item)}>
+                  <Images item={{...item, propertyID}} />
+                </Pressable>
+              </View>}
               initialNumToRender={4}
               maxToRenderPerBatch={5}
               windowSize={7}
@@ -124,37 +142,123 @@ export default function BHDetails() {
             <View className='mt-5'>
               <View className='flex-row items-center gap-x-1'>
                 <Text className='text-xl font-semibold'>Description</Text>
-                <Pressable 
+                {/* <Pressable 
                   onPress={() => setShowAmenitiesModal(true)}
                   className='mt-1'>
                   <Ionicons name='help-circle-outline'/>
-                </Pressable >
-                
+                </Pressable > */}
               </View>
-              <View className='mt-2'>
-                <Text>Discover the perfect blend of comfort and community at Sunset Haven Boarding House. Nestled in a quiet neighborhood, our cozy boarding house offers a home-away-from-home experience for individuals seeking a convenient and communal living space.</Text>
+              <View className='mt-2 h-16'>
+                {data?.description ? (
+                  <Text>
+                    {data?.description}
+                  </Text>
+                ): (
+                  <Text>
+                    No description
+                  </Text>
+                )}
               </View>
             </View>
 
-            {/* AENITIES SECTION*/}
+            {/* AMENITIES SECTION*/}
             <View className='mt-5'>
+              <View className='flex-row items-center'>
+                <Text className='text-xl font-semibold mr-1'>Amenities</Text>
+                <Pressable 
+                  onPress={() => setShowAmenitiesModal(true)}
+                  className='mt-1'>
+                  <Ionicons name='help-circle-outline' size={15}/>
+                </Pressable >  
+              </View>
+
               <Amenities propertyID={propertyID}/>
             </View>
 
-            <View className='bg-white rounded-md p-5'>
-              <View>
-                <Text className='text-lg'>Owned by <Text className='font-semibold'>Airone Vonn</Text></Text>
-                <Text className='text-gray-500'>Joined last February 2024</Text>
+            {/* MORE PHOTOS SECTION */}
+            <View className='mt-5'>
+              <Text className='text-xl font-semibold'>More Photos</Text>
+
+              {images.length > 0 ? (
+                <View className='h-20 mt-2'>
+                <FlatList
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  data={images}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={({ item }) => 
+                  <View className='h-20 w-32 mr-2 rounded-md'>
+                    <Pressable onPress={() => openImage(item)}>
+                      <Images item={{...item, propertyID}}/>
+                    </Pressable>
+                  </View>}
+                  initialNumToRender={4}
+                  maxToRenderPerBatch={5}
+                  windowSize={7}
+                />
+                </View>
+              ) : (
+                <View style={{ width: screenWidth, height: 20, alignItems: 'center', justifyContent: 'center' }}>
+                  <Image
+                    style={{ width: screenWidth, height: 20 }}
+                    source={require("@/assets/images/no-image-placeholder.png")}
+                    resizeMode="cover"
+                  />
+                </View>
+              )}
+            </View>
+
+            {/* REVIEWS SECTION */}
+            <View className='mt-5'>
+              <Text className='text-xl font-semibold'>Reviews</Text>
+
+              <View className='p-5 items-center'>
+                <Text>No reviews</Text>
               </View>
             </View>
 
-            {/* <View className='border-t border-gray-300 my-5'></View> */}
+            {/* OWNER SECTION */}
+            <View>
+              <OwnerInformation/>
+            </View>
+
+            <View className='h-20'>
+
+            </View>
+
+            {showImageModal && (
+            <Modal
+            animationType="fade"
+            visible
+            transparent={true}>
+            <View className="flex-1 justify-center items-center bg-black bg-opacity-50">
+              <View className="w-full h-72 bg-white rounded-lg">
+                <Pressable
+                  className="absolute top-4 right-4 z-10 bg-white rounded-full"
+                  onPress={() => setShowImageModal(!showImageModal)}
+                >
+                  <Ionicons name='close-outline' size={20} />
+                </Pressable>
+
+                <View>
+                  <Images
+                    item={{...selectedImage, propertyID}}
+                  />
+                </View>
+              </View>
+            </View>
+          </Modal>
+            )}
+
             
           </View>
         </View>
-
-        <BottomBar price={data?.price}/>
+        
+        
+      </ScrollView>
       {/* )}  */}
+
+      <BottomBar price={data?.price}/>
     </SafeAreaView>
   );
 }
