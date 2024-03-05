@@ -79,9 +79,9 @@ export default function BHDetails() {
 
   return (
     <SafeAreaView className='flex-1 bg-white'>
-      {/* {loading ? (
+      {loading ? (
         <Text>Loading...</Text>
-      ) : ( */}
+      ) : (
         <ScrollView>
           <View>
             {showAmenitiesModal && (
@@ -256,7 +256,7 @@ export default function BHDetails() {
         
         
       </ScrollView>
-      {/* )}  */}
+      )}
 
       <BottomBar price={data?.price}/>
     </SafeAreaView>

@@ -37,7 +37,7 @@ export function AuthProvider({ children }: Props) {
     ) {
       router.replace('/(auth)/');
     } else if (session?.user && inAuthGroup) {
-      router.replace('/BookingDetails');
+      router.replace('/VisitScreen');
     }
   }, [session, segments, authInitialized, navigationState?.key]);
 
