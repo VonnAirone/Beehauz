@@ -1,8 +1,8 @@
-import { downloadImage } from "@/api/ImageFetching";
+import { downloadImage, loadImages } from "@/api/ImageFetching";
 import { handlePropertyClick } from "@/api/ViewCount";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { FlatList as RNFlatList, Pressable, View, Text } from "react-native";
+import React, { memo, useEffect, useRef, useState } from "react";
+import { FlatList as RNFlatList, Pressable, View, Text, Image, ActivityIndicator, FlatList } from "react-native";
 
 type DataItem = {
     property_id: string;
@@ -25,16 +25,103 @@ type DataItem = {
    router.push({pathname: "/(tenant)/(screens)/BHDetails", params: {propertyID: propertyID}})
   };
 
-  export function PopularNow({ data, image }: { data: DataItem[], image: string }) {
+  //THIS IS THE IMAGE COMPONENT THAT DISPLAYS THE IMAGE
+  const Images = memo(({ item }: { item: any }) => {
+    const [image, setImage] = useState<string | null>(null);
+  
+    useEffect(() => {
+      // Check if image data is already available
+      if (!image) {
+        // If not available, fetch the image data
+        downloadImage(item.propertyID, item.name, setImage);
+      }
+    }, [item.propertyID, item.name, image]); // Add image to the dependency array
+  
+    if (!image) {
+      return (
+        <View className='flex-1 items-center justify-center'>
+          <ActivityIndicator size="large" />
+        </View>
+      );
+    }
+  
+    return (
+      <Image
+        className='w-full h-full rounded-md'
+        source={{ uri: image }}
+        resizeMode="cover"
+      />
+    );
+  });
+  
+
+  //THIS IS THE SINGLE IMAGE DISPLAY COMPONENT THAT DISPLAY A SINGLE IMAGE OF A CERTAIN PROPERTY
+  export const SingleImageDisplay = ({ propertyID }) => {
+    const [images, setImages] = useState([]);
+  
+    useEffect(() => {
+      const fetchImages = async () => {
+        try {
+          await loadImages(propertyID, setImages)
+        } catch (error) {
+          console.error('Error fetching images:', error);
+        }
+      };
+  
+      fetchImages();
+    }, [propertyID]);
+  
+    // if (loading) {
+    //   return (
+    //     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+    //       <ActivityIndicator size="large" />
+    //     </View>
+    //   );
+    // }
+  
+    if (images.length > 0) {
+      const firstImage = images[0];
+      return (
+        <View className="flex-1 rounded-md">
+          <Images 
+          item={{ ...firstImage, propertyID }} />
+        </View>
+      );
+    } else {
+      return (
+        <View className="flex-1 justify-center items-center border border-gray-300 rounded-md">
+          <Text>No images found</Text>
+        </View>
+      );
+    }
+  };
+
+  //THIS IS THE POPULAR NOW COMPONENT FOR THE MOST VISITED PROPERTIES
+  export function PopularNow({ data }: { data: DataItem[]}) {
+    const [imagesLoaded, setImagesLoaded] = useState(false);
+    const hasFetched = useRef(false);
+  
+    useEffect(() => {
+      if (!hasFetched.current) {
+        async function fetchData() {
+          try {
+            await loadImages(data, setImagesLoaded); // Set imagesLoaded to true once all images are loaded
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        }
+        fetchData();
+      }
+    }, [data]);
+  
     const renderItem = ({ item, index }: { item: DataItem; index: number }) => (
       <View className='overflow-hidden'>
-        <Pressable 
-        onPress={() => handleCardPress(item.property_id)}>
+        <Pressable onPress={() => handleCardPress(item.property_id)}>
           <View className='p-2'>
-            <View className='border rounded-md border-gray-200 flex w-40 h-36 p-5 m-auto'>
-              {image}
+            <View style={{ width: 160, height: 144 }}>
+              <SingleImageDisplay propertyID={item.property_id} />
             </View>
-            
+  
             <View className='mt-2'>
               <Text className='font-semibold text-xl'>{item.property_name}</Text>
               <Text>{item.price}</Text>
@@ -44,9 +131,25 @@ type DataItem = {
       </View>
     );
   
-    return <RNFlatList contentContainerStyle={{justifyContent: 'center', alignItems: 'center', paddingLeft: "6%"}} data={data} renderItem={renderItem} showsHorizontalScrollIndicator={false} horizontal={true} />;
-  };
+    return (
+      <>
+        {imagesLoaded && (
+          <RNFlatList
+            contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', paddingLeft: '6%' }}
+            data={data}
+            renderItem={renderItem}
+            showsHorizontalScrollIndicator={false}
+            horizontal={true}
+          />
+        )}
+      </>
+    );
+  }
+  
 
+  //THIS IS FOR THE NEARBY ME COMPONENT THAT DISPLAYS PROPERTY NEARBY THE USER
+
+  //!!!NOTE!!! THIS IS STILL NOT
   export function NearbyMe({ data }: PropertyProps) {
     const renderItem = ({ item, index }: { item: DataItem; index: number }) => (
       <View className='overflow-hidden'>
@@ -54,9 +157,11 @@ type DataItem = {
           <Pressable 
           onPress={() => handleCardPress(item.property_id)}>
             
-            <View className='border rounded-md border-gray-200 flex h-40 w-72 p-5'></View>
+            <View className='h-40 w-72'>
+              <SingleImageDisplay propertyID={item.property_id}/>
+            </View>
               
-              <View>
+              <View className="mt-2">
                 <Text className='font-semibold text-xl'>{item.property_name}</Text>
                 <Text>{item.price}</Text>
               </View>

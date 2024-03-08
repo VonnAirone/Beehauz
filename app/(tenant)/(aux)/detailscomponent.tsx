@@ -79,8 +79,7 @@ export function Amenities({propertyID}) {
     )
 }
 
-export function BottomBar ({price}) {
-
+export function BottomBar ({price, propertyID}) {
   const [isBooking, setIsBooking] = useState(false)
     return (
         <View className='absolute bottom-0 left-0 z-50 w-full h-16 bg-white py-2 px-6 dark:bg-gray-700 dark:border-gray-600 flex-row items-center justify-between'>
@@ -95,7 +94,7 @@ export function BottomBar ({price}) {
 
         <View className='flex-row items-center gap-x-2'>
           <Pressable 
-          onPress={isBooking ? () => router.push('/VisitScreen') : () => router.push('/BookingDetails')}
+          onPress={isBooking ? () => router.push({pathname: '/VisitScreen', params: {propertyID}}) : () => router.push('/BookingDetails')}
           className=' bg-black w-32 p-3 rounded-md'>
             <Text className='text-center text-white text-base font-semibold'>{isBooking ? 'Pay a visit' : 'Book now'}</Text>
           </Pressable>

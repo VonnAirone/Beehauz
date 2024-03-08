@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import BackButton from '@/components/back-button'
@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { format } from 'date-fns';
 import { useAuth } from '@/utils/AuthProvider'
 import { supabase } from '@/utils/supabase'
+import { useLocalSearchParams } from 'expo-router'
 
 interface DataItem {
     first_name: string,
@@ -14,11 +15,18 @@ interface DataItem {
     phone_number: string
 }
 
+//WORKING ON DATABASE AND REALTIME OF VISITS
 export default function PayAVisit() {
     const session = useAuth()?.session;
+    const propertyID = useLocalSearchParams()
     const [user, setUser] = useState<DataItem | null>(null);
-    const [selected, setSelected] = useState('');
+    const [date, setDate] = useState('');
+    const [time, setTime] = useState('')
     const [selectedDateInWords, setSelectedDateInWords] = useState('');
+
+    const handleOnTimeChange = (text) => {
+        setTime(text);
+    }
 
     const getUser = async () => {
         const { data, error } = await supabase
@@ -38,7 +46,38 @@ export default function PayAVisit() {
         }
     }
 
-    useEffect(() => {
+    
+    const clearSelection = () => {
+        setDate('');
+        setSelectedDateInWords('');
+    }
+
+    const handleSubmission = async () => {
+
+        if (!date || !time) {
+            Alert.alert("Missing information", "Please select both time and date of your visits.")
+        } 
+        const { data, error } = await supabase
+            .from('property_visits')
+            .insert({
+                visitor_id: session?.user.id,
+                owner_id: session?.user.id,
+                property_id: propertyID,
+                date: date,
+                time: time,
+                status: 'pending',
+              })
+            .select() 
+
+            if (error) {
+                console.error('Error submitting visit request:', error);
+                Alert.alert('Error', 'There was a problem submitting your visit request.');
+            } else {
+                Alert.alert('Success', 'Your visit request has been successfully submitted.');
+            }
+        }
+
+    useEffect(() => { 
         getUser()
     }, [])
     
@@ -52,23 +91,26 @@ export default function PayAVisit() {
 
                 <View className='mt-3'>
                     <View className='flex-row gap-x-2'>
-                        <View className='border border-gray-300 bg-white py-2 rounded-md px-5 mt-3  flex-row items-center w-stretch'>
-                            <View className='mr-2'>
-                                <Ionicons name='calendar-outline' size={28}/>
+                        <View className='border border-gray-300 bg-white py-2 rounded-md px-5 mt-3 w-48'>
+                            <View className='mr-2 flex-row'>
+                                <Ionicons name='calendar-outline' size={15}/>
+                                <Text className='ml-2'>Date of Visit</Text>
                             </View>
-                            <View>
-                                <Text>Date of Visit</Text>
+                            <View className='mt-2'>
                                 <Text>{selectedDateInWords}</Text>
                             </View>
                         </View>
 
-                        <View className='border border-gray-300 bg-white py-2 rounded-md px-5 mt-3  flex-row items-center flex-grow'>
-                            <View className='mr-2'>
-                                <Ionicons name='time-outline' size={28}/>
+                        <View className='border border-gray-300 bg-white py-2 rounded-md px-5 mt-3 flex-grow justify-center'>
+                            <View className='mr-2 flex-row'>
+                                <Ionicons name='time-outline' size={15}/>
+                                <Text className='ml-2'>Time of Visit</Text>
                             </View>
                             <View>
-                                <Text>Time of Visit</Text>
-                                <TextInput placeholder='12:))'/>
+                                <TextInput 
+                                onChangeText={handleOnTimeChange}
+                                className='text-' 
+                                placeholder='Enter your preffered time'/>
                             </View>
                         </View>
                     </View>
@@ -83,16 +125,25 @@ export default function PayAVisit() {
                                 todayTextColor: '#00adf5',
                                 dayTextColor: '#2d4150',}}
                                 onDayPress={day => {
-                                    setSelected(day.dateString);
+                                    setDate(day.dateString);
                                     const formattedDate = format(new Date(day.dateString), 'EEEE, MMMM d, yyyy');
                                     setSelectedDateInWords(formattedDate);
                             }}
                             markedDates={{
-                                [selected]: {selected: true, disableTouchEvent: false}
+                                [date]: {selected: true, disableTouchEvent: false}
                             }}
                             className='border border-gray-300 rounded-md'
                             current={'2012-03-01'}/>
                     </View>
+                    <View className='absolute -bottom-10 right-0 rounded-md overflow-hidden'>
+                        <Pressable
+                        android_ripple={{color: 'red'}} 
+                        onPress={() => clearSelection()} 
+                        className='border border-gray-300 p-2 rounded-md bg-white'>
+                            <Text>Clear Selection</Text>
+                        </Pressable>
+                    </View>
+
                 </View>
 
                 <View className='mt-5'>

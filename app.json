@@ -1,33 +1,34 @@
 {
   "expo": {
     "name": "BeehauzApp",
-    "slug": "BeehauzApp",
+    "slug": "beehauzapp",
     "version": "1.0.0",
-    
-      "scheme": "com.beehauz",
-      "web": {
-        "bundler": "metro",
-        "output": "static",
-        "favicon": "/assets/images/favicon.png"
-      },
-      "plugins": [["expo-router"], [
+    "scheme": "com.beehauz",
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-router"
+      ],
+      [
         "expo-image-picker",
         {
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
-      ]],
-      "experiments": {
-        "typedRoutes": true
-        
-          ,"tsconfigPaths": true
-        
-      },
-    
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "tsconfigPaths": true
+    },
     "orientation": "portrait",
-    "icon": "/assets/images/icon.png",
+    "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "/assets/images/splash.png",
+      "image": "./assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -35,13 +36,27 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aironevonn.beehauzapp"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "/assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.aironevonn.beehauzapp"
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "7238d136-11d1-4ca7-9c76-f502360e6cc8"
       }
-    }
+    },
+    "owner": "aironevonn"
   }
 }

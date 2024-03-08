@@ -255,7 +255,7 @@ export default function Account() {
                   <Pressable 
                   onPress={signOUt}
                   android_ripple={{color: 'yellow'}}
-                  className='bg-yellow-500 px-2 py-3 w-32'>
+                  className='bg-yellow px-2 py-3 w-32 rounded-md'>
                     <Text className='text-center'>Logout</Text>
                   </Pressable>
                 </View>
