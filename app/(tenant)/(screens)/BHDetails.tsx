@@ -19,7 +19,6 @@ interface DataItem {
   description: string;
 }
 
-
 const Images = memo(({ item } : {item : any}) => {
   const [image, setImage] = useState<string | null>(null);
 
@@ -80,7 +79,9 @@ export default function BHDetails() {
   return (
     <SafeAreaView className='flex-1 bg-white'>
       {loading ? (
-        <Text>Loading...</Text>
+        <View className='flex-1 justify-center items-center'>
+          <Text>Loading...</Text>
+        </View>
       ) : (
         <ScrollView>
           <View>
@@ -258,7 +259,7 @@ export default function BHDetails() {
       </ScrollView>
       )}
 
-      <BottomBar price={data?.price}/>
+      <BottomBar price={data?.price} propertyID={propertyID}/>
     </SafeAreaView>
   );
 }

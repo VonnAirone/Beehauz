@@ -1,6 +1,17 @@
 {
-  "name": "BeehauzApp",
-  "version": "1.0.0",
+  "expo": {
+    "name": "Beehauz App",
+    "slug": "beehauzapp",
+    "icon": "/assets/images/icon.png",
+    "plugins": [
+      "expo-image-picker"
+    ],
+    "install": {
+      "exclude": [
+        "react-native-safe-area-context"
+      ]
+    }
+  },
   "scripts": {
     "android": "expo start --android",
     "format": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix && prettier \"**/*.{js,jsx,ts,tsx,json}\" --write",
@@ -15,12 +26,16 @@
     "@supabase/supabase-js": "^2.38.4",
     "axios": "^1.6.7",
     "date-fns": "^3.3.1",
+    "debounce": "^2.0.0",
     "expo": "~50.0.8",
     "expo-auth-session": "~5.4.0",
     "expo-constants": "~15.4.5",
     "expo-crypto": "~12.8.1",
+    "expo-dev-client": "~3.3.9",
+    "expo-device": "~5.9.3",
     "expo-image-picker": "^14.7.1",
     "expo-linking": "~6.2.2",
+    "expo-notifications": "~0.27.6",
     "expo-router": "^3.4.6",
     "expo-status-bar": "~1.11.1",
     "expo-system-ui": "~2.9.3",
@@ -60,16 +75,6 @@
   },
   "overrides": {
     "expo-modules-core": "~1.11.0"
-  },
-  "expo": {
-    "plugins": [
-      "expo-image-picker"
-    ],
-    "install": {
-      "exclude": [
-        "react-native-safe-area-context"
-      ]
-    }
   },
   "private": true
 }

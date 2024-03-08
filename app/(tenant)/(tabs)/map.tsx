@@ -4,6 +4,7 @@ import { supabase } from '@/utils/supabase'
 import * as ImagePicker from 'expo-image-picker'
 import { fetchPropertyListData } from '@/api/DataFetching'
 import { Ionicons } from '@expo/vector-icons'
+import { router } from 'expo-router'
 
 type DataItem = {
   property_id: string;
@@ -79,8 +80,11 @@ export default function Map() {
   }
   return (
     <View className='flex-1 justify-center items-center'>
-
-
+      <Pressable 
+      onPress={() => router.push("/Push")}
+      className='border border-gray-300 bg-white p-4 rounded-md'>
+        <Text>Press here</Text>
+      </Pressable>
     </View>
   )
 }

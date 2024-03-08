@@ -73,28 +73,19 @@ export function Button({ onPress, text, loading }) {
 export function CheckEmail({ email, actionType }) {
   
   const openEmail = async () => {
-    console.log('onpress')
-    if (actionType != 'confirmation') {
-      forgotPassword()
-    } else {
-      let emailUrl = `mailto:${email}`;
-    
-      if (Platform.OS === 'android') {
-        emailUrl = 'intent://compose/#Intent;package=com.google.android.gm;scheme=mailto;end';
-      }
-  
-      try {
-        const supported = await Linking.canOpenURL(emailUrl);
-        if (supported) {
-          await Linking.openURL(emailUrl);
-        } else {
-          console.error('Opening email not supported');
-        }
-      } catch (error) {
-        console.error(error);
-      }
+    const gmailUrl = 'https://mail.google.com/mail/u/?authuser=user@gmail.com';
+
+    try {
+       const supported = await Linking.canOpenURL(gmailUrl);
+       if (supported) {
+          await Linking.openURL(gmailUrl);
+       } else {
+          console.error('Opening Gmail not supported');
+       }
+    } catch (error) {
+       console.error(error);
     }
-  };
+ }
 
   const [userEmail, setUserEmail] = useState('')
   const [isEmailEmpty, setIsEmailEmpty] = useState(false)

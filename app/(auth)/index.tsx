@@ -76,16 +76,22 @@ export default function Login() {
           setLoading(true);
 
           if(isNotRegistered) {
-            // const { error } = await supabase.auth.signUp({
-            //   email: email,
-            //   password: password,
-            // });
+            const { error } = await supabase.auth.signUp({
+              email: email,
+              password: password,
+              options: {
+                data: {
+                  profileCompleted: false
+                },
+                emailRedirectTo: 'http://192.168.110.181:8081'
+              }
+            });
   
-            // if (error) {
-            //   Alert.alert('Error creating account', error.message);
-            // } else {
-            //   Alert.alert('Account created successfully!');
-            // }
+            if (error) {
+              Alert.alert('Error creating account', error.message);
+            } else {
+              Alert.alert('Account created successfully!');
+            }
             setShowModal(true)
           } else {
             const { error } = await supabase.auth.signInWithPassword({
@@ -239,7 +245,7 @@ export default function Login() {
             <Pressable onPress={Register}>
               <Text>
                 {!isNotRegistered ? "Don't have an account?" : "Already have an account?"}{''}
-                <Text style={{ color: 'blue' }}>Press here.</Text>
+                <Text style={{ color: 'blue' }}> Press here.</Text>
               </Text>
             </Pressable>
 

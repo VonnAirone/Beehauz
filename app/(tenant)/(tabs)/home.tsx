@@ -1,11 +1,11 @@
-import { fetchPopularNowList, fetchPropertyDetailsData } from '@/api/DataFetching';
-import { downloadImage } from '@/api/ImageFetching';
+import { fetchPopularNowList } from '@/api/DataFetching';
+import { downloadImage, loadImages } from '@/api/ImageFetching';
 import { NearbyMe, PopularNow, Services } from '@/app/(tenant)/(aux)/homecomponents';
 import Logo from '@/components/logo';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { View, Text, TextInput, Image, ScrollView } from 'react-native'; // Rename the component to avoid conflict
+import { router, useLocalSearchParams } from 'expo-router';
+import { memo, useEffect, useState } from 'react';
+import { View, Text, TextInput, Image, ScrollView, ActivityIndicator, Pressable } from 'react-native'; // Rename the component to avoid conflict
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type DataItem = {
@@ -45,10 +45,8 @@ const services = [
 
 
 export default function HomePage() {
-  const { usertype } = useLocalSearchParams();
   const [PopularList, setPopularList] = useState<DataItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [propertyImage, setPropertyImage] = useState<DataItem[]>([])
 
   useEffect(() => {
     async function fetchData() {
@@ -71,24 +69,24 @@ export default function HomePage() {
       <View></View>
     ) : (  
     <> 
-    <View className='absolute left-72 opacity-10'>
-      <Image className='h-60 w-60' source={require("assets/honeyv3.png")}/>
-    </View>
-    
       <View className='mt-10'>
         <View className='items-start ml-5'>
           <Logo/>
         </View>
 
+
         {/* SEARCHBAR */}
         <View className='flex-row items-center justify-center ml-4'>
-          <View className='flex-row items-center border border-gray-200 p-2 w-80 backdrop-blur-3xl bg-white/30'>
-            <View className='mx-2'>
-              <Ionicons name='search' size={20}/>
+          <Pressable onPress={() => router.push("/Searchpage")}>    
+            <View className='flex-row items-center border border-gray-300 rounded-md p-2 w-80 backdrop-blur-3xl bg-white/30'>
+              <View className='mx-2'>
+                <Ionicons name='search' size={20}/>
+              </View>
+              <TextInput 
+              editable={false} 
+              placeholder='Search for a place'/>
             </View>
-            <TextInput placeholder='Search for a place'/>
-          </View>
-
+          </Pressable>
           <View className='mx-3'>
             <Ionicons name='notifications' size={28}/>
           </View>
@@ -98,7 +96,6 @@ export default function HomePage() {
         <View className='mt-10'>
           <Text className='font-semibold text-xl ml-8'>POPULAR NOW</Text>
           <PopularNow 
-          image={undefined}
           data={PopularList} 
           //this is where you put the router.push()
           />

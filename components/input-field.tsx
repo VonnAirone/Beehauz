@@ -19,7 +19,7 @@ export default function InputField({
       placeholder={placeholder}
       secureTextEntry={isPassword}
       onChangeText={onChangeText}
-      className='p-3 pl-5 border-gray-200 focus:border-gray-400 border rounded-md w-80 text-sm'
+      className='p-2 pl-5 border-gray-300 focus:border-gray-400 border rounded-md text-sm'
     />
   );
 }

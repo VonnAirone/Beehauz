@@ -37,7 +37,13 @@ export function AuthProvider({ children }: Props) {
     ) {
       router.replace('/(auth)/');
     } else if (session?.user && inAuthGroup) {
-      router.replace('/VisitScreen');
+      //add here the condition to render the profile completion page 
+      if (session?.user.user_metadata.profileCompleted == false) {
+        router.replace('/(tenant)/(screens)/Usertype')
+      } else {
+        router.replace('/home');
+      }
+      
     }
   }, [session, segments, authInitialized, navigationState?.key]);
 
