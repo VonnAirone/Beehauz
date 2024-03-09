@@ -29,6 +29,7 @@ export default function Usertype() {
         if (error) {
             Alert.alert("Error updating user type", error.message)
         } else {
+            setShowModal(false)
             router.push({pathname: "/ProfileCompletion", params: {usertype}})
             setLoading(false)
         }
