@@ -1,10 +1,11 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-import List from '@/app/(aux)/ImageList'
-
-export default function Dashboard() {
+// import { Alert, StyleSheet, Text, View } from 'react-native'
+// import React from 'react'
+// import List from '@/app/(aux)/ImageList'
+// import * as ImagePicker from 'expo-image-picker'
+// import { supabase } from '@/utils/supabase';
+// export default function Dashboard() {
   
-  // async function uploadImage(propertyID: string) {
+//   async function uploadImage(propertyID: string) {
 //   try {
 //     const result = await ImagePicker.launchImageLibraryAsync({
 //       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -51,9 +52,9 @@ export default function Dashboard() {
 //   }
 // }
 
-  return (
-    <List/>
-  )
-}
+//   return (
+//     <List/>
+//   )
+// }
 
-const styles = StyleSheet.create({})
+// const styles = StyleSheet.create({})

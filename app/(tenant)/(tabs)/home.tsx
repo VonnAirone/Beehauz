@@ -2,10 +2,12 @@ import { fetchPopularNowList } from '@/api/DataFetching';
 import { downloadImage, loadImages } from '@/api/ImageFetching';
 import { NearbyMe, PopularNow, Services } from '@/app/(tenant)/(aux)/homecomponents';
 import Logo from '@/components/logo';
+import { useAuth } from '@/utils/AuthProvider';
+import { supabase } from '@/utils/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { memo, useEffect, useState } from 'react';
-import { View, Text, TextInput, Image, ScrollView, ActivityIndicator, Pressable } from 'react-native'; // Rename the component to avoid conflict
+import { View, Text, TextInput, Image, ScrollView, ActivityIndicator, Pressable, Alert } from 'react-native'; // Rename the component to avoid conflict
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type DataItem = {
@@ -110,7 +112,6 @@ export default function HomePage() {
           <Text className='font-semibold text-xl ml-8'>SERVICES</Text>
           <Services data={services}/>
         </View>
-
 
       </View>
     </> 

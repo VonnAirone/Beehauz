@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Alert, Keyboard, KeyboardAvoidingView, Platform, Pressable, Text, TouchableWithoutFeedback, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Glass from 'components/glassmorph';
 import InputField from 'components/input-field';
@@ -9,6 +9,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
+import * as Location from "expo-location"
 
 export default function TenantRegistration({ email }) {
   const { usertype } = useLocalSearchParams();
@@ -24,6 +25,42 @@ export default function TenantRegistration({ email }) {
   const handleAgeChange = (num) => setAge(num);
   const handlePhoneNumberChange = (num) => setPhoneNumber(num);
 
+  // useEffect(() => {
+  //   async function getUserLocation() {
+  //     let { status } = await Location.getForegroundPermissionsAsync()
+  //     if (stats !== "granted") {
+  //      console.log("Permission to access location was denied")
+  //      return;
+  //    }
+  //     let location = await Location.getCurrentPositionAsync({});
+  //     setLocation(location)
+  //   }
+  //    
+  //    getUserLocation()
+  //   
+  //    
+  // })
+  const updateUserInformation = async () => {
+     let {data, error} = await supabase.from('profiles')
+     .update({
+      name: name, 
+      email: user?.email,
+      age: age,
+      address: address,
+      phone_number: phoneNumber
+    })
+    .eq("id", user?.id)
+
+      if (error) {
+        Alert.alert("Error updating user information:", error.message)
+      } else {
+        if (usertype === "Tenant") {
+          router.push("/(tenant)/(tabs)/home")
+        } else {
+          router.push("/(owner)/(tabs)/one")
+        }
+      }
+  }
   const handleSubmission = async () => {
     const fields = [name, address, age, phoneNumber];
     let isEmpty = false;
@@ -47,11 +84,8 @@ export default function TenantRegistration({ email }) {
       if (error) {
         Alert.alert("Error updating metadata:", error.message)
       } else {
-        if (usertype === "Tenant") {
-          router.push("/(tenant)/(tabs)/home")
-        } else {
-          router.push("/(owner)/(tabs)/one")
-        }
+        Alert.alert("Successfully completed personal information.")
+        updateUserInformation()
       }
     }
   }
@@ -89,62 +123,56 @@ export default function TenantRegistration({ email }) {
               <View className="flex gap-y-4 w-80">
                 <View>
                   <Text className="mb-1">Name</Text>
-                  <InputField
-                    value={name}
-                    onChangeText={handleNameChange}
-                    placeholder={'Name: (ex. Juan De La Cruz)'}
-                    isPassword={false}
-                    isNumeric={""}
-                    isEditable={true}
-                  />
+                    <TextInput
+                      clearTextOnFocus
+                      value={name}
+                      placeholder={"Name: (ex. Juan De La Cruz)"}
+                      onChangeText={handleNameChange}
+                      className='p-2 pl-5 border-gray-300 focus:border-gray-400 border rounded-md text-sm'
+                    />
                 </View>
 
                 <View>
                   <Text className="mb-1">Email Address</Text>
-                  <InputField
-                    value={user?.email}
-                    onChangeText={email}
-                    placeholder={user?.email}
-                    isPassword={false}
-                    isNumeric={""}
-                    isEditable={false}
-                  />
+                  <TextInput
+                      clearTextOnFocus
+                      value={user?.email}
+                      editable={false}
+                      className='p-2 pl-5 border-gray-300 focus:border-gray-400 border rounded-md text-sm'
+                    />
                 </View>
 
                 <View>
                   <Text className="mb-1">Address</Text>
-                  <InputField
-                    value={address}
-                    onChangeText={handleAddressChange}
-                    placeholder={'(ex. Barangay, Municipality, Province)'}
-                    isPassword={false}
-                    isNumeric={""}
-                    isEditable={true}
-                  />
+                    <TextInput
+                      clearTextOnFocus
+                      value={address}
+                      placeholder={'(ex. Barangay, Municipality, Province)'}
+                      onChangeText={handleAddressChange}
+                      className='p-2 pl-5 border-gray-300 focus:border-gray-400 border rounded-md text-sm'
+                    />
                 </View>
 
                 <View className="flex-row justify-between">
                   <View className="w-28">
                     <Text className="mb-1">Age</Text>
-                    <InputField
+                    <TextInput
+                      clearTextOnFocus
                       value={age}
+                      placeholder={'Age'}
                       onChangeText={handleAgeChange}
-                      placeholder={"Age"}
-                      isPassword={false}
-                      isNumeric={"numeric"}
-                      isEditable={true}
+                      className='p-2 pl-5 border-gray-300 focus:border-gray-400 border rounded-md text-sm'
                     />
                   </View>
 
                   <View className="w-48">
                     <Text className="mb-1">Phone Number</Text>
-                    <InputField
+                    <TextInput
+                      clearTextOnFocus
                       value={phoneNumber}
+                      placeholder={'+63'}
                       onChangeText={handlePhoneNumberChange}
-                      placeholder={"+63"}
-                      isPassword={false}
-                      isNumeric={"numeric"}
-                      isEditable={true}
+                      className='p-2 pl-5 border-gray-300 focus:border-gray-400 border rounded-md text-sm'
                     />
                   </View>
                 </View>
