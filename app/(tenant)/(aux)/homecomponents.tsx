@@ -1,21 +1,23 @@
 import { downloadImage, loadImages } from "@/api/ImageFetching";
 import { handlePropertyClick } from "@/api/ViewCount";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { memo, useEffect, useRef, useState } from "react";
 import { FlatList as RNFlatList, Pressable, View, Text, Image, ActivityIndicator, FlatList } from "react-native";
 
 type DataItem = {
     property_id: string;
-    property_name: string;
+    name: string;
     price: string;
     view_count: number;
+    address: string;
   };
   
   type PropertyProps = {
     data: DataItem[];
   };
 
-  // THIS IS TO ADD VIEW COUNT EVERYTIME A USER CLICKS A PROPERTY AS WELL AS TO REDIRECT THE USER TO THE BH DETAILS
+ 
   const handleCardPress = async (propertyID: string) => {
     try {
       await handlePropertyClick(propertyID);
@@ -25,23 +27,20 @@ type DataItem = {
    router.push({pathname: "/(tenant)/(screens)/BHDetails", params: {propertyID: propertyID}})
   };
 
-  //THIS IS THE IMAGE COMPONENT THAT DISPLAYS THE IMAGE
+
   const Images = memo(({ item }: { item: any }) => {
     const [image, setImage] = useState<string | null>(null);
   
     useEffect(() => {
-      // Check if image data is already available
       if (!image) {
-        // If not available, fetch the image data
         downloadImage(item.propertyID, item.name, setImage);
       }
-    }, [item.propertyID, item.name, image]); // Add image to the dependency array
+
+    }, [item.propertyID, item.name, image]);
   
     if (!image) {
       return (
-        <View className='flex-1 items-center justify-center'>
-          <ActivityIndicator size="large" />
-        </View>
+        <View className='bg-gray-300'/>
       );
     }
   
@@ -55,7 +54,7 @@ type DataItem = {
   });
   
 
-  //THIS IS THE SINGLE IMAGE DISPLAY COMPONENT THAT DISPLAY A SINGLE IMAGE OF A CERTAIN PROPERTY
+
   export const SingleImageDisplay = ({ propertyID }) => {
     const [images, setImages] = useState([]);
   
@@ -70,14 +69,8 @@ type DataItem = {
   
       fetchImages();
     }, [propertyID]);
-  
-    // if (loading) {
-    //   return (
-    //     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    //       <ActivityIndicator size="large" />
-    //     </View>
-    //   );
-    // }
+
+    
   
     if (images.length > 0) {
       const firstImage = images[0];
@@ -123,25 +116,31 @@ type DataItem = {
             </View>
   
             <View className='mt-2'>
-              <Text className='font-semibold text-xl'>{item.property_name}</Text>
+              <Text className='font-semibold text-xl'>{item.name}</Text>
               <Text>{item.price}</Text>
             </View>
           </View>
         </Pressable>
       </View>
     );
+
+    const skeleton = () => (
+      <View className="p-2">
+        <View className='bg-gray-300 w-40 h-36 rounded-md'/>
+        <View className='mt-2 h-4 w-32 bg-gray-300 rounded-md'></View>
+        <View className='mt-2 h-2 w-20 bg-gray-300 rounded-md'></View>
+    </View>
+    );
   
     return (
       <>
-        {imagesLoaded && (
           <RNFlatList
             contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', paddingLeft: '6%' }}
             data={data}
-            renderItem={renderItem}
+            renderItem={imagesLoaded ? renderItem : skeleton}
             showsHorizontalScrollIndicator={false}
             horizontal={true}
           />
-        )}
       </>
     );
   }
@@ -162,8 +161,13 @@ type DataItem = {
             </View>
               
               <View className="mt-2">
-                <Text className='font-semibold text-xl'>{item.property_name}</Text>
+                <Text className='font-semibold text-xl'>{item.name}</Text>
                 <Text>{item.price}</Text>
+                <View className="flex-row items-center">
+                  <Ionicons name="location-outline" color={'#FFA233'}/>
+                  <Text className="text-yellow">{item.address}</Text>
+                </View>
+                
               </View>
           </Pressable>
         </View>
@@ -174,27 +178,38 @@ type DataItem = {
   };
 
 
-
-  type ServiceProps = {
-    name: string;
-    image: string;
-  };
-  
-  type ServicesProps = {
-    data: ServiceProps[];
-  };
-  
-
-  export function Services({ data }: ServicesProps) {
-    const renderItem = ({ item }: { item: ServiceProps }) => (
-      <View>
+  export function Services() {
+    return (
+      <View className="ml-5">
         <View className="p-2 flex-row gap-x-5 mt-2">
-        <View className="items-center">
-          <View className="h-14 w-14 border rounded-md border-gray-200">{item.image}</View>
-          <Text className="mt-2">{item.name}</Text>
-        </View>
-        </View>
+          <View className="items-center justify-center">
+            <View className="">
+              <Image className="w-8 h-8 object-contain" source={require("assets/services icons/laundry-machine.png")}/>
+            </View>
+            <Text className="mt-2">Laundry Shops</Text>
+          </View>
+
+          <View className="items-center justify-center">
+            <View className="">
+              <Image className="w-8 h-8 object-contain" source={require("assets/services icons/tools.png")}/>
+            </View>
+            <Text className="mt-2">Barber Shops</Text>
+          </View>
+
+          <View className="items-center justify-center">
+            <View className="">
+              <Image className="w-8 h-8 object-contain" source={require("assets/services icons/school.png")}/>
+            </View>
+            <Text className="mt-2">School Supplies</Text>
+          </View>
+
+          <View className="items-center justify-center">
+            <View className="">
+              <Image className="w-8 h-8 object-contain" source={require("assets/services icons/water-tap.png")}/>
+            </View>
+            <Text className="mt-2">Refilling Stations</Text>
+          </View>
       </View>
-    );
-    return <RNFlatList contentContainerStyle={{justifyContent: 'center', alignItems: 'center', paddingLeft: "6%"}} data={data} renderItem={renderItem} showsHorizontalScrollIndicator={false} horizontal={true} />;
+    </View>
+    )
   }

@@ -1,10 +1,11 @@
-import { StyleSheet } from 'react-native';
-import React from 'react';
-import List from '@/app/(aux)/ImageList';
+import { StyleSheet, Text, View } from 'react-native'
+import React from 'react'
 
-export default function Map() {
+export default function map() {
   return (
-    <List/>
+    <View>
+      <Text>map</Text>
+    </View>
   )
 }
 

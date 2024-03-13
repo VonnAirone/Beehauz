@@ -8,7 +8,7 @@ module.exports = {
       },
       backgroundColor: {
         'yellow' : '#FFA233'
-      }
+      },
     },
   },
   plugins: [],

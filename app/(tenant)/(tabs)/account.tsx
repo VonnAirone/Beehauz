@@ -1,18 +1,39 @@
-import { Pressable, SafeAreaView, Text, View, Modal, Alert, TextInput, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { Pressable, SafeAreaView, Text, View, Modal, Alert, TextInput, TouchableWithoutFeedback, Keyboard, Image } from 'react-native';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import Logo from '@/components/logo';
 import { supabase } from '@/utils/supabase';
+import { downloadAvatar, loadAvatar } from '@/api/ImageFetching';
+import { getProfile } from '@/api/DataFetching';
 import { useAuth } from '@/utils/AuthProvider';
+import { getUsername } from '../(aux)/usercomponent';
 
 export default function Account() {
-  const auth = useAuth();
-  const user = auth.session ? auth.session.user : null;
+  const user = useAuth().session?.user;
   const [phoneNumber, setPhoneNumber] = useState('')
   const [email, setEmail] = useState(user?.email)
   const [modalVisible, setModalVisible] = useState(false);
   const [onEditMode, setOnEditMode] = useState(false);
   const [isChangeMade, setIsChangeMade] = useState(false)
+  const [username, setUsername] = useState('')
+  const hasFetched = useRef(false);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  useEffect(() => {
+    getUsername(user?.id, setUsername);
+
+    if (!hasFetched.current) {
+      async function fetchData() {
+        try {
+          await loadAvatar(username, setImagesLoaded);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
+      }
+      fetchData();
+    }
+  }, []);
+
 
   const updateUserData = async ({phoneNumber}) => {
     
@@ -45,6 +66,60 @@ export default function Account() {
     }
   }
 
+  const Avatar = memo(({ item }: { item: any }) => {
+    const [image, setImage] = useState<string | null>(null);
+  
+    useEffect(() => {
+      if (!image) {
+        downloadAvatar(username, item.name, setImage);
+      } 
+    }, [username, item.name]);
+  
+    if (!image) {
+      return (
+        <View></View>
+      );
+    }
+  
+    return (
+      <Image
+        className='w-full h-full rounded-full'
+        source={{ uri: image }}
+        resizeMode="cover"
+      />
+    );
+  });
+
+  const SingleImageDisplay = ({ username }) => {
+    const [images, setImages] = useState([]);
+    const hasFetched = useRef(false);
+  
+    useEffect(() => {
+      if (!hasFetched.current) {
+        const fetchImages = async () => {
+          try {
+            await loadAvatar(username, setImages)
+          } catch (error) {
+            console.error('Error fetching images:', error);
+          }
+        };
+    
+        fetchImages();
+      }
+    }, [username]);
+
+    
+  
+    if (images.length > 0) {
+      const firstImage = images[0];
+      return (
+        <View className="flex-1">
+          <Avatar 
+          item={{ ...firstImage, username }} />
+        </View>
+      );
+    }}
+
   return (
     <TouchableWithoutFeedback className='flex-1' onPress={() => Keyboard.dismiss()}>
       <SafeAreaView className='flex-1 w-80 justify-center m-auto '>
@@ -53,7 +128,12 @@ export default function Account() {
         </View>
 
         <View className='items-center mb-10'>
-          <View className='bg-slate-300 h-20 w-20 rounded-full mb-2'></View>
+          <View className='h-20 w-20 rounded-full mb-2'>
+            {imagesLoaded && (
+              <SingleImageDisplay username={username}/>
+            )}
+            
+          </View>
           <Text className='text-xl font-semibold'>Airone Vonn Villasor</Text>
         </View>
 

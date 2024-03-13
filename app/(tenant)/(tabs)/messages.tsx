@@ -1,116 +1,197 @@
-import React, { useEffect, useState, memo, useRef } from 'react';
-import { Text, View, Image, FlatList, Dimensions, ActivityIndicator, ScrollView, Pressable, Modal } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { fetchPropertyDetailsData } from '@/api/DataFetching';
-import { downloadImage, loadImages } from '@/api/ImageFetching';
-import BackButton from '@/components/back-button';
+import { useEffect, useState } from 'react';
+import { FlatList, Pressable, Text, TextInput, View, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { Amenities, AmenitiesModal, BottomBar, OwnerInformation, Reviews } from '../(aux)/detailscomponent';
-import Bookmark from '@/components/bookmarks-button';
-import { handlePropertyClick } from '@/api/ViewCount';
-
-const screenWidth = Dimensions.get('window').width;
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAuth } from '@/utils/AuthProvider';
+import { fetchPropertyData, getProfile } from '@/api/DataFetching';
+import { fetchUserMessages } from '../(aux)/messagecomponent';
+import { subscribeToRealTimeMessages } from '../(aux)/messagecomponent';
+import { router } from 'expo-router';
 
 interface DataItem {
-  property_id: string;
-  property_name: string;
-  price: string;
-  view_count: number;
-  description: string;
+  message_id: string;
+  room_id: string;
+  sender_id: string;
+  receiver_id: string;
+  message_content: string;
+  time_sent: string;
+  sender_info: {
+    senderId: string;
+    name: string;
+    propertyName: string;
+  };
 }
 
-const Images = memo(({ item } : {item : any}) => {
-  const [image, setImage] = useState<string | null>(null);
+export default function Messages() {
+  const session = useAuth();
+  const userID = session?.session.user.id;
+  const [messages, setMessages] = useState<DataItem[]>([]);
+  const [senderData, setSenderData] = useState<Record<string, { name: string; propertyName: string; gender: string; }>>({});
+  const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    downloadImage(item.propertyID, item.name, setImage);
-  }, [item.propertyID, item.name]);
+  const formatTime = (time: string) => {
+    const [hours, minutes, seconds] = time.split(':').map(Number);
+    const suffix = hours >= 12 ? 'PM' : 'AM';
+    const formattedHours = hours % 12 || 12;
+    const formattedMinutes = minutes.toString().padStart(2, '0');
+    return `${formattedHours}:${formattedMinutes} ${suffix}`;
+  };
 
-  if (!image) {
+
+  const renderItem = ({ item, index }: { item: DataItem; index: number }) => {
+    const formattedTime = item.time_sent ? formatTime(item.time_sent) : '';
+    const isCurrentUser = item.sender_id === userID;
+
     return (
-      <View 
-      className='flex-1'>
-        <ActivityIndicator size="large" />
+      <View>
+      {loading ? (
+        <View className='flex-row py-4 items-center w-80'>
+          <View className='rounded-full bg-gray-300 w-14 h-14 mr-5'/>
+           <View className='flex-grow'>
+              <View className='flex-row items-center gap-x-2'>
+                <View className='bg-gray-300 h-3 w-28 rounded-md'/>
+                <Ionicons name='ellipse' size={4} />
+                <View className='bg-gray-300 h-3 w-16 rounded-md'/>
+              </View>
+
+              <View className='flex-row justify-between items-center mt-2'>
+                <View className='bg-gray-300 h-4 w-40 rounded-md'/>
+                <View className='bg-gray-300 h-2 w-10 rounded-md'/>
+              </View>
+          </View>
+        </View>
+      ) : (
+        <Pressable onPress={() => 
+          router.push({
+            pathname: "/Chatbox", 
+            params: { room_id: item.room_id, sender_id: item.sender_id, receiver_id: item.receiver_id }
+          })
+        }> 
+          <View className='flex-row items-center py-4 w-80'>
+          <View className='rounded-full object-contain w-14 h-14 bg-yellow mr-5'>
+                <Image className='w-full h-full' source={require("@/assets/images/icon.png")} />
+              </View>
+            <View className='flex-grow'>
+              <View className='flex-row items-center gap-x-1'>
+              <Text className='font-semibold text-base'>
+                {isCurrentUser ? senderData[item.receiver_id]?.name : senderData[item.sender_id]?.name}
+              </Text>
+              {!isCurrentUser && (
+                <View className='flex-row items-center gap-x-1'>
+                  <Ionicons name='ellipse' size={4} />
+                  <Text>{senderData[item.sender_id]?.propertyName}</Text>
+                </View>
+              )}
+  
+              </View>
+    
+              <View className='flex-row justify-between mt-2'>
+                <Text>
+                  {isCurrentUser ? "You" : senderData[item.sender_id]?.gender === "Male" ? "Him" : "Her"}
+                  : {item.message_content}</Text>
+                <Text>{formattedTime}</Text>
+              </View>
+            </View>
+          </View>
+        </Pressable>
+      )}
       </View>
     );
-  }
-
-  return (
-    <Image
-      className='w-full h-full'
-      source={{ uri: image }}
-      resizeMode="cover"
-    />
-  );
-});
-
-const handleCardPress = async (propertyID: string) => {
-  try {
-    await handlePropertyClick(propertyID);
-  } catch (error) {
-    console.error('Error handling property click:', error);
-  } 
- router.push({pathname: "/(tenant)/(screens)/BHDetails", params: {propertyID: propertyID}})
-};
-
-
-export default function BHDetails() {
-  let propertyID  = "31b5dc93-c6ae-4cde-9490-dd017cca5a92"
-  const [data, setData] = useState<DataItem | null>(null);
-  const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const hasFetched = useRef(false);
-
+  };
+  
   useEffect(() => {
-    if (!hasFetched.current) {
-    async function fetchData() {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const fetchedData = await fetchPropertyDetailsData("31b5dc93-c6ae-4cde-9490-dd017cca5a92");
-        setData(fetchedData);
-        await loadImages(propertyID, setImages);
+        if (session) {
+          const fetchedMessages = await fetchUserMessages(userID);
+          setMessages(fetchedMessages);
+          const senderIds = fetchedMessages.map((message) => message.sender_id);
+          const senderData = await fetchSenderData(senderIds);
+          setSenderData(senderData);
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
-    }
+    };
+  
     fetchData();
-  }}, [propertyID]);
+    setLoading(false)
+    const unsubscribe = subscribeToRealTimeMessages(userID, handleNewMessage);
+    return () => {
+      unsubscribe();
+    };
+  });
+  
 
+  async function handleNewMessage(newMessage: DataItem) {
+    if ((newMessage.sender_id === userID && newMessage.receiver_id === userID) || (newMessage.sender_id === userID && newMessage.receiver_id === userID)) {
+      const updatedMessage = await fetchUserMessages(userID);
+      const latestMessage = updatedMessage.find((message) => message.message_id === newMessage.message_id);
+      if (latestMessage) {
+        setMessages((prevMessages) =>
+          prevMessages.map((message) =>
+            message.message_id === latestMessage.message_id ? { ...message, message_content: latestMessage.message_content, time_sent: latestMessage.time_sent } : message
+          )
+        );
+      }
+    }
+  }
+  
+  
+  
+
+  async function fetchSenderData(senderIds) {
+    const usernamePromises = senderIds.map(async (senderId) => {
+      const profileData = await getProfile(senderId);
+      let name = profileData?.name || '';
+      let gender = profileData?.gender
+      let propertyName = '';
+
+      if (profileData && profileData.user_type === 'Owner') {
+        const propertyData = await fetchPropertyData(senderId);
+        propertyName = propertyData?.name || '';
+      }
+
+      return { gender, name, propertyName };
+    });
+
+    const resolvedUsernames = await Promise.all(usernamePromises);
+    const senderData = {};
+
+    resolvedUsernames.forEach((user, index) => {
+      senderData[senderIds[index]] = user;
+    });
+
+    return senderData;
+  }
 
   return (
-    <SafeAreaView className='flex-1 bg-white'>
-      {loading ? (
-        <Text>Loading...</Text>
-      ) : (
+    <SafeAreaView className='flex-1 items-center'>
+      <View className='flex-row mt-5 justify-between py-5 w-80'>
         <View>
-          {images.length > 0 ? (
-            <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-              data={images}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => 
-              <View className='w-screen h-72'> 
-                  <Images item={{...item, propertyID}} />
-              </View>}
-              initialNumToRender={4}
-              maxToRenderPerBatch={5}
-              windowSize={7}
-            />
-          ) : (
-            <View style={{ width: screenWidth, height: 200, alignItems: 'center', justifyContent: 'center' }}>
-              <Image
-                style={{ width: screenWidth, height: 200 }}
-                source={require("@/assets/images/no-image-placeholder.png")}
-                resizeMode="cover"
-              />
-            </View>
-          )}
-         </View>
-      )}
+          <Text className='font-semibold text-2xl'>Messages</Text>
+        </View>
+
+        <View>
+          <Ionicons name='create' size={28} color={'#ffa233'} />
+        </View>
+      </View>
+
+      <View>
+        <View className='flex-row items-center border border-gray-300 rounded-md p-2 w-80 backdrop-blur-3xl bg-white/30'>
+          <View className='mx-2'>
+            <Ionicons name='search' size={20} />
+          </View>
+          <TextInput editable={false} placeholder='Search for a place' />
+        </View>
+      </View>
+
+      <FlatList data={messages} renderItem={renderItem} />
+
+
     </SafeAreaView>
   );
 }
