@@ -8,7 +8,7 @@ export async function handlePropertyClick(propertyID: string) {
       })
 
       if (error) console.error(error)
-    //   else console.log(data)
+      else console.log(data)
 
    } catch (error) {
       console.error('Network error:', error);

@@ -85,7 +85,7 @@ const List = () => {
   }
 
   async function uploadImage() {
-    const propertyID = "1"
+    const propertyID = "2"
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,

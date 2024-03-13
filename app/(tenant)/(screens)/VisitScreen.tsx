@@ -32,7 +32,7 @@ export default function PayAVisit() {
         const { data, error } = await supabase
             .from('profiles')
             .select('*')
-            .eq('user_id', session?.user.id);
+            .eq('id', session?.user.id);
     
         if (error) {
             console.error('Error fetching user data:', error);

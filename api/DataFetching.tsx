@@ -38,6 +38,14 @@ export async function fetchPropertyDetailsData(propertyID: string) {
   return fetchData(query);
 }
 
+export async function fetchPropertyData(ownerID: string) {
+  const query = supabase
+    .from('property')
+    .select('*')
+    .eq('owner_id', ownerID)
+  return fetchData(query);
+}
+
 export async function fetchFilteredProperties(filterCriteria) {
   const { prices } = filterCriteria;
 
@@ -59,6 +67,12 @@ export async function fetchFilteredProperties(filterCriteria) {
   }
 }
 
-export async function getImages () {
-  
+
+export async function getProfile(userID: string) {
+  const query = supabase
+    .from('profiles')
+    .select('*')
+    .eq('id)', userID)
+    .single();
+  return fetchData(query);
 }

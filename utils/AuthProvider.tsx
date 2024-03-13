@@ -41,7 +41,7 @@ export function AuthProvider({ children }: Props) {
       if (session?.user.user_metadata.profileCompleted == false) {
         router.replace('/(tenant)/(screens)/Usertype')
       } else {
-        router.replace('/home');
+        router.replace('/OwnerProfile');
       }
       
     }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, memo, useRef } from 'react';
 import { Text, View, Image, FlatList, Dimensions, ActivityIndicator, ScrollView, Pressable, Modal } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchPropertyDetailsData } from '@/api/DataFetching';
 import { downloadImage, loadImages } from '@/api/ImageFetching';
@@ -8,15 +8,17 @@ import BackButton from '@/components/back-button';
 import { Ionicons } from '@expo/vector-icons';
 import { Amenities, AmenitiesModal, BottomBar, OwnerInformation, Reviews } from '../(aux)/detailscomponent';
 import Bookmark from '@/components/bookmarks-button';
+import { useAuth } from '@/utils/AuthProvider';
 
 const screenWidth = Dimensions.get('window').width;
 
 interface DataItem {
   property_id: string;
-  property_name: string;
+  name: string;
   price: string;
   view_count: number;
   description: string;
+  owner_id: string;
 }
 
 const Images = memo(({ item } : {item : any}) => {
@@ -45,6 +47,7 @@ const Images = memo(({ item } : {item : any}) => {
 });
 
 export default function BHDetails() {
+  const user = useAuth()?.session.user;
   let { propertyID } = useLocalSearchParams();
   const [data, setData] = useState<DataItem | null>(null);
   const [images, setImages] = useState([]);
@@ -95,7 +98,7 @@ export default function BHDetails() {
         <View className={`${showAmenitiesModal ? 'opacity-20 z-0' : ''}`}>
           <View className='flex-row justify-between'>
             <BackButton/>
-            <Bookmark/>
+            <Bookmark propertyID={propertyID} tenantID={user?.id}/>
           </View>
 
           {images.length > 0 ? (
@@ -126,7 +129,7 @@ export default function BHDetails() {
           <View className='mx-5 mt-5'>
 
             <View>
-              <Text className='text-4xl font-semibold'>{data?.property_name}</Text>
+              <Text className='text-4xl font-semibold'>{data?.name}</Text>
             </View>
             
               {/* LOCATION IS MISSING */}
@@ -220,7 +223,10 @@ export default function BHDetails() {
 
             {/* OWNER SECTION */}
             <View>
-              <OwnerInformation/>
+              <Pressable onPress={() => router.push({pathname: "/OwnerProfile", params: {owner_id : data?.owner_id}})}>
+                <OwnerInformation/>
+              </Pressable>
+              
             </View>
 
             <View className='h-20'>

@@ -42,13 +42,14 @@ export function Amenities({propertyID}) {
 
     const fetchAmenities = async () => {
         const {data, error} = await supabase
-        .from('property_amenities')
+        .from('amenities')
         .select('*')
         .eq('property_id', propertyID)
         if (error) {
             console.log('Error message', error.message)
-        }
+        } else {
         setAmenities(data)
+        }
     }
 
     const hasFetched = useRef(false)
