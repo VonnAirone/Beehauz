@@ -1,10 +1,10 @@
 import { fetchPopularNowList } from '@/api/DataFetching';
-import { NearbyMe, PopularNow, Services } from '@/app/(tenant)/(aux)/homecomponents';
+import { PopularNow, PropertyList, Services } from '@/app/(tenant)/(aux)/homecomponents';
 import Logo from '@/components/logo';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { View, Text, TextInput, ScrollView, Pressable } from 'react-native'; // Rename the component to avoid conflict
+import { View, Text, TextInput, ScrollView, Pressable, TouchableOpacity } from 'react-native'; // Rename the component to avoid conflict
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 type DataItem = {
@@ -59,7 +59,10 @@ export default function HomePage() {
             </View>
           </Pressable>
           <View className='mx-3'>
-            <Ionicons name='notifications' size={28}/>
+            <TouchableOpacity>
+              <Ionicons name='notifications' size={28} color={"#ffa233"}/>
+            </TouchableOpacity>
+            
           </View>
         </View>
 
@@ -78,7 +81,7 @@ export default function HomePage() {
 
         <View className='mt-5'>
           <Text className='font-semibold text-xl ml-8'>NEARBY ME</Text>
-          <NearbyMe data={PopularList}/>
+          <PropertyList data={PopularList}/>
         </View>
 
       </View>

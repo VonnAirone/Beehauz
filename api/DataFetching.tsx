@@ -72,7 +72,7 @@ export async function getProfile(userID: string) {
   const query = supabase
     .from('profiles')
     .select('*')
-    .eq('id)', userID)
+    .eq('id', userID)
     .single();
   return fetchData(query);
 }

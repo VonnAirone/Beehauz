@@ -28,7 +28,7 @@ type DataItem = {
   };
 
 
-  const Images = memo(({ item }: { item: any }) => {
+  export const Images = memo(({ item }: { item: any }) => {
     const [image, setImage] = useState<string | null>(null);
   
     useEffect(() => {
@@ -54,20 +54,23 @@ type DataItem = {
   });
   
 
-
   export const SingleImageDisplay = ({ propertyID }) => {
     const [images, setImages] = useState([]);
+    const hasFetched = useRef(false)
   
     useEffect(() => {
-      const fetchImages = async () => {
-        try {
-          await loadImages(propertyID, setImages)
-        } catch (error) {
-          console.error('Error fetching images:', error);
-        }
-      };
+      if (!hasFetched.current) {
+        const fetchImages = async () => {
+          try {
+            await loadImages(propertyID, setImages)
+          } catch (error) {
+            console.error('Error fetching images:', error);
+          }
+        };
+        fetchImages();
+      }
   
-      fetchImages();
+      
     }, [propertyID]);
 
     
@@ -75,16 +78,8 @@ type DataItem = {
     if (images.length > 0) {
       const firstImage = images[0];
       return (
-        <View className="flex-1 rounded-md">
           <Images 
           item={{ ...firstImage, propertyID }} />
-        </View>
-      );
-    } else {
-      return (
-        <View className="flex-1 justify-center items-center border border-gray-300 rounded-md">
-          <Text>No images found</Text>
-        </View>
       );
     }
   };
@@ -95,10 +90,11 @@ type DataItem = {
     const hasFetched = useRef(false);
   
     useEffect(() => {
+      setImagesLoaded(true)
       if (!hasFetched.current) {
         async function fetchData() {
           try {
-            await loadImages(data, setImagesLoaded); // Set imagesLoaded to true once all images are loaded
+            await loadImages(data, setImagesLoaded);
           } catch (error) {
             console.error('Error fetching data:', error);
           }
@@ -112,7 +108,7 @@ type DataItem = {
         <Pressable onPress={() => handleCardPress(item.property_id)}>
           <View className='p-2'>
             <View style={{ width: 160, height: 144 }}>
-              <SingleImageDisplay propertyID={item.property_id} />
+              <SingleImageDisplay propertyID={item.property_id}/>
             </View>
   
             <View className='mt-2'>
@@ -149,7 +145,24 @@ type DataItem = {
   //THIS IS FOR THE NEARBY ME COMPONENT THAT DISPLAYS PROPERTY NEARBY THE USER
 
   //!!!NOTE!!! THIS IS STILL NOT
-  export function NearbyMe({ data }: PropertyProps) {
+  export function PropertyList({ data }: { data: DataItem[]}) {
+
+    const [imagesLoaded, setImagesLoaded] = useState(false);
+    const hasFetched = useRef(false);
+  
+    useEffect(() => {
+      if (!hasFetched.current) {
+        async function fetchData() {
+          try {
+            await loadImages(data, setImagesLoaded);
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        }
+        fetchData();
+      }
+    }, [data]);
+
     const renderItem = ({ item, index }: { item: DataItem; index: number }) => (
       <View className='overflow-hidden'>
         <View className="p-2">
@@ -173,8 +186,22 @@ type DataItem = {
         </View>
       </View>
     );
+
+    const skeleton = () => (
+        <View className="p-2">
+            <View className='bg-gray-300 w-72 h-40 rounded-md'/>
+            <View className='mt-2 h-4 w-32 bg-gray-300 rounded-md'></View>
+            <View className='mt-2 h-3 w-16 bg-gray-300 rounded-md'></View>
+            <View className='mt-2 h-3 w-48 bg-gray-300 rounded-md'></View>
+        </View>
+    )
   
-    return <RNFlatList contentContainerStyle={{justifyContent: 'center', alignItems: 'center', paddingLeft: "6%"}} data={data} renderItem={renderItem} showsHorizontalScrollIndicator={false} horizontal={true} />;
+    return <RNFlatList 
+    contentContainerStyle={{justifyContent: 'center', alignItems: 'center', paddingLeft: "6%"}} 
+    data={data} 
+    renderItem={imagesLoaded ? renderItem : skeleton} 
+    showsHorizontalScrollIndicator={false} 
+    horizontal={true} />;
   };
 
 

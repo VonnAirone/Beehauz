@@ -1,5 +1,5 @@
 import React, { useEffect, useState, memo, useRef } from 'react';
-import { Text, View, Image, FlatList, Dimensions, ActivityIndicator, ScrollView, Pressable, Modal } from 'react-native';
+import { Text, View, Image, FlatList, Dimensions, ActivityIndicator, ScrollView, Pressable, Modal, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchPropertyDetailsData } from '@/api/DataFetching';
@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Amenities, AmenitiesModal, BottomBar, OwnerInformation, Reviews } from '../(aux)/detailscomponent';
 import Bookmark from '@/components/bookmarks-button';
 import { useAuth } from '@/utils/AuthProvider';
+import { Images } from '../(aux)/homecomponents';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -19,32 +20,34 @@ interface DataItem {
   view_count: number;
   description: string;
   owner_id: string;
+  latitude: number,
+  longitude: number,
 }
 
-const Images = memo(({ item } : {item : any}) => {
-  const [image, setImage] = useState<string | null>(null);
+// const Images = memo(({ item } : {item : any}) => {
+//   const [image, setImage] = useState<string | null>(null);
 
-  useEffect(() => {
-    downloadImage(item.propertyID, item.name, setImage);
-  }, [item.propertyID, item.name]);
+//   useEffect(() => {
+//     downloadImage(item.propertyID, item.name, setImage);
+//   }, [item.propertyID, item.name]);
 
-  if (!image) {
-    return (
-      <View 
-      className='flex-1'>
-        <ActivityIndicator size="large" />
-      </View>
-    );
-  }
+//   if (!image) {
+//     return (
+//       <View 
+//       className='flex-1'>
+//         <ActivityIndicator size="large" />
+//       </View>
+//     );
+//   }
 
-  return (
-    <Image
-      className='w-full h-full'
-      source={{ uri: image }}
-      resizeMode="cover"
-    />
-  );
-});
+//   return (
+//     <Image
+//       className='w-full h-full'
+//       source={{ uri: image }}
+//       resizeMode="cover"
+//     />
+//   );
+// });
 
 export default function BHDetails() {
   const user = useAuth()?.session.user;
@@ -86,6 +89,7 @@ export default function BHDetails() {
           <Text>Loading...</Text>
         </View>
       ) : (
+        <View>
         <ScrollView>
           <View>
             {showAmenitiesModal && (
@@ -133,9 +137,13 @@ export default function BHDetails() {
             </View>
             
               {/* LOCATION IS MISSING */}
-            <View className='flex-row items-center'>
-              <Ionicons name='location-outline' size={15} color={'#FF8B00'}/>
-              <Text className='text-base'>Catungan 1, Sibalom, Antique</Text>
+            <View className='my-2'>
+              <TouchableOpacity 
+              onPress={() => router.push({pathname: "/MapView", params: {latitude: data.latitude, longitude: data.longitude}})}
+              className='flex-row items-center gap-x-1'>
+                <Ionicons name='location-outline' size={15} color={'#FF8B00'}/>
+                <Text className='text-base'>Catungan 1, Sibalom, Antique</Text>
+              </TouchableOpacity>
             </View>
 
             <View className='mt-1'>
@@ -224,7 +232,7 @@ export default function BHDetails() {
             {/* OWNER SECTION */}
             <View>
               <Pressable onPress={() => router.push({pathname: "/OwnerProfile", params: {owner_id : data?.owner_id}})}>
-                <OwnerInformation/>
+                <OwnerInformation owner_id={data?.owner_id.toString()}/>
               </Pressable>
               
             </View>
@@ -261,11 +269,12 @@ export default function BHDetails() {
           </View>
         </View>
         
-        
       </ScrollView>
+      <BottomBar price={data?.price} propertyID={propertyID}/>
+      </View>
       )}
 
-      <BottomBar price={data?.price} propertyID={propertyID}/>
+     
     </SafeAreaView>
   );
 }

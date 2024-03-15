@@ -1,5 +1,5 @@
 import React, { memo, useState, useEffect } from 'react';
-import { View, Image } from 'react-native';
+import { View, Image, Text } from 'react-native';
 import { downloadAvatar, loadAvatar } from '@/api/ImageFetching';
 
 const Avatar = memo(({ item, username }: { item: any; username: string }) => {
@@ -41,7 +41,11 @@ const SingleImageDisplay = ({ username }) => {
   }, [username]);
 
   if (images.length === 0) {
-    return null;
+    return (
+      <View>
+        <Image className='h-14 w-14' source={require("@/assets/images/icon.png")}/>
+      </View>
+    )
   }
 
   const firstImage = images[0];
@@ -54,7 +58,7 @@ const SingleImageDisplay = ({ username }) => {
 
 export default function AvatarImage({username}) {
     return (
-        <View>
+        <View className='flex-1 items-center justify-center'>
             <SingleImageDisplay username={username}/>
         </View>
     )
