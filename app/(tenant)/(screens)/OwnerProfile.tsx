@@ -1,13 +1,14 @@
-import { FlatList, Pressable, StyleSheet, Text, View, ScrollView, ActivityIndicator } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { Pressable, Text, View, ScrollView, ActivityIndicator, TouchableOpacity, Image } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import BackButton from '@/components/back-button'
 import { Ionicons } from '@expo/vector-icons'
 import { fetchPropertyData, getProfile } from '@/api/DataFetching'
 import { SingleImageDisplay } from '../(aux)/homecomponents'
-import { useLocalSearchParams } from 'expo-router'
-import RatingComponent from '../(aux)/rating'
 import { supabase } from '@/utils/supabase'
+import StarRatingComponent from '../(aux)/starrating'
+import { useLocalSearchParams } from 'expo-router'
+import AvatarImage from '../(aux)/avatar'
 
 interface OwnerData {
     name: string;
@@ -26,55 +27,100 @@ type PropertyData = {
     address: string;
 }
 
+type ReviewData = {
+    tenant_id: string;
+    review_content: string;
+    rating: string;
+}
 export default function OwnerProfile() {
     const [propertyList, setPropertyList] = useState<PropertyData[] | null>(null);
     const [ownerData, setOwnerData] = useState<OwnerData | null>(null);
-    const [ownerReviews, setOwnerReviews] = useState<any[]>([]);
+    const [ownerReviews, setOwnerReviews] = useState<ReviewData[] | null>(null);
+    const [reviewUsernames, setReviewUsernames] = useState([])
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState<'Details' | 'Reviews'>('Details');
-    let owner_id = "d9899903-c412-4d9f-bd71-23d4927773fd";
+    let { owner_id } = useLocalSearchParams();
+    const hasFetched = useRef(null)
 
+    //working on realtime changes in review table
     useEffect(() => {
-        setLoading(true);
-        fetchData();
-        console.log(ownerReviews)
+        fetchData();     
+        const unsubscribe = listenToRealTimeChanges();
+        return () => {
+            if (unsubscribe) {
+                unsubscribe();
+            }
+        }
+    }, []);
 
-        async function fetchData() {
+    function listenToRealTimeChanges() {
+        const reviews = supabase.channel('custom-all-channel')
+        .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'owner_reviews' },
+        (payload) => {
+            fetchData()
+            console.log("Updated reviews!", payload)
+        }
+        )
+        return () => {
+            reviews.unsubscribe();
+        };
+    }
+
+    async function fetchData() {
+        if(!hasFetched.current) {
             try {
-                const [profileData, propertyData] = await Promise.all([
-                    getOwnerProfile(),
-                    fetchOwnerProperties()
+                const [profileData, propertyData, ownerReviews] = await Promise.all([
+                    getUserProfile(owner_id.toString()),
+                    fetchOwnerProperties(),
+                    getReviews(),
                 ]);
                 setOwnerData(profileData);
                 setPropertyList(propertyData);
+                setOwnerReviews(ownerReviews);
+    
+                const tenant_id = ownerReviews.map(review => review.tenant_id);
+                const tenantData = await Promise.all(tenant_id.map(id => getProfile(id)));
+                const usernames = tenantData.map(tenant => tenant.name);
+                setReviewUsernames(usernames);
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
                 setLoading(false);
             }
         }
-    }, []);
-    
-    async function getOwnerProfile() {
+    }
+
+    async function getUserProfile(id: string) {
         try {
-            const data = await getProfile(owner_id.toString());
+            const data = await getProfile(id);
             return data;
         } catch (error) {
             console.log("Error fetching owner", error.message);
             throw error;
         }
     }
-    
+
     async function getReviews() {
         try {
-            const { data } = await supabase.from("owner_reviews").select("*").eq('owner_id)', owner_id)
+            const { data, error } = await supabase
+                .from("owner_reviews")
+                .select("*")
+                .eq('owner_id', owner_id);
 
-            setOwnerReviews(data)
-            
+            if (error) {
+                console.log("Error fetching owner reviews: ", error.message);
+                return null;
+            } else {
+                return data;
+            }
         } catch (error) {
-            console.log("Error fetching owner reviews: ", error.message)
+            console.log("Error fetching owner reviews: ", error.message);
+            return null;
         }
     }
+
     async function fetchOwnerProperties() {
         try {
             const data = await fetchPropertyData(owner_id.toString());
@@ -84,20 +130,21 @@ export default function OwnerProfile() {
             throw error;
         }
     }
-    
 
   return (
     <SafeAreaView className='flex-1'>
-    <ScrollView className='flex-1'>
-        <BackButton/>
+        
       {loading ? (
-        <View>
-            <ActivityIndicator size="large" color="#FFA233"/>
+        <View className='flex-1 justify-center items-center'>
+            <Text>Loading...</Text>
         </View>
       ) : (
+        <ScrollView>
+        <BackButton/>
         <View>
             <View className='items-center '>
                 <View className='rounded-full border  border-white bg-white h-40 w-40'>
+                    <AvatarImage username={ownerData?.name}/>
                 </View>
             </View>
 
@@ -113,7 +160,8 @@ export default function OwnerProfile() {
 
                 <View className='items-center mt-10'>
                     <View className='flex-row gap-x-20'>
-                        <Pressable onPress={() => setActiveTab('Details')}>
+                        <Pressable
+                        onPress={() => setActiveTab('Details')}>
                             <Text className={`text-base ${activeTab === 'Details' ? 'text-yellow' : 'text-gray-500'}`}>Details</Text>
                         </Pressable>
                         <View className='border-left border border-gray-500'/>
@@ -158,7 +206,9 @@ export default function OwnerProfile() {
                                     <Pressable onPress={() => {}}>
                                         <View className='p-2'>
                                             <View style={{ width: 160, height: 144 }}>
-                                                <SingleImageDisplay propertyID={item.property_id} />
+                                                {!hasFetched.current && (
+                                                    <SingleImageDisplay propertyID={item.property_id} />
+                                                )} 
                                             </View>
 
                                             <View className='mt-2'>
@@ -173,24 +223,40 @@ export default function OwnerProfile() {
                     </View>
                 )}
                     {activeTab === 'Reviews' && (
-                        <View className='p-5'>
-                            <Text className='text-xl font-medium'>(10) Reviews</Text>
-                            
-                            <View className='flex-row items-center gap-x-2 justify-center py-4'>
-                                <View className='bg-gray-300 h-16 w-16 rounded-full'/>
-                                <View>
-                                    <View>
-                                        <Text className='font-semibold text-lg'>Name of User</Text>
+                    <View className='p-5'>
+                        <View className='mb-5'>
+                            <Text className='w-80 mx-auto text-center italic'>Note: Only previous tenants and currently boarding are allowed to leave reviews for the owner.</Text>
+                        </View>
+                        <Text className='text-xl font-medium'>({ownerReviews ? ownerReviews.length : 0}) Reviews</Text>
+
+                        {ownerReviews ? (
+                            <View className='h-20 justify-center items-center'>
+                                <Text>No Reviews</Text>
+                            </View>
+                        ) : (
+                            <View>
+                                {ownerReviews.map((item, index) => (
+                                <View key={index} className='flex-row items-center gap-x-2 justify-center py-4'>
+                                    <View className='bg-white h-16 w-16 rounded-full'>
+                                        <Image className='w-full h-full' source={require("@/assets/images/icon.png")} />
                                     </View>
                                     <View>
-                                        <Text>Rating</Text>
-                                    </View>
-                                    <View className='w-72'>
-                                        <Text>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</Text>
+                                        <View>
+                                            <Text className='font-semibold text-lg'>{reviewUsernames[index]}</Text>
+                                        </View>
+                                        <View>
+                                        <StarRatingComponent rating={item.rating} />
+                                        </View>
+                                        <View className='w-72 mt-3'>
+                                            <Text>{item.review_content}</Text>
+                                        </View>
                                     </View>
                                 </View>
+                                ))}
                             </View>
-                        </View>
+                        )}
+                        
+                    </View>
                     )}
 
 
@@ -198,8 +264,8 @@ export default function OwnerProfile() {
                 </View>
             </View>
         </View>
+        </ScrollView>
       )}
-    </ScrollView> 
     </SafeAreaView>
   )
 }

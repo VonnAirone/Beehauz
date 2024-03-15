@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '@/utils/supabase'
 import { router } from 'expo-router'
+import { getProfile } from '@/api/DataFetching'
 
 export function Reviews() {
   return (
@@ -182,16 +183,55 @@ export function AmenitiesModal ({hideModal}) {
   )
 }
 
-export function OwnerInformation() {
+interface OwnerData {
+  name: string;
+  address: string;
+  email: string;
+  gender: string;
+  phone_number: string;
+  age: string;
+  created_at: string;
+}
+
+import moment from 'moment';
+import AvatarImage from './avatar'
+
+export function OwnerInformation({owner_id}) {
+  const [ownerData, setOwnerData] = useState<OwnerData | null>(null);
+
+  useEffect(() => {
+    async function getOwnerData() {
+      try {
+        const data = await getProfile(owner_id.toString())
+
+        if (data) {
+          setOwnerData(data)
+        }
+      } catch (error) {
+        console.log("Error fetching owner data", error.message)
+      }
+    }
+
+    getOwnerData()
+  }, [])
+
+  const formatDate = (date) => {
+    return moment(date).format('MMMM YYYY');
+  };
+
+
   return (
     <View className='rounded-md p-5 mt-5'>
       <View className='flex-row items-center gap-x-3 justify-between'>
       
       <View className='flex-row items-center'>
-        <View className='bg-gray-300 h-14 w-14 rounded-full'/>
+        <View className='h-14 w-14 rounded-full border border-gray-300'>
+          <AvatarImage username={owner_id}/>
+        </View>
         <View className='ml-3'>
-          <Text className='text-lg'>Owned by <Text className='font-semibold'>Airone Vonn</Text></Text>
-          <Text className='text-gray-500'>Joined last February 2024</Text>
+          <Text className='text-lg'>Owned by <Text className='font-semibold'>{ownerData?.name}</Text></Text>
+          <Text className='text-gray-500'>Joined last {formatDate(ownerData?.created_at)}</Text>
+          {/* still hasn't been able to implement the logic for response time */}
           <Text className='text-gray-500 text-sm'>Response time: within an hour</Text>
         </View>
       </View>
@@ -217,8 +257,11 @@ export function OwnerInformation() {
       </View> */}
 
 
-      <View className='border border-black rounded-full p-4 mt-3'>
-        <Pressable>
+      <View className='border border-black rounded-md overflow-hidden mt-3'>
+        <Pressable 
+        className='p-4 rounded-md'
+        android_ripple={{color: "#ffa233"}}
+        onPress={() => router.push({pathname: "/OwnerProfile", params: {owner_id : owner_id}})}>
           <Text className='text-center'>Contact Owner</Text>
         </Pressable>
       </View>

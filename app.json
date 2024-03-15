@@ -22,6 +22,11 @@
         {
           "font": "/assets/fonts/Poppins-Regular.ttf"
         }
+      ], [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow BeehauzApp to use your location."
+        }
       ]
     ],
     "experiments": {

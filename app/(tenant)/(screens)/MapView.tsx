@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Image, TextInput } from 'react-native';
+import { StyleSheet, View, Text, Image } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from "expo-location";
@@ -7,6 +7,7 @@ import { fetchPropertyListData } from '@/api/DataFetching';
 import { Images, SingleImageDisplay } from '../(aux)/homecomponents';
 import { ZoomIn } from 'react-native-reanimated';
 import BackButton from '@/components/back-button';
+import { useLocalSearchParams } from 'expo-router';
 
 type LocationData = {
   latitude: number;
@@ -40,11 +41,15 @@ const PropertyCallout = ({ property } : {property : PropertyData}) => {
   );
 };
 
-export default function map() {
+export default function PropertyLocationView() {
   const [properties, setProperties] = useState<PropertyData[]>([])
   const [location, setLocation] = useState<LocationData | null>(null);
   const [address, setAddress] = useState('');
   const [markerPosition, setMarkerPosition] = useState({ latitude: 10.7198499, longitude: 122.5616936 });
+  const { latitude , longitude } = useLocalSearchParams()
+
+  const latitudeFloat = parseFloat(latitude.toString());
+  const longitudeFloat = parseFloat(longitude.toString());
 
   async function fetchProperties() {
     try {
@@ -58,7 +63,6 @@ export default function map() {
   }
 
   useEffect(() => {
-    
     getPermissions();
     fetchProperties();
   }, []);
@@ -97,8 +101,8 @@ export default function map() {
           // showsUserLocation
             className='w-full h-full'
             initialRegion={{
-              latitude: location.latitude,
-              longitude: location.longitude,
+              latitude: latitudeFloat,
+              longitude: longitudeFloat,
               latitudeDelta: 0.005,
               longitudeDelta: 0.005,
             }}
@@ -116,15 +120,13 @@ export default function map() {
               </MarkerAnimated>
             ))}
 
-
+              {/* <Marker
+                coordinate={markerPosition}
+                draggable
+                onDragEnd={handleMarkerDrag}
+              /> */}
           </MapView>
-            <View className='absolute bottom-10 w-full items-center'>
-              <TextInput
-              className='shadow-md bg-yellow text-white p-3 w-80 rounded-md' 
-              placeholder='Enter a property' 
-              value={address}
-              onChangeText={handleAddressChange}/>
-            </View>
+
 
           </View>
       ) : (
