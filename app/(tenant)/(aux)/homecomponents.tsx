@@ -52,6 +52,34 @@ type DataItem = {
       />
     );
   });
+
+  export const Cover = memo(({ item }: { item: any }) => {
+    const [image, setImage] = useState<string | null>(null);
+  
+    useEffect(() => {
+      if (!image) {
+        downloadImage(item.propertyID, item.name, setImage);
+      }
+
+    }, [item.propertyID, item.name, image]);
+  
+    if (!image) {
+      return (
+        <View className='bg-gray-300'/>
+      );
+    }
+  
+    return (
+      <Image
+        className='w-full h-full'
+        source={{ uri: image }}
+        resizeMode="cover"
+      />
+    );
+  });
+
+
+  
   
 
   export const SingleImageDisplay = ({ propertyID }) => {

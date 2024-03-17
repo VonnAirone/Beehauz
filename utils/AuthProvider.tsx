@@ -37,11 +37,10 @@ export function AuthProvider({ children }: Props) {
     ) {
       router.replace('/(auth)/');
     } else if (session?.user && inAuthGroup) {
-      //add here the condition to render the profile completion page 
       if (session?.user.user_metadata.profileCompleted == false) {
         router.replace('/(tenant)/(screens)/Usertype')
       } else {
-        router.replace('/map');
+        router.replace('/one');
       }
       
     }
