@@ -47,9 +47,9 @@ export default function HomePage() {
 
 
         {/* SEARCHBAR */}
-        <View className='flex-row items-center justify-center ml-3'>
+        <View className='flex-row items-center justify-start ml-8'>
           <Pressable onPress={() => router.push("/Searchpage")}>    
-            <View className='flex-row items-center border border-gray-300 rounded-md p-2 w-80 backdrop-blur-3xl bg-white/30'>
+            <View className='flex-row items-center border border-gray-300 rounded-md p-2 w-72 backdrop-blur-3xl bg-white'>
               <View className='mx-2'>
                 <Ionicons name='search' size={20}/>
               </View>

@@ -9,29 +9,9 @@ import { supabase } from '@/utils/supabase'
 import StarRatingComponent from '../(aux)/starrating'
 import { useLocalSearchParams } from 'expo-router'
 import AvatarImage from '../(aux)/avatar'
+import { OwnerData, PropertyData, ReviewData } from '@/api/Properties'
 
-interface OwnerData {
-    name: string;
-    address: string;
-    email: string;
-    gender: string;
-    phone_number: string;
-    age: string;
-}
 
-type PropertyData = {
-    property_id: string;
-    name: string;
-    price: string;
-    view_count: number;
-    address: string;
-}
-
-type ReviewData = {
-    tenant_id: string;
-    review_content: string;
-    rating: string;
-}
 export default function OwnerProfile() {
     const [propertyList, setPropertyList] = useState<PropertyData[] | null>(null);
     const [ownerData, setOwnerData] = useState<OwnerData | null>(null);
@@ -144,13 +124,13 @@ export default function OwnerProfile() {
         <View>
             <View className='items-center '>
                 <View className='rounded-full border  border-white bg-white h-40 w-40'>
-                    <AvatarImage username={ownerData?.name}/>
+                    <AvatarImage username={ownerData?.first_name}/>
                 </View>
             </View>
 
             <View>
                 <View className='items-center mt-5'>
-                    <Text className='text-2xl font-semibold'>{ownerData?.name}</Text>
+                    <Text className='text-2xl font-semibold'>{ownerData?.first_name}</Text>
                     <Text className='text-lg'>Owner of {propertyList[0]?.name}</Text>
                     <View className='flex-row items-center gap-x-1 mt-1'>
                         <Text className='text-blue-700'>Verified</Text>
@@ -194,7 +174,7 @@ export default function OwnerProfile() {
 
                             <View className='flex-row items-center gap-x-4'>
                                 <Ionicons name='logo-facebook' size={18}/>
-                                <Text className='text-base'>{ownerData?.name}</Text>
+                                <Text className='text-base'>{ownerData?.first_name}</Text>
                             </View>
                         </View>
 

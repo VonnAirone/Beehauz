@@ -54,7 +54,6 @@ export default function Login() {
 
   const handleSubmission = async () => {
     try {
-
       const emailIsEmpty = email.trim() === '';
       const passwordIsEmpty = password.trim() === '';
 
@@ -76,6 +75,7 @@ export default function Login() {
           setLoading(true);
 
           if(isNotRegistered) {
+            setLoading(true)
             const { error } = await supabase.auth.signUp({
               email: email,
               password: password,

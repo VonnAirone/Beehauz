@@ -76,3 +76,5 @@ export async function getProfile(userID: string) {
     .single();
   return fetchData(query);
 }
+
+

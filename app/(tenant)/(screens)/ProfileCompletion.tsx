@@ -14,13 +14,15 @@ import * as Location from "expo-location"
 export default function TenantRegistration({ email }) {
   const { usertype } = useLocalSearchParams();
   const user = useAuth().session?.user;
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('')
   const [address, setAddress] = useState('');
   const [age, setAge] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isEmpty, setIsEmpty] = useState(false);
 
-  const handleNameChange = (text) => { setName(text); setIsEmpty(false); };
+  const handleFirstNameChange = (text) => { setFirstName(text); setIsEmpty(false); };
+  const handleLastNameChange = (text) => { setLastName(text); setIsEmpty(false); };
   const handleAddressChange = (text) => setAddress(text);
   const handleAgeChange = (num) => setAge(num);
   const handlePhoneNumberChange = (num) => setPhoneNumber(num);
@@ -43,7 +45,8 @@ export default function TenantRegistration({ email }) {
   const updateUserInformation = async () => {
      let {data, error} = await supabase.from('profiles')
      .update({
-      name: name, 
+      first_name: firstName,
+      last_name: lastName, 
       email: user?.email,
       age: age,
       address: address,
@@ -61,8 +64,9 @@ export default function TenantRegistration({ email }) {
         }
       }
   }
+  
   const handleSubmission = async () => {
-    const fields = [name, address, age, phoneNumber];
+    const fields = [firstName, lastName, address, age, phoneNumber];
     let isEmpty = false;
 
     for (const field of fields) {
@@ -121,15 +125,26 @@ export default function TenantRegistration({ email }) {
               </View>
 
               <View className="flex gap-y-4 w-80">
-                <View>
-                  <Text className="mb-1">Name</Text>
-                    <TextInput
-                      clearTextOnFocus
-                      value={name}
-                      placeholder={"Name: (ex. Juan De La Cruz)"}
-                      onChangeText={handleNameChange}
-                      className='p-2 pl-5 border-gray-300 focus:border-gray-400 border rounded-md text-sm'
-                    />
+                <View className='flex-row items-center justify-between'>
+                  <View>
+                    <Text className="mb-1">First name</Text>
+                      <TextInput
+                        clearTextOnFocus
+                        value={firstName}
+                        onChangeText={handleFirstNameChange}
+                        className='p-2 pl-5 w-36 border-gray-300 focus:border-gray-400 border rounded-md text-sm'
+                      />
+                  </View>
+                  <View>
+                    <Text className="mb-1">Last Name</Text>
+                      <TextInput
+                        clearTextOnFocus
+                        value={lastName}
+                        onChangeText={handleLastNameChange}
+                        className='p-2 pl-5 w-36 border-gray-300 focus:border-gray-400 border rounded-md text-sm'
+                      />
+                  </View>
+                  
                 </View>
 
                 <View>
