@@ -1,4 +1,5 @@
 import { fetchPopularNowList } from '@/api/DataFetching';
+import { PropertyData } from '@/api/Properties';
 import { PopularNow, PropertyList, Services } from '@/app/(tenant)/(aux)/homecomponents';
 import Logo from '@/components/logo';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,16 +8,8 @@ import { useEffect, useState } from 'react';
 import { View, Text, TextInput, ScrollView, Pressable, TouchableOpacity } from 'react-native'; // Rename the component to avoid conflict
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-type DataItem = {
-  property_id: string;
-  name: string;
-  price: string;
-  view_count: number;
-  address: string;
-};
-
 export default function HomePage() {
-  const [PopularList, setPopularList] = useState<DataItem[]>([]);
+  const [PopularList, setPopularList] = useState<PropertyData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

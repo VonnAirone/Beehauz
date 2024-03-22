@@ -1,21 +1,12 @@
-import { downloadImage, loadImages } from "@/api/ImageFetching";
+import { downloadImage, loadAvatar, loadImages } from "@/api/ImageFetching";
 import { handlePropertyClick } from "@/api/ViewCount";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { memo, useEffect, useRef, useState } from "react";
 import { FlatList as RNFlatList, Pressable, View, Text, Image, ActivityIndicator, FlatList } from "react-native";
+import AvatarImage from "./avatar";
+import { PropertyData, UserData } from "@/api/Properties";
 
-type DataItem = {
-    property_id: string;
-    name: string;
-    price: string;
-    view_count: number;
-    address: string;
-  };
-  
-  type PropertyProps = {
-    data: DataItem[];
-  };
 
  
   const handleCardPress = async (propertyID: string) => {
@@ -46,7 +37,7 @@ type DataItem = {
   
     return (
       <Image
-        className='w-full h-full rounded-md'
+        className='w-full h-full rounded-lg'
         source={{ uri: image }}
         resizeMode="cover"
       />
@@ -113,7 +104,7 @@ type DataItem = {
   };
 
   //THIS IS THE POPULAR NOW COMPONENT FOR THE MOST VISITED PROPERTIES
-  export function PopularNow({ data }: { data: DataItem[]}) {
+  export function PopularNow({ data }: { data: PropertyData[]}) {
     const [imagesLoaded, setImagesLoaded] = useState(false);
     const hasFetched = useRef(false);
   
@@ -131,17 +122,21 @@ type DataItem = {
       }
     }, [data]);
   
-    const renderItem = ({ item, index }: { item: DataItem; index: number }) => (
+    const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
       <View className='overflow-hidden'>
         <Pressable onPress={() => handleCardPress(item.property_id)}>
-          <View className='p-2'>
-            <View style={{ width: 160, height: 144 }}>
+          <View>
+            <View className="h-40 w-40">
               <SingleImageDisplay propertyID={item.property_id}/>
             </View>
   
             <View className='mt-2'>
-              <Text className='font-semibold text-xl'>{item.name}</Text>
-              <Text>{item.price}</Text>
+              <Text className="font-bold text-base">{item.name}</Text>
+              <View className="flex-row items-center gap-x-1">
+                <Ionicons name="bed-outline"/>
+                <Text className="text-xs">{item.available_beds} Beds</Text>
+              </View>
+              <Text className="font-semibold">{item.price} / month</Text>
             </View>
           </View>
         </Pressable>
@@ -159,21 +154,17 @@ type DataItem = {
     return (
       <>
           <RNFlatList
-            contentContainerStyle={{ justifyContent: 'center', alignItems: 'center', paddingLeft: '6%' }}
             data={data}
             renderItem={imagesLoaded ? renderItem : skeleton}
             showsHorizontalScrollIndicator={false}
             horizontal={true}
+            
           />
       </>
     );
   }
   
-
-  //THIS IS FOR THE NEARBY ME COMPONENT THAT DISPLAYS PROPERTY NEARBY THE USER
-
-  //!!!NOTE!!! THIS IS STILL NOT
-  export function PropertyList({ data }: { data: DataItem[]}) {
+  export function PropertyList({ data }: { data: PropertyData[]}) {
 
     const [imagesLoaded, setImagesLoaded] = useState(false);
     const hasFetched = useRef(false);
@@ -191,12 +182,11 @@ type DataItem = {
       }
     }, [data]);
 
-    const renderItem = ({ item, index }: { item: DataItem; index: number }) => (
+    const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
       <View className='overflow-hidden'>
-        <View className="p-2">
+        <View>
           <Pressable 
           onPress={() => handleCardPress(item.property_id)}>
-            
             <View className='h-40 w-72'>
               <SingleImageDisplay propertyID={item.property_id}/>
             </View>
@@ -225,7 +215,6 @@ type DataItem = {
     )
   
     return <RNFlatList 
-    contentContainerStyle={{justifyContent: 'center', alignItems: 'center', paddingLeft: "6%"}} 
     data={data} 
     renderItem={imagesLoaded ? renderItem : skeleton} 
     showsHorizontalScrollIndicator={false} 
@@ -268,3 +257,33 @@ type DataItem = {
     </View>
     )
   }
+
+
+  export function Avatar({ data }: { data: UserData[]}) {
+    const [imagesLoaded, setImagesLoaded] = useState(false);
+    const hasFetched = useRef(false);
+  
+    useEffect(() => {
+      setImagesLoaded(true)
+      if (!hasFetched.current) {
+        async function fetchData() {
+          try {
+            await loadAvatar(data, setImagesLoaded);
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        }
+        fetchData();
+      }
+    }, [data]);
+  
+    const renderItem = ({ item, index }: { item: UserData; index: number }) => (
+      <View >
+        <View style={{ width: 160, height: 144 }}>
+          <AvatarImage username={item.first_name}/>
+        </View>
+      </View>
+    );
+  }
+
+  

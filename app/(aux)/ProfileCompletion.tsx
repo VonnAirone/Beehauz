@@ -82,7 +82,10 @@ export default function TenantRegistration({ email }) {
       return;
     } else {
       const { data, error } = await supabase.auth.updateUser({
-        data: { ...user.user_metadata, profileCompleted: 'true' }
+        data: { 
+          ...user.user_metadata, 
+          profileCompleted: 'true',
+          usertype: usertype }
       })
 
       if (error) {

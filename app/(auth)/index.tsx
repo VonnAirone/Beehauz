@@ -81,7 +81,8 @@ export default function Login() {
               password: password,
               options: {
                 data: {
-                  profileCompleted: false
+                  profileCompleted: false,
+                  usertype: ''
                 },
                 emailRedirectTo: 'http://192.168.110.181:8081'
               }
@@ -89,10 +90,12 @@ export default function Login() {
   
             if (error) {
               Alert.alert('Error creating account', error.message);
+              setEmail('')
+              setPassword('')
             } else {
               Alert.alert('Account created successfully!');
             }
-            setShowModal(true)
+            // setShowModal(true)
           } else {
             const { error } = await supabase.auth.signInWithPassword({
               email: email,

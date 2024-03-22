@@ -1,4 +1,4 @@
-export interface OwnerData {
+export interface UserData {
     first_name: string;
     last_name: string;
     address: string;
@@ -8,12 +8,22 @@ export interface OwnerData {
     age: string;
 }
 
-export type PropertyData = {
+// export type PropertyData = {
+//     property_id: string;
+//     name: string;
+//     price: string;
+//     view_count: number;
+//     address: string;
+// }
+
+export type AppointmentData = {
+    appointment_id: string;
+    tenant_id: string;
     property_id: string;
-    name: string;
-    price: string;
-    view_count: number;
-    address: string;
+    appointment_date: string;
+    appointment_time: string;
+    status: "Pending" | "Approved" | "Rejected" | "Finished" | "Cancelled"
+    type: "Visit" | "Book"
 }
 
 export type ReviewData = {
@@ -23,14 +33,41 @@ export type ReviewData = {
     rating: string;
 }
 
-export interface DataItem {
+export type TenantsData = {
+  property_id: string;
+  tenant_id: string;
+  status: "Active" | "Left"
+}
+
+export type PropertyData = {
   property_id: string;
   name: string;
-  price: string;
+  price: number;
   view_count: number;
   description: string;
   owner_id: string;
   latitude: number,
   longitude: number,
   address: string,
+  available_beds: number,
+}
+
+
+export interface MessageInfoData {
+  message_id: string;
+  room_id: string;
+  sender_id: string;
+  receiver_id: string;
+  message_content: string;
+  time_sent: string;
+  sender_info: {
+    senderId: string;
+    name: string;
+    propertyName: string;
+  };
+}
+
+export type LocationData = {
+  latitude: number;
+  longitude: number
 }

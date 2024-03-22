@@ -56,9 +56,9 @@ export const downloadImage = async (propertyID, itemName, setImage) => {
     }
   };
 
-  export const loadAvatar = async (username, setAvatar) => {
+  export const loadAvatar = async (firstName, setAvatar) => {
     try {
-      const { data } = await supabase.storage.from('images').list(`avatars/${username}`);
+      const { data } = await supabase.storage.from('images').list(`avatars/${firstName}`);
       if (data) {
         setAvatar(data);
       } else {

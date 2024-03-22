@@ -1,64 +1,31 @@
-import React, { useEffect, useState, memo, useRef } from 'react';
-import { Text, View, Image, FlatList, Dimensions, ActivityIndicator, ScrollView, Pressable, Modal, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { Text, View, Image, FlatList, Dimensions, ScrollView, Pressable, Modal, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { fetchPropertyDetailsData } from '@/api/DataFetching';
-import { downloadImage, loadImages } from '@/api/ImageFetching';
+import { fetchPropertyDetailsData, getPropertyReviews } from '@/api/DataFetching';
+import { loadImages } from '@/api/ImageFetching';
 import BackButton from '@/components/back-button';
 import { Ionicons } from '@expo/vector-icons';
-import { Amenities, AmenitiesModal, BottomBar, OwnerInformation, Reviews } from '../(aux)/detailscomponent';
+import { Amenities, AmenitiesModal, BottomBar, OwnerInformation } from '../(aux)/detailscomponent';
 import Bookmark from '@/components/bookmarks-button';
 import { useAuth } from '@/utils/AuthProvider';
 import { Images } from '../(aux)/homecomponents';
+import { PropertyData, ReviewData } from '@/api/Properties';
 
 const screenWidth = Dimensions.get('window').width;
-
-interface DataItem {
-  property_id: string;
-  name: string;
-  price: string;
-  view_count: number;
-  description: string;
-  owner_id: string;
-  latitude: number,
-  longitude: number,
-}
-
-// const Images = memo(({ item } : {item : any}) => {
-//   const [image, setImage] = useState<string | null>(null);
-
-//   useEffect(() => {
-//     downloadImage(item.propertyID, item.name, setImage);
-//   }, [item.propertyID, item.name]);
-
-//   if (!image) {
-//     return (
-//       <View 
-//       className='flex-1'>
-//         <ActivityIndicator size="large" />
-//       </View>
-//     );
-//   }
-
-//   return (
-//     <Image
-//       className='w-full h-full'
-//       source={{ uri: image }}
-//       resizeMode="cover"
-//     />
-//   );
-// });
 
 export default function BHDetails() {
   const user = useAuth()?.session.user;
   let { propertyID } = useLocalSearchParams();
-  const [data, setData] = useState<DataItem | null>(null);
+  const [data, setData] = useState<PropertyData | null>(null);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAmenitiesModal, setShowAmenitiesModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false)
   const [selectedImage, setSelectedImage] = useState(null)
   const hasFetched = useRef(false);
+  const [ratings, setRatings] = useState(0)
+  const [propertyReviews, setPropertyReviews] = useState<ReviewData[] | null>(null);
 
   const openImage = (image) => {
     setSelectedImage(image);
@@ -82,6 +49,22 @@ export default function BHDetails() {
     fetchData();
   }}, [propertyID]);
 
+  const fetchPropertyReviews = async () => {
+    try {
+      const reviews = await getPropertyReviews(propertyID);
+      setPropertyReviews(reviews);
+      const allRatings = reviews.map((review) => review.rating);
+      const totalRating = allRatings.reduce((acc, rating) => acc + rating, 0);
+      setRatings(totalRating);
+    } catch (error) {
+      console.error('Error fetching property reviews:', error);
+      setPropertyReviews(null);
+    }
+
+    setLoading(false)
+  };
+
+
   return (
     <SafeAreaView className='flex-1 bg-white'>
       {loading ? (
@@ -90,7 +73,7 @@ export default function BHDetails() {
         </View>
       ) : (
         <View>
-        <ScrollView>
+        <ScrollView showsVerticalScrollIndicator={false}>
           <View>
             {showAmenitiesModal && (
             <View className='z-20'>
@@ -146,8 +129,9 @@ export default function BHDetails() {
               </TouchableOpacity>
             </View>
 
-            <View className='mt-1'>
-              <Reviews/>
+            <View className='flex-row items-center gap-x-1'>
+              <Ionicons name='star' size={15} color={'#FF8B00'}/>
+              <Text> <Text className='font-semibold'>{ratings}</Text> stars / <Text className='font-semibold'>{propertyReviews?.length}</Text> {propertyReviews?.length > 0 ? 'review' : 'reviews'}</Text>
             </View>
             
             {/* DESCRIPTION SECTION */}

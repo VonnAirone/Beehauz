@@ -1,56 +1,37 @@
 import { Pressable, SafeAreaView, Text, View, Modal, Alert, TextInput, TouchableWithoutFeedback, Keyboard, Image } from 'react-native';
 import React, { memo, useEffect, useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import Logo from '@/components/logo';
 import { supabase } from '@/utils/supabase';
-import { downloadAvatar, loadAvatar } from '@/api/ImageFetching';
 import { useAuth } from '@/utils/AuthProvider';
-import { getUsername } from '../(aux)/usercomponent';
+import { getProfile } from '@/api/DataFetching';
+import { UserData } from '@/api/Properties';
+import { downloadAvatar, loadAvatar } from '@/api/ImageFetching';
+import { Images } from '@/app/(tenant)/(aux)/homecomponents';
 
 export default function Account() {
-  const user = useAuth().session?.user;
+  const auth = useAuth();
+  const user = auth.session?.user;
   const [phoneNumber, setPhoneNumber] = useState('')
-  const [email, setEmail] = useState(user?.email)
   const [modalVisible, setModalVisible] = useState(false);
   const [onEditMode, setOnEditMode] = useState(false);
   const [isChangeMade, setIsChangeMade] = useState(false)
-  const [username, setUsername] = useState('')
-  const hasFetched = useRef(false);
-  const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserData | null>(null)
 
   useEffect(() => {
-    getUsername(user?.id, setUsername);
-
-    if (!hasFetched.current) {
-      async function fetchData() {
-        try {
-          await loadAvatar(username, setImagesLoaded);
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
+    async function getUserProfile(id: string) {
+      try {
+          const data = await getProfile(id);
+          setUserProfile(data);
+      } catch (error) {
+          console.log("Error fetching owner", error.message);
+          throw error;
       }
-      fetchData();
     }
-  }, []);
+
+    getUserProfile(user?.id)
+  }, [userProfile]);
 
 
-  const updateUserData = async ({phoneNumber}) => {
-    
-    const { data, error } = await supabase.auth.updateUser({
-      phone: phoneNumber
-    });
-
-    if (error) {
-      console.error('Error fetching user data:', error.message);
-    } else {
-      console.log('User data:', data);
-    }
-  }
-
-  const handleEmailChange = (text) => {
-    setEmail(text)
-    setIsChangeMade(!!text)
-  }
 
   const handlePhoneChange = (text) => {
     setPhoneNumber(text)
@@ -70,9 +51,9 @@ export default function Account() {
   
     useEffect(() => {
       if (!image) {
-        downloadAvatar(username, item.name, setImage);
-      } 
-    }, [username, item.name]);
+        downloadAvatar(userProfile?.first_name, item.name, setImage);
+      }
+    }, [userProfile?.first_name, item.name, image]); 
   
     if (!image) {
       return (
@@ -89,7 +70,7 @@ export default function Account() {
     );
   });
 
-  const SingleImageDisplay = ({ username }) => {
+  const AvatarDisplay = ({ username }) => {
     const [images, setImages] = useState([]);
     const hasFetched = useRef(false);
   
@@ -106,9 +87,7 @@ export default function Account() {
         fetchImages();
       }
     }, [username]);
-
     
-  
     if (images.length > 0) {
       const firstImage = images[0];
       return (
@@ -119,31 +98,26 @@ export default function Account() {
       );
     }}
 
-  return (
-    <TouchableWithoutFeedback className='flex-1' onPress={() => Keyboard.dismiss()}>
-      <SafeAreaView className='flex-1 w-80 justify-center m-auto '>
-        <View className='items-start -left-4'>
-          <Logo/>
-        </View>
+  
 
-        <View className='items-center mb-10'>
-          <View className='h-20 w-20 rounded-full mb-2'>
-            {imagesLoaded && (
-              <SingleImageDisplay username={username}/>
-            )}
-            
+  return (
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <SafeAreaView className='flex-1 px-10'>
+
+        <View className='items-center mt-10'>
+          <View className='h-20 w-20 rounded-full'>
+            {/* AVATAR IN HERE */}
           </View>
-          <Text className='text-xl font-semibold'>Airone Vonn Villasor</Text>
+          <Text className='text-xl font-semibold'>{userProfile?.first_name} {userProfile?.last_name}</Text>
         </View>
 
         <View className='flex-row justify-between'>
-          <Text className='text-base text-yellow'>Personal Information</Text>
+          <Text className='font-semibold text-yellow'>Personal Information</Text>
           <Pressable 
-          onPress={() => setOnEditMode(!onEditMode)}
+          onPress={() => {}}
           
           className='flex-row items-center gap-x-1'>
-            <Ionicons color={onEditMode ? '#FF8B00' : 'black'} name='pencil'/>
-            <Text className={onEditMode ? 'text-yellow' : 'black'}>Edit</Text>
+            <Ionicons name='chevron-forward-outline'/>
           </Pressable>
         </View>
 
@@ -156,25 +130,24 @@ export default function Account() {
 
         <View className='gap-y-3 mt-3 mb-10'>
           <View className='flex-row justify-between p-2'>
-            <View className='flex-row items-center gap-x-2 opacity-60'>
+            <View className='flex-row items-center gap-x-2'>
               <Ionicons name='mail-outline' size={18}/>
-              <Text className='text-base'>Email</Text>
+              <Text className='font-semibold'>Email</Text>
             </View>
 
             <View>
               <TextInput 
-                editable={onEditMode}
-                placeholderTextColor={onEditMode? 'black' : 'gray'}  
-                placeholder={email}/>
+                className='text-xs text-right'
+                placeholder={userProfile?.email}/>
             </View>
           </View>
 
           <View className='border-b opacity-10'></View>
 
           <View className='flex-row justify-between p-2'>
-            <View className='flex-row items-center gap-x-2 opacity-60'>
+            <View className='flex-row items-center gap-x-2'>
               <Ionicons name='phone-portrait-outline' size={18}/>
-              <Text className='text-base'>Phone</Text>
+              <Text className='font-semibold'>Phone</Text>
             </View>
 
             <View className='relative w-40'>
@@ -182,23 +155,25 @@ export default function Account() {
               editable={onEditMode} 
               onChangeText={handlePhoneChange}
               placeholderTextColor={onEditMode? 'black' : 'gray'} 
-              placeholder={!user?.phone ? 'Add your number' :  user?.phone}
-              className='text-right'/>
+              value={userProfile?.phone_number.toString()}
+              className='text-right text-xs'/>
             </View>
           </View>
 
           <View className='border-b opacity-10'></View>
 
           <View className='flex-row justify-between p-2'>
-            <View className='flex-row items-center gap-x-2 opacity-60'>
+            <View className='flex-row items-center gap-x-2'>
               <Ionicons name='location-outline' size={18}/>
-              <Text className='text-base'>Location</Text>
+              <Text className='font-semibold'>Location</Text>
             </View>
 
             <View>
               <TextInput 
               editable={onEditMode}
-              placeholderTextColor={onEditMode? 'black' : 'gray'} placeholder='Catungan 1, Sibalom, Antique' className='text-right'/>
+              placeholderTextColor={onEditMode? 'black' : 'gray'}
+              value={userProfile?.address}
+              className='text-right text-xs'/>
             </View>
           </View>
           
@@ -215,15 +190,15 @@ export default function Account() {
         </View>
 
         <View>
-          <Text className='text-base text-yellow'>Utilities</Text>
+          <Text className='font-semibold text-yellow'>Utilities</Text>
         </View>
 
         <View className='gap-y-3 mt-3 mb-10'>
           <Pressable android_ripple={{color: 'f1f1f1'}} className='p-2'>
             <View className='flex-row justify-between items-center'>
-              <View className='flex-row items-center gap-x-2 opacity-60'>
+              <View className='flex-row items-center gap-x-2'>
                 <Ionicons name='document-text-outline' size={18}/>
-                <Text className='text-base'>Transaction History</Text>
+                <Text className='font-semibold'>Transaction History</Text>
               </View>
 
               <View>
@@ -236,9 +211,9 @@ export default function Account() {
 
           <Pressable android_ripple={{color: 'f1f1f1'}} className='p-2'>
             <View className='flex-row justify-between items-center'>
-              <View className='flex-row items-center gap-x-2 opacity-60'>
+              <View className='flex-row items-center gap-x-2'>
                 <Ionicons name='information-circle-outline' size={18}/>
-                <Text className='text-base'>Help Center</Text>
+                <Text className='font-semibold'>Help Center</Text>
               </View>
 
               <View>
@@ -251,9 +226,9 @@ export default function Account() {
 
           <Pressable android_ripple={{color: 'f1f1f1'}} className='p-2'>
             <View className='flex-row justify-between items-center'>
-              <View className='flex-row items-center gap-x-2 opacity-60'>
+              <View className='flex-row items-center gap-x-2'>
                 <Ionicons name='star-half-outline' size={18}/>
-                <Text className='text-base'>Rate this app</Text>
+                <Text className='font-semibold'>Rate this app</Text>
               </View>
 
               <View>
@@ -269,9 +244,9 @@ export default function Account() {
           android_ripple={{color: 'f1f1f1'}} 
           className='p-2'>
             <View className='flex-row justify-between items-center'>
-              <View className='flex-row items-center gap-x-2 opacity-60'>
+              <View className='flex-row items-center gap-x-2'>
                 <Ionicons name='log-out-outline' size={18}/>
-                <Text className='text-base'>Logout</Text>
+                <Text className='font-semibold'>Logout</Text>
               </View>
 
               <View>
@@ -279,25 +254,6 @@ export default function Account() {
               </View>
             </View>
           </Pressable>
-
-          {/* <View className='border-b opacity-10'></View> */}
-
-          {/* <Pressable
-          onPress={() => {}}
-          android_ripple={{color: 'f1f1f1'}} 
-          className='p-2'>
-            <View className='flex-row justify-between items-center'>
-              <View className='flex-row items-center gap-x-2 opacity-60'>
-                <Ionicons name='log-out-outline' size={18} color={'red'}/>
-                <Text className='text-base text-red-500'>Delete account</Text>
-              </View>
-
-              <View>
-                <Ionicons name='chevron-forward-outline' color={'red'}/>
-              </View>
-            </View>
-          </Pressable> */}
-          
         </View>
 
         

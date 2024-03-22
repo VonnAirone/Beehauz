@@ -5,17 +5,6 @@ import { supabase } from '@/utils/supabase'
 import { router } from 'expo-router'
 import { getProfile } from '@/api/DataFetching'
 
-export function Reviews() {
-  return (
-    <View> 
-        <View className='flex-row items-center gap-x-1'>  
-          <Ionicons name='star-outline' size={15} color={'#FF8B00'}/>
-          <Text className='text-base'>4.5k reviews</Text>
-        </View>
-
-    </View>
-  )
-}
 
 //   async function insertAmenity() {
 //     try {
@@ -63,14 +52,14 @@ export function Amenities({propertyID}) {
 
     const Amenity = ({ item }) => {
         const renderItem = ({ item }) => (
-            <View className='mr-3'>
+            <View className='mr-2'>
                 <View key={item.amenity_id} className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
                     <Text className='text-center'>{item.amenity_name}</Text>
                 </View>
             </View>
         );
 
-    return ( <RNFlatList  data={item} renderItem={renderItem}showsHorizontalScrollIndicator={false} horizontal={true} />)}
+    return ( <RNFlatList data={item} renderItem={renderItem} showsHorizontalScrollIndicator={false} horizontal={true} />)}
 
     return (
         <View>

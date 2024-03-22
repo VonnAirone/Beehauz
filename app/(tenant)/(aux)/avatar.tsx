@@ -1,18 +1,20 @@
-import React, { memo, useState, useEffect } from 'react';
-import { View, Image, Text } from 'react-native';
+import React, { memo, useState, useEffect, useRef } from 'react';
+import { View, Image } from 'react-native';
 import { downloadAvatar, loadAvatar } from '@/api/ImageFetching';
 
-const Avatar = memo(({ item, username }: { item: any; username: string }) => {
+const Avatar = memo(({ item, name }: { item: any, name }) => {
   const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!image) {
-      downloadAvatar(username, item.name, setImage);
+      downloadAvatar(name, item.name, setImage);
     }
-  }, [username, item.name]);
+  }, [name, item.name, image]); 
 
   if (!image) {
-    return <View></View>;
+    return (
+      <View></View>
+    );
   }
 
   return (
@@ -24,42 +26,41 @@ const Avatar = memo(({ item, username }: { item: any; username: string }) => {
   );
 });
 
-
-const SingleImageDisplay = ({ username }) => {
-  const [images, setImages] = useState([]); 
+const AvatarDisplay = ({ username }) => {
+  const [images, setImages] = useState([]);
+  const hasFetched = useRef(false);
 
   useEffect(() => {
-    const fetchImages = async () => {
-      try {
-        await loadAvatar(username, setImages);
-      } catch (error) {
-        console.error('Error fetching images:', error);
-      }
-    };
-
-    fetchImages();
+    if (!hasFetched.current) {
+      const fetchImages = async () => {
+        try {
+          await loadAvatar(username, setImages)
+        } catch (error) {
+          console.error('Error fetching images:', error);
+        }
+      };
+  
+      fetchImages();
+    }
   }, [username]);
-
-  if (images.length === 0) {
+  
+  if (images.length > 0) {
+    const firstImage = images[0];
     return (
-      <View>
-        <Image className='h-14 w-14' source={require("@/assets/images/icon.png")}/>
+      <View className="flex-1">
+        <Avatar 
+        name={username}
+        item={firstImage} />
       </View>
-    )
-  }
+    );
+  }}
 
-  const firstImage = images[0];
+const AvatarImage = ({ username }) => {
   return (
-    <View className="flex-1">
-      <Avatar item={{ ...firstImage}} username={username}/>
+    <View className='flex-1 items-center justify-center'>
+      <AvatarDisplay username={username}/>
     </View>
   );
 };
 
-export default function AvatarImage({username}) {
-    return (
-        <View className='flex-1 items-center justify-center'>
-            <SingleImageDisplay username={username}/>
-        </View>
-    )
-}
+export default AvatarImage;

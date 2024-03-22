@@ -9,12 +9,12 @@ import { supabase } from '@/utils/supabase'
 import StarRatingComponent from '../(aux)/starrating'
 import { useLocalSearchParams } from 'expo-router'
 import AvatarImage from '../(aux)/avatar'
-import { OwnerData, PropertyData, ReviewData } from '@/api/Properties'
+import { PropertyData, ReviewData, UserData } from '@/api/Properties'
 
 
 export default function OwnerProfile() {
     const [propertyList, setPropertyList] = useState<PropertyData[] | null>(null);
-    const [ownerData, setOwnerData] = useState<OwnerData | null>(null);
+    const [ownerData, setOwnerData] = useState<UserData | null>(null);
     const [ownerReviews, setOwnerReviews] = useState<ReviewData[] | null>(null);
     const [reviewUsernames, setReviewUsernames] = useState([])
     const [loading, setLoading] = useState(true)
