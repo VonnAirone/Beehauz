@@ -38,9 +38,15 @@ export function AuthProvider({ children }: Props) {
       router.replace('/(auth)/');
     } else if (session?.user && inAuthGroup) {
       if (session?.user.user_metadata.profileCompleted == false) {
-        router.replace('/(tenant)/(screens)/Usertype')
+        router.replace('/Usertype')
       } else {
-        router.replace('/one');
+        if (session?.user.user_metadata.usertype == "Tenant") {
+          router.replace("/home")
+        } else {
+          router.replace("/one")
+        }
+
+        
       }
       
     }
@@ -80,7 +86,7 @@ export function AuthProvider({ children }: Props) {
       // Check if the session is initialized and the user is authenticated.
       if (session?.user) {
         setAuthInitialized(true);
-        router.replace('/(tenant)/(tabs)/home');
+        router.replace('/');
       } else {
         setAuthInitialized(true);
       }

@@ -78,3 +78,63 @@ export async function getProfile(userID: string) {
 }
 
 
+export async function getProperties(id, setLoading, setProperties) {
+  try {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from("property")
+      .select()
+      .eq("owner_id", id);
+    
+    if (error) {
+      console.log("Error fetching properties: ", error.message)
+    } else {
+      setProperties(data);
+    }
+    // setLoading(false);
+  } catch (error) {
+    console.log("Error fetching properties: ", error.message)
+    // setLoading(false);
+  } finally {
+    setTimeout(() => {
+      setLoading(false);
+    }, 2000); 
+  }
+}
+
+
+export async function getPropertyReviews(propertyID) {
+  try {
+      const { data, error } = await supabase
+          .from("property_reviews")
+          .select("*")
+          .eq('property_id', propertyID);
+
+      if (error) {
+          console.log("Error fetching property reviews: ", error.message);
+          return null;
+      }
+
+      if (data) {
+          return data
+      } else {
+          console.log("No property reviews found.");
+      }
+  } catch (error) {
+      console.log("Error fetching property reviews: ", error.message);
+      return null;
+  }
+}
+
+
+export const fetchAmenities = async (propertyID, setAmenities) => {
+  const {data, error} = await supabase
+  .from('amenities')
+  .select('*')
+  .eq('property_id', propertyID)
+  if (error) {
+      console.log('Error message', error.message)
+  } else {
+  setAmenities(data)
+  }
+}

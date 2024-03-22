@@ -49,12 +49,19 @@ export default function TabLayout() {
       <Tabs.Screen
         name="three"
         options={{
+          title: 'Messages',
+          tabBarIcon: ({ color }) => <TabBarIcon name="chatbox-outline" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="four"
+        options={{
           title: 'Notifications',
           tabBarIcon: ({ color }) => <TabBarIcon name="notifications-outline" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="four"
+        name="five"
         options={{
           title: 'Notifications',
           tabBarIcon: ({ color }) => <TabBarIcon name="person-circle-outline" color={color} />,

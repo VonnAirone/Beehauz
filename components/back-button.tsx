@@ -5,11 +5,11 @@ import { router } from 'expo-router'
 
 export default function BackButton() {
   return (
-    <View className='relative ml-5 mt-5'>
+    <View>
         <Pressable onPress={() => router.back()}>
             <View className='flex-row items-center '>
-                <Ionicons name='chevron-back-outline' size={28}/>
-                <Text className='text-lg'>Back</Text>
+                <Ionicons name='chevron-back-outline' size={20}/>
+                <Text>Back</Text>
             </View>
         </Pressable>
     </View>
