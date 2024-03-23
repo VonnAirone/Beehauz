@@ -123,10 +123,10 @@ import { PropertyData, UserData } from "@/api/Properties";
     }, [data]);
   
     const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
-      <View className='overflow-hidden'>
+      <View className='overflow-hidden mr-4'>
         <Pressable onPress={() => handleCardPress(item.property_id)}>
           <View>
-            <View className="h-40 w-40">
+            <View className="h-32 w-32">
               <SingleImageDisplay propertyID={item.property_id}/>
             </View>
   
@@ -183,7 +183,7 @@ import { PropertyData, UserData } from "@/api/Properties";
     }, [data]);
 
     const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
-      <View className='overflow-hidden'>
+      <View className='overflow-hidden mr-4'>
         <View>
           <Pressable 
           onPress={() => handleCardPress(item.property_id)}>
@@ -221,41 +221,98 @@ import { PropertyData, UserData } from "@/api/Properties";
     horizontal={true} />;
   };
 
+  export function NearbyProperties({ data }: { data: PropertyData[]}) {
 
-  export function Services() {
-    return (
-      <View className="ml-5">
-        <View className="p-2 flex-row gap-x-5 mt-2">
-          <View className="items-center justify-center">
-            <View className="">
-              <Image className="w-8 h-8 object-contain" source={require("assets/services icons/laundry-machine.png")}/>
-            </View>
-            <Text className="mt-2">Laundry Shops</Text>
-          </View>
+    const [imagesLoaded, setImagesLoaded] = useState(false);
+    const hasFetched = useRef(false);
+  
+    useEffect(() => {
+      if (!hasFetched.current) {
+        async function fetchData() {
+          try {
+            await loadImages(data, setImagesLoaded);
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        }
+        fetchData();
+      }
+    }, [data]);
 
-          <View className="items-center justify-center">
-            <View className="">
-              <Image className="w-8 h-8 object-contain" source={require("assets/services icons/tools.png")}/>
+    const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
+      <View className='overflow-hidden mr-4'>
+        <View>
+          <Pressable 
+          onPress={() => handleCardPress(item.property_id)}>
+            <View className='h-40 w-72'>
+              <SingleImageDisplay propertyID={item.property_id}/>
             </View>
-            <Text className="mt-2">Barber Shops</Text>
-          </View>
-
-          <View className="items-center justify-center">
-            <View className="">
-              <Image className="w-8 h-8 object-contain" source={require("assets/services icons/school.png")}/>
-            </View>
-            <Text className="mt-2">School Supplies</Text>
-          </View>
-
-          <View className="items-center justify-center">
-            <View className="">
-              <Image className="w-8 h-8 object-contain" source={require("assets/services icons/water-tap.png")}/>
-            </View>
-            <Text className="mt-2">Refilling Stations</Text>
-          </View>
+              
+              <View className="mt-2">
+                <Text className='font-semibold text-xl'>{item.name}</Text>
+                <Text>{item.price}</Text>
+                <View className="flex-row items-center">
+                  <Ionicons name="location-outline" color={'#FFA233'}/>
+                  <Text className="text-yellow">{item.address}</Text>
+                </View>
+                
+              </View>
+          </Pressable>
+        </View>
       </View>
-    </View>
+    );
+
+    const skeleton = () => (
+        <View className="p-2">
+            <View className='bg-gray-300 w-72 h-40 rounded-md'/>
+            <View className='mt-2 h-4 w-32 bg-gray-300 rounded-md'></View>
+            <View className='mt-2 h-3 w-16 bg-gray-300 rounded-md'></View>
+            <View className='mt-2 h-3 w-48 bg-gray-300 rounded-md'></View>
+        </View>
     )
+  
+    return <RNFlatList 
+    data={data} 
+    renderItem={data.length === 0 ? renderItem : skeleton} 
+    showsHorizontalScrollIndicator={false} 
+    horizontal={true} />;
+  };
+  
+  const servicesData = [
+      { id: 1, name: 'Laundry Shops', icon: require("assets/services icons/laundry-machine.png") },
+      { id: 2, name: 'Barber Shops', icon: require("assets/services icons/tools.png") },
+      { id: 3, name: 'School Supplies', icon: require("assets/services icons/school.png") },
+      { id: 4, name: 'Refilling Stations', icon: require("assets/services icons/water-tap.png") }
+  ];
+  
+  const renderItem = ({ item }) => (
+    <View className="overflow-hidden rounded-md">
+      <Pressable 
+      android_ripple={{color: "#ffa233"}}
+      className="flex-row items-center p-2 mr-2 rounded-md">
+        <View className="mr-2">
+          <Image className="w-5 h-5 object-contain" source={item.icon} />
+        </View>
+        <View>
+          <Text className="text-xs">{item.name}</Text>
+        </View>
+      </Pressable>
+    </View>
+  );
+  
+  export function Services() {
+      return (
+          <View>
+              <FlatList
+                  data={servicesData}
+                  renderItem={renderItem}
+                  keyExtractor={item => item.id.toString()}
+                  horizontal={true}
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingVertical: 2, paddingHorizontal: 5 }}
+              />
+          </View>
+      );
   }
 
 

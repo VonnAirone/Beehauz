@@ -9,8 +9,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { Amenities, AmenitiesModal, BottomBar, OwnerInformation } from '../(aux)/detailscomponent';
 import Bookmark from '@/components/bookmarks-button';
 import { useAuth } from '@/utils/AuthProvider';
-import { Images } from '../(aux)/homecomponents';
+import { Cover, Images } from '../(aux)/homecomponents';
 import { PropertyData, ReviewData } from '@/api/Properties';
+import { PropertyReviews } from '@/app/(owner)/(aux)/propertycomponents';
+import LoadingComponent from '@/components/LoadingComponent';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -40,6 +42,7 @@ export default function BHDetails() {
         const fetchedData = await fetchPropertyDetailsData(propertyID.toString());
         setData(fetchedData);
         await loadImages(propertyID, setImages);
+        await fetchPropertyReviews();
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -68,9 +71,7 @@ export default function BHDetails() {
   return (
     <SafeAreaView className='flex-1 bg-white'>
       {loading ? (
-        <View className='flex-1 justify-center items-center'>
-          <Text>Loading...</Text>
-        </View>
+        <LoadingComponent/>
       ) : (
         <View>
         <ScrollView showsVerticalScrollIndicator={false}>
@@ -83,7 +84,7 @@ export default function BHDetails() {
           </View>
                 
         <View className={`${showAmenitiesModal ? 'opacity-20 z-0' : ''}`}>
-          <View className='flex-row justify-between'>
+          <View className='flex-row items-center justify-between p-5'>
             <BackButton/>
             <Bookmark propertyID={propertyID} tenantID={user?.id}/>
           </View>
@@ -95,9 +96,9 @@ export default function BHDetails() {
               data={images}
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item }) => 
-              <View className='w-screen h-72'> 
+              <View className='w-screen h-60'> 
                 <Pressable onPress={() => openImage(item)}>
-                  <Images item={{...item, propertyID}} />
+                  <Cover item={{...item, propertyID}} />
                 </Pressable>
               </View>}
               initialNumToRender={4}
@@ -114,13 +115,9 @@ export default function BHDetails() {
             </View>
           )}
           <View className='mx-5 mt-5'>
-
-            <View>
-              <Text className='text-4xl font-semibold'>{data?.name}</Text>
-            </View>
+              <Text className='text-xl font-semibold'>{data?.name}</Text>
             
-              {/* LOCATION IS MISSING */}
-            <View className='my-2'>
+            <View>
               <TouchableOpacity 
               onPress={() => router.push({pathname: "/MapView", params: {latitude: data.latitude, longitude: data.longitude}})}
               className='flex-row items-center gap-x-1'>
@@ -133,18 +130,12 @@ export default function BHDetails() {
               <Ionicons name='star' size={15} color={'#FF8B00'}/>
               <Text> <Text className='font-semibold'>{ratings}</Text> stars / <Text className='font-semibold'>{propertyReviews?.length}</Text> {propertyReviews?.length > 0 ? 'review' : 'reviews'}</Text>
             </View>
-            
-            {/* DESCRIPTION SECTION */}
+ 
             <View className='mt-5'>
               <View className='flex-row items-center gap-x-1'>
-                <Text className='text-xl font-semibold'>Description</Text>
-                {/* <Pressable 
-                  onPress={() => setShowAmenitiesModal(true)}
-                  className='mt-1'>
-                  <Ionicons name='help-circle-outline'/>
-                </Pressable > */}
+                <Text className='font-semibold'>Description</Text>
               </View>
-              <View className='mt-2 h-16'>
+              <View className='mt-2'>
                 {data?.description ? (
                   <Text>
                     {data?.description}
@@ -157,10 +148,9 @@ export default function BHDetails() {
               </View>
             </View>
 
-            {/* AMENITIES SECTION*/}
             <View className='mt-5'>
               <View className='flex-row items-center'>
-                <Text className='text-xl font-semibold mr-1'>Amenities</Text>
+                <Text className='font-semibold mr-1'>Amenities</Text>
                 <Pressable 
                   onPress={() => setShowAmenitiesModal(true)}
                   className='mt-1'>
@@ -171,9 +161,9 @@ export default function BHDetails() {
               <Amenities propertyID={propertyID}/>
             </View>
 
-            {/* MORE PHOTOS SECTION */}
+
             <View className='mt-5'>
-              <Text className='text-xl font-semibold'>More Photos</Text>
+              <Text className='font-semibold'>More Photos</Text>
 
               {images.length > 0 ? (
                 <View className='h-20 mt-2'>
@@ -204,26 +194,20 @@ export default function BHDetails() {
               )}
             </View>
 
-            {/* REVIEWS SECTION */}
             <View className='mt-5'>
-              <Text className='text-xl font-semibold'>Reviews</Text>
+              <Text className='font-semibold'>Reviews ({propertyReviews?.length})</Text>
 
-              <View className='p-5 items-center'>
-                <Text>No reviews</Text>
-              </View>
+              <PropertyReviews reviews={propertyReviews}/>
             </View>
 
-            {/* OWNER SECTION */}
-            <View>
+            <View className='mt-5'>
+              <Text className='font-semibold'>More Details:</Text>
               <Pressable onPress={() => router.push({pathname: "/OwnerProfile", params: {owner_id : data?.owner_id}})}>
-                <OwnerInformation owner_id={data?.owner_id.toString()}/>
+                <OwnerInformation owner_id={data?.owner_id}/>
               </Pressable>
-              
             </View>
 
-            <View className='h-20'>
-
-            </View>
+            <View className='h-20'/>
 
             {showImageModal && (
             <Modal

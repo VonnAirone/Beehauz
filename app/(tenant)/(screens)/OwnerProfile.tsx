@@ -7,9 +7,10 @@ import { fetchPropertyData, getProfile } from '@/api/DataFetching'
 import { SingleImageDisplay } from '../(aux)/homecomponents'
 import { supabase } from '@/utils/supabase'
 import StarRatingComponent from '../(aux)/starrating'
-import { useLocalSearchParams } from 'expo-router'
+import { Link, useLocalSearchParams } from 'expo-router'
 import AvatarImage from '../(aux)/avatar'
 import { PropertyData, ReviewData, UserData } from '@/api/Properties'
+import LoadingComponent from '@/components/LoadingComponent'
 
 
 export default function OwnerProfile() {
@@ -115,133 +116,134 @@ export default function OwnerProfile() {
     <SafeAreaView className='flex-1'>
         
       {loading ? (
-        <View className='flex-1 justify-center items-center'>
-            <Text>Loading...</Text>
-        </View>
+        <LoadingComponent/>
       ) : (
-        <ScrollView>
+        <ScrollView 
+        showsVerticalScrollIndicator={false}
+        className='p-5'>
+        
         <BackButton/>
         <View>
-            <View className='items-center '>
-                <View className='rounded-full border  border-white bg-white h-40 w-40'>
-                    <AvatarImage username={ownerData?.first_name}/>
-                </View>
+          <View className='items-center bg-yellow rounded-md mt-2 h-32 mb-6'>
+            <View className='absolute -bottom-10 rounded-full border-2 border-yellow bg-white h-28 w-28'>
+                <AvatarImage username={ownerData?.first_name}/>
+            </View>
+          </View>
+
+          <View>
+            <View className='items-center mt-5'>
+              <Text className='text-2xl font-semibold'>{ownerData?.first_name} {ownerData?.last_name}</Text>
+              <Text>Owner of {propertyList[0]?.name}</Text>
             </View>
 
-            <View>
-                <View className='items-center mt-5'>
-                    <Text className='text-2xl font-semibold'>{ownerData?.first_name}</Text>
-                    <Text className='text-lg'>Owner of {propertyList[0]?.name}</Text>
-                    <View className='flex-row items-center gap-x-1 mt-1'>
-                        <Text className='text-blue-700'>Verified</Text>
-                        <Ionicons name='shield-checkmark-outline' color={"#1d4ed8"}/>
-                    </View>
-                </View>
+            {/* <View className='items-center mt-10'>
+              <View className='flex-row gap-x-20'>
+                <Pressable
+                onPress={() => setActiveTab('Details')}>
+                    <Text className={`text-base ${activeTab === 'Details' ? 'text-yellow' : 'text-gray-500'}`}>Details</Text>
+                </Pressable>
+                <View className='border-left border border-gray-500'/>
+                <Pressable onPress={() => setActiveTab('Reviews')}>
+                    <Text className={`text-base ${activeTab === 'Reviews' ? 'text-yellow' : 'text-gray-500'}`}>Reviews</Text>
+                </Pressable>
+              </View>
+            </View> */}
 
-                <View className='items-center mt-10'>
-                    <View className='flex-row gap-x-20'>
-                        <Pressable
-                        onPress={() => setActiveTab('Details')}>
-                            <Text className={`text-base ${activeTab === 'Details' ? 'text-yellow' : 'text-gray-500'}`}>Details</Text>
-                        </Pressable>
-                        <View className='border-left border border-gray-500'/>
-                        <Pressable onPress={() => setActiveTab('Reviews')}>
-                            <Text className={`text-base ${activeTab === 'Reviews' ? 'text-yellow' : 'text-gray-500'}`}>Reviews</Text>
-                        </Pressable>
-                    </View>
-                </View>
-
-                <View>
+              <View>
                 {activeTab === 'Details' && (
-                    <View className='p-5 gap-y-3'>
-                        <View className='gap-y-2'>
-                            <Text className='text-xl font-medium'>Bio</Text>
+                <View className='gap-y-3'>
+                  <View className='gap-y-2'>
+                      <Text className='font-semibold text-base'>Bio</Text>
 
-                            <Text>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</Text>
-                        </View>
+                      <Text>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</Text>
+                  </View>
 
-                        <View className='gap-y-3'>
-                            <Text className='text-xl font-medium'>Contact Details</Text>
-                            <View className='flex-row items-center gap-x-4'>
-                                <Ionicons name='call' size={18}/>
-                                <Text className='text-base'>{ownerData?.phone_number}</Text>
-                            </View>
-
-                            <View className='flex-row items-center gap-x-4'>
-                                <Ionicons name='mail' size={18}/>
-                                <Text className='text-base'>{ownerData?.email}</Text>
-                            </View>
-
-                            <View className='flex-row items-center gap-x-4'>
-                                <Ionicons name='logo-facebook' size={18}/>
-                                <Text className='text-base'>{ownerData?.first_name}</Text>
-                            </View>
-                        </View>
-
-                        <View className='gap-y-3'>
-                            <Text className='text-xl font-medium'>Owned Properties</Text>
-
-                            {propertyList.map((item, index) => (
-                                <View key={index} className='overflow-hidden'>
-                                    <Pressable onPress={() => {}}>
-                                        <View className='p-2'>
-                                            <View style={{ width: 160, height: 144 }}>
-                                                {!hasFetched.current && (
-                                                    <SingleImageDisplay propertyID={item.property_id} />
-                                                )} 
-                                            </View>
-
-                                            <View className='mt-2'>
-                                                <Text className='font-semibold text-xl'>{item.name}</Text>
-                                                <Text>{item.price}</Text>
-                                            </View>
-                                        </View>
-                                    </Pressable>
-                                </View>
-                            ))}
-                        </View>
+                  <View className='gap-y-3'>
+                    <Text className='font-semibold'>Contact Details</Text>
+                    <View className='flex-row items-center gap-x-4'>
+                        <Ionicons name='call' size={18}/>
+                        <Text className='text-base'>{ownerData?.phone_number}</Text>
                     </View>
-                )}
-                    {activeTab === 'Reviews' && (
-                    <View className='p-5'>
-                        <View className='mb-5'>
-                            <Text className='w-80 mx-auto text-center italic'>Note: Only previous tenants and currently boarding are allowed to leave reviews for the owner.</Text>
-                        </View>
-                        <Text className='text-xl font-medium'>({ownerReviews ? ownerReviews.length : 0}) Reviews</Text>
 
-                        {ownerReviews ? (
-                            <View className='h-20 justify-center items-center'>
-                                <Text>No Reviews</Text>
-                            </View>
-                        ) : (
-                            <View>
-                                {ownerReviews.map((item, index) => (
-                                <View key={index} className='flex-row items-center gap-x-2 justify-center py-4'>
-                                    <View className='bg-white h-16 w-16 rounded-full'>
-                                        <Image className='w-full h-full' source={require("@/assets/images/icon.png")} />
-                                    </View>
-                                    <View>
-                                        <View>
-                                            <Text className='font-semibold text-lg'>{reviewUsernames[index]}</Text>
-                                        </View>
-                                        <View>
-                                        <StarRatingComponent rating={item.rating} />
-                                        </View>
-                                        <View className='w-72 mt-3'>
-                                            <Text>{item.review_content}</Text>
-                                        </View>
-                                    </View>
-                                </View>
-                                ))}
-                            </View>
-                        )}
-                        
+                    <View className='flex-row items-center gap-x-4'>
+                      <Ionicons name='mail' size={18}/>
+                      <Text className='text-base'>{ownerData?.email}</Text>
                     </View>
-                    )}
 
+                    <View className='flex-row items-center gap-x-4'>
+                      <Ionicons name='logo-facebook' size={18}/>
+                      <Text className='text-base'>{ownerData?.first_name} {ownerData.last_name}</Text>
+                    </View>
+                  </View>
 
-                    
+                  <View className='gap-y-3'>
+                    <Text className='font-semibold'>Owned Properties</Text>
+
+                    {propertyList.map((item, index) => (
+                      <View key={index} className='overflow-hidden'>
+                        <Pressable 
+                        onPress={() => {}}>
+                          <View className='flex-row items-center'>
+                            <View className='h-24 w-24'>
+                              {!hasFetched.current && (
+                                <SingleImageDisplay propertyID={item.property_id} />
+                              )} 
+                            </View>
+
+                            <View className='p-2 gap-y-1'>
+                              <Text className='font-semibold'>{item.name}</Text>
+                              <View className="flex-row items-center gap-x-1">
+                                <Ionicons name="bed-outline"/>
+                                <Text className="text-xs">{item.available_beds} Beds</Text>
+                              </View>
+                              <Text className="font-semibold">{item.price} / month</Text>
+                              <View className="flex-row items-center">
+                                <Ionicons name="location" color={'#FFA233'}/>
+                                <Text className='text-xs'>{item.address}</Text>
+                              </View>
+                            </View>
+                          </View>
+                        </Pressable>
+                      </View>
+                    ))}
+                  </View>
                 </View>
+                )}
+                <View className='mt-5'>
+                  <Text className='font-semibold'>Reviews ({ownerReviews ? ownerReviews.length : 0})</Text>
+
+                  <View className='mb-5'>
+                      <Text className='italic text-xs mt-1'>Note: Only previous tenants and currently boarding are allowed to leave reviews for the owner.</Text>
+                  </View>
+
+                  {ownerReviews ? (
+                    <View className='h-20 justify-center items-center'>
+                        <Text>No Reviews</Text>
+                    </View>
+                  ) : (
+                    <View>
+                      {ownerReviews.map((item, index) => (
+                      <View key={index} className='flex-row items-center gap-x-2 justify-center py-4'>
+                        <View className='bg-white h-16 w-16 rounded-full'>
+                            <Image className='w-full h-full' source={require("@/assets/images/icon.png")} />
+                        </View>
+                        <View>
+                          <View>
+                              <Text className='font-semibold text-lg'>{reviewUsernames[index]}</Text>
+                          </View>
+                          <View>
+                          <StarRatingComponent rating={item.rating} />
+                          </View>
+                          <View className='w-72 mt-3'>
+                              <Text>{item.review_content}</Text>
+                          </View>
+                        </View>
+                      </View>
+                      ))}
+                    </View>
+                  )}
+                </View>  
+              </View>
             </View>
         </View>
         </ScrollView>

@@ -9,6 +9,9 @@ module.exports = {
       backgroundColor: {
         'yellow' : '#FFA233'
       },
+      fontFamily: {
+        body: ['Rubik']
+      }
     },
   },
   plugins: [],

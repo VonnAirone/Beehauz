@@ -4,6 +4,7 @@ import { Slot, Stack } from 'expo-router';
 import { useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
+import { useFontStatus } from '@/utils/FontLoader';
 
 export const unstable_settings = {
   initialRouteName: '(tabs)',
@@ -11,12 +12,22 @@ export const unstable_settings = {
 
 export default function RootLayout() {
 
+  const [fontsLoaded, fontError] = useFonts({
+    'Rubik': require('@/assets/fonts/Rubik-Regular.ttf'),
+  });
+
+  if (!fontsLoaded && !fontError) {
+    return null;
+  }
+
   return (
     <AuthProvider>
       <RootLayoutNav />
     </AuthProvider>
   );
 }
+
+
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();

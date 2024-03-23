@@ -27,6 +27,31 @@ export const ratingsData = [
   { id: 5, rating: 5 },
 ];
 
+export async function fetchNearbyMe(latitude, longitude, setNearbyProperties) {
+  try {
+    const radius = 1000;
+
+    const { data, error } = await supabase
+      .from('property')
+      .select("*")
+      .lte('latitude', latitude + radius / 111000)
+      .gte('latitude', latitude - radius / 111000)
+      .lte('longitude', longitude + radius / (111000 * Math.cos(latitude * Math.PI / 180)))
+      .gte('longitude', longitude - radius / (111000 * Math.cos(latitude * Math.PI / 180)));
+
+    if (error) {
+      console.error('Error fetching nearby properties:', error.message);
+      return;
+    }
+
+    if (data) {
+      setNearbyProperties(data);
+    }
+  } catch (error) {
+    console.error('Error fetching nearby properties:', error.message);
+  }
+}
+
 export async function fetchNearbyUA(setNearbyProperties) {
   try {
     const radius = 1000;
@@ -52,10 +77,88 @@ export async function fetchNearbyUA(setNearbyProperties) {
   }
 }
 
+export async function fetchNearbySAC(setNearbyProperties) {
+  try {
+    const radius = 1000;
+    const { data, error } = await supabase
+      .from('property')
+      .select("*")
+      .lte('latitude', 10.7389901 + radius / 111000)
+      .gte('latitude', 10.7389901 - radius / 111000)
+      .lte('longitude', 121.9474484 + radius / (111000 * Math.cos(10.7389901 * Math.PI / 180)))
+      .gte('longitude', 121.9474484 - radius / (111000 * Math.cos(10.7389901 * Math.PI / 180)));
+
+    if (error) {
+      console.error('Error fetching nearby properties:', error.message);
+      return;
+    }
+
+    if (data) {
+      setNearbyProperties(data);
+    }
+  } catch (error) {
+    console.error('Error fetching nearby properties:', error.message);
+  }
+}
+
 export async function fetchCheapProperties(setCheapProperties) {
   try {
     const minPrice = 500
     const maxPrice = 1000
+
+    const { data, error } = await supabase
+      .from('property')
+      .select()
+      .gte('price', minPrice)
+      .lte('price', maxPrice);
+
+    if (error) {
+      console.error('Error fetching cheap properties:', error.message);
+      return null;
+    }
+
+    if (data) {
+      setCheapProperties(data)
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error fetching cheap properties:', error.message);
+    return null;
+  }
+}
+
+export async function fetchAverageProperties(setCheapProperties) {
+  try {
+    const minPrice = 1000
+    const maxPrice = 1500
+
+    const { data, error } = await supabase
+      .from('property')
+      .select()
+      .gte('price', minPrice)
+      .lte('price', maxPrice);
+
+    if (error) {
+      console.error('Error fetching cheap properties:', error.message);
+      return null;
+    }
+
+    if (data) {
+      setCheapProperties(data)
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error fetching cheap properties:', error.message);
+    return null;
+  }
+}
+
+export async function fetchExpensiveProperties(setCheapProperties) {
+  try {
+    const minPrice = 1500
+    const maxPrice = 5000
 
     const { data, error } = await supabase
       .from('property')
