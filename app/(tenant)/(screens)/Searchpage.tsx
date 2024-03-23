@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import BackButton from '@/components/back-button';
 import { LocationData } from '@/api/Properties';
 import { getPermissions } from '@/api/Location';
-import { Filters, fetchCheapProperties, fetchNearbyUA, fetchPropertiesByTotalRating, locationsData, pricesData, ratingsData } from '../(aux)/Filters';
+import { Filters, fetchAverageProperties, fetchCheapProperties, fetchNearbySAC, fetchNearbyUA, fetchPropertiesByTotalRating, locationsData, pricesData, ratingsData } from '../(aux)/Filters';
 
 export default function Searchpage() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -17,6 +17,9 @@ export default function Searchpage() {
     const [nearbyUA, setNearbyUA] = useState([])
     const [nearbySAC, setNearbySAC] = useState([])
     const [cheapProperties, setCheapProperties] = useState([]);
+    const [averageProperties, setAverageProperties] = useState([]);
+    const [expensiveProperties, setExpensiveProperties] = useState([]);
+    
     const [location, setLocation] = useState<LocationData | null>(null);
 
     const [selectedFilter, setSelectedFilter] = useState(null);
@@ -36,9 +39,11 @@ export default function Searchpage() {
 
         fetchData();
         fetchCurrentLocation();
-        fetchNearbyUA(setNearbyUA)
-        fetchCheapProperties(setCheapProperties)
-        fetchPropertiesByTotalRating()
+        fetchNearbyUA(setNearbyUA);
+        fetchNearbySAC(setNearbySAC);
+        fetchCheapProperties(setCheapProperties);
+        // fetchAverageProperties(undefined)
+        fetchPropertiesByTotalRating();
     }, []);
 
     async function fetchCurrentLocation() {
@@ -203,7 +208,7 @@ export default function Searchpage() {
                 <View className='mt-5'>
                 {selectedLocation && selectedLocation === 'UA Main Campus' ? (
                   nearbyUA.length === 0 ? (
-                      <View>
+                      <View className='bg-slate-300 grow'>
                           <Text>No Results</Text>
                       </View>
                   ) : (
@@ -219,7 +224,7 @@ export default function Searchpage() {
                   )
                 )  : searchResults.length === 0 ? (
                   <View>
-                      <Text>No Results</Text>
+                      {/* <Text>No Results</Text> */}
                   </View>
               ) : (
                   <PropertyList data={searchResults}/>

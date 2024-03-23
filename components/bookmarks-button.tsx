@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import React, { useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '@/utils/supabase'
@@ -34,17 +34,13 @@ export default function Bookmark({propertyID, tenantID}) {
       }
     }
   return (
-    <View className='mt-5 mr-5 mb-3'>
     <Pressable onPress={addToFavorites}>
         <View className='flex-row items-center '>
             <Pressable onPress={addToFavorites}>
-                <Ionicons name={bookmarkStatus == true ? 'bookmark' : 'bookmark-outline'} size={28}/>
+                <Ionicons name={bookmarkStatus == true ? 'bookmark' : 'bookmark-outline'} size={28} color={"#ffa233"}/>
             </Pressable>
 
         </View>
     </Pressable>
-</View>
   )
 }
-
-const styles = StyleSheet.create({})

@@ -1,4 +1,4 @@
-import { Text, View, Pressable, Alert, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView } from 'react-native';
+import { Text, View, Pressable, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import React, { useState } from 'react';
 import { router } from 'expo-router';
 import Button from 'components/button';
@@ -147,7 +147,6 @@ export default function Login() {
   // })
 
   return (
-    <KeyboardAvoidingView>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View className='justify-center items-center relative bg-white h-full'>
       
@@ -167,7 +166,6 @@ export default function Login() {
         </View>
 
         <View className={`justify-center items-center z-0 ${showModal && 'opacity-40'}`}>
-
           <Logo/>
 
           <View>
@@ -198,10 +196,10 @@ export default function Login() {
                 onPressReveal={() => setIsRevealed(!isRevealed)}
                 feedbackText={isPasswordEmpty && password.trim() === '' ? 'Your password is required for signing in.' : ''} defaultFeedback={undefined}/>
 
-            <View className='absolute -bottom-2'>
+            <View className='absolute -bottom-2 w-80'>
               {!isNotRegistered ? (
                 <Pressable onPress={() => setShowModal(!showModal)}>
-                    <Text className='text-right w-80 right-1'>Forgot Password?</Text>
+                    <Text className='text-right text-xs right-1'>Forgot Password?</Text>
                 </Pressable>
               ) : (
                 <Text className='text-right bottom- right-1'></Text>
@@ -227,28 +225,37 @@ export default function Login() {
           <View className='flex-row justify-center my-5'>
             <View className='mx-5'>
               <Pressable>
-                <Ionicons name='logo-facebook' size={32}/>
+                <Ionicons 
+                name='logo-facebook' 
+                size={40} 
+                color={"#ffa233"}/>
               </Pressable>
             </View>
 
             <View className='mx-5'>
               <Pressable>
-                <Ionicons name='logo-google' size={32}/>
+                <Ionicons 
+                name='logo-google' 
+                size={40}
+                color={"#ffa233"}/>
               </Pressable>
             </View>
 
             <View className='mx-5'>
               <Pressable>
-                <Ionicons name='logo-instagram' size={32}/>
+                <Ionicons 
+                name='logo-instagram' 
+                size={40}
+                color={"#ffa233"}/>
               </Pressable>
             </View>
           </View>
 
           <View className='items-center relative top-20'>
             <Pressable onPress={Register}>
-              <Text>
+              <Text className='text-xs'>
                 {!isNotRegistered ? "Don't have an account?" : "Already have an account?"}{''}
-                <Text style={{ color: 'blue' }}> Press here.</Text>
+                <Text className='text-blue-500'> Press here.</Text>
               </Text>
             </Pressable>
 
@@ -261,6 +268,5 @@ export default function Login() {
 
         </View>
       </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
   );
 }

@@ -54,7 +54,7 @@ export function Amenities({propertyID}) {
         const renderItem = ({ item }) => (
             <View className='mr-2'>
                 <View key={item.amenity_id} className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
-                    <Text className='text-center'>{item.amenity_name}</Text>
+                    <Text className='text-center text-xs'>{item.amenity_name}</Text>
                 </View>
             </View>
         );
@@ -73,26 +73,30 @@ export function Amenities({propertyID}) {
 export function BottomBar ({price, propertyID}) {
   const [isBooking, setIsBooking] = useState(false)
     return (
-        <View className='absolute bottom-0 left-0 z-50 w-full h-16 bg-white py-2 px-6 dark:bg-gray-700 dark:border-gray-600 flex-row items-center justify-between'>
+        <View className='absolute bottom-0 left-0 z-50 w-full h-16 bg-yellow py-2 px-6 flex-row items-center justify-between'>
 
         <View>
-          <Text>Rental Price</Text>
-          <View className='flex-row items-center'>
-            <Text className='text-4xl font-semibold mr-1'>{price}</Text>
-            <Text className='text-base'>/ per month</Text>
-          </View>
+          <Text className='text-white'>Rental Price</Text>
+          <Text className='text-base font-semibold text-white'>{price} / month</Text>
         </View>
 
         <View className='flex-row items-center gap-x-2'>
-          <Pressable 
-          onPress={isBooking ? () => router.push({pathname: '/VisitScreen', params: {propertyID}}) : () => router.push('/BookingDetails')}
-          className=' bg-black w-32 p-3 rounded-md'>
-            <Text className='text-center text-white text-base font-semibold'>{isBooking ? 'Pay a visit' : 'Book now'}</Text>
-          </Pressable>
+          <View className='overflow-hidden rounded-md'>
+            <Pressable 
+            onPress={() => router.push({pathname: "/VisitScreen", params: {propertyID}})}
+            android_ripple={{color: "#FDFDD9"}}
+            className='border border-white p-3 rounded-md'>
+              <Text className='text-white'>Pay a Visit</Text>
+            </Pressable>
+          </View>
 
-          <Pressable onPress={() => setIsBooking(!isBooking)}>
-            <Ionicons name='swap-vertical-outline' size={24}/> 
-          </Pressable>
+          <View className='overflow-hidden rounded-md'>
+            <Pressable 
+            android_ripple={{color: "#ffa233"}}
+            className='bg-white p-3 rounded-md'>
+              <Text>Book Now</Text>
+            </Pressable>
+          </View>
         </View>
         
       </View>
@@ -173,7 +177,8 @@ export function AmenitiesModal ({hideModal}) {
 }
 
 interface OwnerData {
-  name: string;
+  first_name: string;
+  last_name: string;
   address: string;
   email: string;
   gender: string;
@@ -183,7 +188,6 @@ interface OwnerData {
 }
 
 import moment from 'moment';
-import AvatarImage from './avatar'
 
 export function OwnerInformation({owner_id}) {
   const [ownerData, setOwnerData] = useState<OwnerData | null>(null);
@@ -202,7 +206,7 @@ export function OwnerInformation({owner_id}) {
     }
 
     getOwnerData()
-  }, [])
+  }, [ownerData])
 
   const formatDate = (date) => {
     return moment(date).format('MMMM YYYY');
@@ -210,48 +214,26 @@ export function OwnerInformation({owner_id}) {
 
 
   return (
-    <View className='rounded-md p-5 mt-5'>
+    <View className='mt-3 bg-gray-50 p-3 rounded-md'>
       <View className='flex-row items-center gap-x-3 justify-between'>
-      
-      <View className='flex-row items-center'>
-        <View className='h-14 w-14 rounded-full border border-gray-300'>
-          <AvatarImage username={owner_id}/>
-        </View>
-        <View className='ml-3'>
-          <Text className='text-lg'>Owned by <Text className='font-semibold'>{ownerData?.name}</Text></Text>
-          <Text className='text-gray-500'>Joined last {formatDate(ownerData?.created_at)}</Text>
-          {/* still hasn't been able to implement the logic for response time */}
-          <Text className='text-gray-500 text-sm'>Response time: within an hour</Text>
+        <View className='gap-y-1'>
+
+          <Text>Name of Owner: <Text className='font-semibold'>{ownerData?.first_name} {ownerData?.last_name}</Text></Text>
+
+          <Text>Joined last {formatDate(ownerData?.created_at)}</Text>
+
+          <Text className='text-gray-500 text-xs'>Response time: within an hour</Text>
         </View>
       </View>
 
-      <View className='items-center'>
-        <Ionicons name='shield-checkmark-outline' size={32}/>
-        <Text className='text-xs'>Verified!</Text>
-      </View>
-      
-        
-      </View>
 
-      {/* <View className='flex-row gap-x-3 mt-3'>
-        <View className='flex-row items-center border border-gray-300 p-3 justify-center rounded-lg'>
-          <Ionicons name='shield-checkmark' size={20}/>
-          <Text className='ml-1 text-base'>Verified</Text>
-        </View>
-
-        <View className='flex-row items-center border border-gray-300 p-3 justify-center rounded-lg'>
-          <Ionicons name='star-half' size={20}/>
-          <Text className='ml-1 text-base'>116 Reviews</Text>
-        </View>
-      </View> */}
-
-
-      <View className='border border-black rounded-md overflow-hidden mt-3'>
+      <View className='w-40 self-end mt-4 overflow-hidden rounded-md'>
         <Pressable 
-        className='p-4 rounded-md'
-        android_ripple={{color: "#ffa233"}}
+        className='p-2 rounded-md flex-row items-center border border-yellow'
+        android_ripple={{color: "#FDFDD9"}}
         onPress={() => router.push({pathname: "/OwnerProfile", params: {owner_id : owner_id}})}>
-          <Text className='text-center'>Contact Owner</Text>
+          <Text className='text-yellow'>View Owner details</Text>
+          <Ionicons name='chevron-forward-outline' size={20} color={"#ffa233"}/>
         </Pressable>
       </View>
     </View>

@@ -8,10 +8,10 @@ export function Logo () {
   return (
     <View className='mb-5 flex flex-row items-center w-80 justify-center'>
       <View>
-        <Image className='w-20 h-20' style={{ resizeMode: 'contain' }} source={require("@/assets/images/icon.png")} />
+        <Image className='w-10 h-10' style={{ resizeMode: 'contain' }} source={require("@/assets/images/icon.png")} />
       </View>
       <View>
-        <Text className='text-5xl'>BEEHAUZ</Text>
+        <Text className='text-2xl font-semibold'>BEEHAUZ</Text>
       </View>
     </View>
   )
@@ -20,14 +20,14 @@ export function Logo () {
 export function TextInputField({ label, value, placeholder, isPassword, isRevealed, onChangeText, onPressReveal, feedbackText, isEditable, defaultFeedback }) {
   return (
     <View>
-      <Text className='p-2'>{label}</Text>
+      <Text className='p-2 font-semibold'>{label}</Text>
       <View className='justify-center'>
         <TextInput
           editable={isEditable}
           value={value}
           placeholder={placeholder}
           placeholderTextColor={feedbackText ? 'red' : 'gray'}
-          className={`p-3 pl-5 border border-gray-200 focus:border-gray-400 rounded-md w-80 ${
+          className={`p-2 text-xs pl-5 border border-gray-200 focus:border-gray-400 rounded-md w-80 ${
             feedbackText ? 'border-red-500' : value.trim() === '' ? '' : 'border-gray-400'
           }`}
           onChangeText={onChangeText}
@@ -62,7 +62,7 @@ export function TextInputField({ label, value, placeholder, isPassword, isReveal
 export function Button({ onPress, text, loading }) {
   return (
     <Pressable onPress={onPress}>
-      <Text className={`p-4 text-center bg-yellow-500 w-80 rounded-sm ${loading ? 'text-white' : 'text-black'}`}>
+      <Text className={`p-2 text-center bg-yellow-500 w-80 rounded-sm ${loading ? 'text-white' : 'text-black'}`}>
         {loading ? 'LOADING' : text}
       </Text>
     </Pressable>

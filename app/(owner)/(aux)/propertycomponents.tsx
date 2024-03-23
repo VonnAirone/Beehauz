@@ -1,10 +1,9 @@
 import { getProfile } from '@/api/DataFetching';
 import StarRatingComponent from '@/app/(tenant)/(aux)/starrating';
-import { supabase } from '@/utils/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Text, View, Pressable, TouchableOpacity } from 'react-native';
+import { Text, View, Pressable, TouchableOpacity, FlatList } from 'react-native';
 
 export const AmenitiesSelection = () => {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
@@ -139,7 +138,7 @@ export const DashboardComponents = ({id, properties, tenants, bookings}) => {
   )
 }
 
-export const PropertyReviews = ({reviews}) => {
+export const PropertyReviews = ({ reviews }) => {
   const [tenantNames, setTenantNames] = useState({});
 
   useEffect(() => {
@@ -158,37 +157,38 @@ export const PropertyReviews = ({reviews}) => {
     }
   }, [reviews]);
   
-  return (
-  <View>
+  if (!reviews || reviews.length === 0) {
+    return <Text>No reviews found</Text>;
+  }
 
-    {reviews && reviews.length > 0 ? ( 
-      reviews.map((review, index) => (
-    <View key={index} className='mt-3 bg-gray-50 rounded-md shadow-lg p-5'>
-      <View className='flex-row items-center'>
-        <View>
+  return (
+    <View>
+      <FlatList
+      horizontal
+      data={reviews}
+      renderItem={({ item, index }) => (
+      <View key={index} className='mt-3 bg-gray-50 rounded-md shadow-lg p-5 w-80'>
+        <View className='flex-row items-center'>
           <View>
-            <Text>{tenantNames[review.tenant_id]}</Text>
-          </View>
-          <View>
-            <StarRatingComponent rating={1}/>
+            <View>
+              <Text className='font-semibold'>{tenantNames[item.tenant_id]}</Text>
+            </View>
+            <View>
+              <StarRatingComponent rating={1} />
+            </View>
           </View>
         </View>
-      </View>
 
-      <View className='mt-1'>
-        <Text>{review?.review_content}</Text>
+        <View className='mt-1'>
+          <Text>{item?.review_content}</Text>
+        </View>
       </View>
+      )}
+      />
     </View>
-    )) 
-    ) : (
-      <View className='mt-2 h-40 rounded-md items-center justify-center bg-gray-100'>
-        <Text>No Reviews</Text>
-      </View>
-    )}
+  );
+};
 
-  </View>
-  )
-}
 
 
 export const AmenityItem = ({ amenity, isChecked, onPress, showChanges }) => {
