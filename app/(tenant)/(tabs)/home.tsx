@@ -47,33 +47,39 @@ export default function HomePage() {
       <View></View>
     ) : (  
     <> 
-      <View className='mt-5'>
-        <View className='items-start ml-4'>
-          <Logo/>
-        </View>
-
-        <View className='flex-row items-center justify-start ml-5'>
-          <Pressable 
-          className='grow'
-          onPress={() => router.push("/Searchpage")}>    
-            <View className='flex-row items-center border border-gray-300 rounded-md p-2'>
-              <View className='mx-2'>
-                <Ionicons 
-                name='search' 
-                size={20}
-                color={"#ffa233"}/>
-              </View>
-              <TextInput 
-              editable={false} 
-              placeholder='Search for a place'/>
+      <View>
+        <View className='bg-yellow p-5'>
+          <View className='items-start'>
+            <View className='flex-row items-center p-2 justify-center' >
+              <Image className='w-10 h-10' source={require("@/assets/images/icon.png")}/>
+              <Text className='text-xl font-semibold pr-2 text-white'>BEEHAUZ</Text>
             </View>
-          </Pressable>
-          <View className='mx-3 w-10'>
-            <TouchableOpacity>
-              <Ionicons name='heart' size={28} color={"#ffa233"}/>
-            </TouchableOpacity>
+          </View>
+
+          <View className='flex-row items-center'>
+            <Pressable 
+            className='grow'
+            onPress={() => router.push("/Searchpage")}>    
+              <View className='flex-row items-center bg-white rounded-md p-2'>
+                <View className='mx-2'>
+                  <Ionicons 
+                  name='search' 
+                  size={20}
+                  color={"#ffa233"}/>
+                </View>
+                <TextInput 
+                editable={false} 
+                placeholder='Search for a place'/>
+              </View>
+            </Pressable>
+            <View className='ml-3'>
+              <TouchableOpacity onPress={() => router.push("/Bookmarked")}>
+                <Ionicons name='bookmark' size={32} color={"white"}/>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
+        
 
         <View className='p-5'>
           <View>
@@ -92,7 +98,7 @@ export default function HomePage() {
           </View>
 
           <View className='my-5'>
-            <View className='border border-gray-300 rounded-md'>
+            <View className='rounded-md'>
               <Image
               className='h-48 w-full rounded-md'
               source={require("@/assets/images/Map Illustration.jpg")}/>

@@ -4,28 +4,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/utils/AuthProvider';
 import { fetchPropertyData, getProfile } from '@/api/DataFetching';
-import { fetchUserMessages } from '../(aux)/messagecomponent';
-import { subscribeToRealTimeMessages } from '../(aux)/messagecomponent';
 import { router } from 'expo-router';
-
-interface DataItem {
-  message_id: string;
-  room_id: string;
-  sender_id: string;
-  receiver_id: string;
-  message_content: string;
-  time_sent: string;
-  sender_info: {
-    senderId: string;
-    name: string;
-    propertyName: string;
-  };
-}
+import { fetchUserMessages, subscribeToRealTimeMessages } from '@/app/(tenant)/(aux)/messagecomponent';
+import { MessageInfoData } from '@/api/Properties';
 
 export default function Messages() {
   const session = useAuth();
   const userID = session?.session.user.id;
-  const [messages, setMessages] = useState<DataItem[]>([]);
+  const [messages, setMessages] = useState<MessageInfoData[]>([]);
   const [senderData, setSenderData] = useState<Record<string, { name: string; propertyName: string; gender: string; }>>({});
   const [loading, setLoading] = useState(false)
 
@@ -38,7 +24,7 @@ export default function Messages() {
   };
 
 
-  const renderItem = ({ item, index }: { item: DataItem; index: number }) => {
+  const renderItem = ({ item, index }: { item: MessageInfoData; index: number }) => {
     const formattedTime = item.time_sent ? formatTime(item.time_sent) : '';
     const isCurrentUser = item.sender_id === userID;
 
@@ -126,7 +112,7 @@ export default function Messages() {
   });
   
 
-  async function handleNewMessage(newMessage: DataItem) {
+  async function handleNewMessage(newMessage: MessageInfoData) {
     if ((newMessage.sender_id === userID && newMessage.receiver_id === userID) || (newMessage.sender_id === userID && newMessage.receiver_id === userID)) {
       const updatedMessage = await fetchUserMessages(userID);
       const latestMessage = updatedMessage.find((message) => message.message_id === newMessage.message_id);
@@ -169,27 +155,33 @@ export default function Messages() {
   }
 
   return (
-    <SafeAreaView className='flex-1 items-center'>
-      <View className='flex-row mt-5 justify-between py-5 w-80'>
-        <View>
-          <Text className='font-semibold text-2xl'>Messages</Text>
-        </View>
+    <SafeAreaView className='flex-1'>
+      <View className='p-5'>
 
-        <View>
-          <Ionicons name='create' size={28} color={'#ffa233'} />
-        </View>
-      </View>
-
-      <View>
-        <View className='flex-row items-center border border-gray-300 rounded-md p-2 w-80 backdrop-blur-3xl bg-white/30'>
-          <View className='mx-2'>
-            <Ionicons name='search' size={20} />
+        <View className='flex-row justify-between mb-4'>
+          <View>
+            <Text className='text-xl font-semibold'>Messages</Text>
           </View>
-          <TextInput editable={false} placeholder='Search for a place' />
-        </View>
-      </View>
 
-      <FlatList data={messages} renderItem={renderItem} />
+          <View>
+            <Ionicons name='create' size={28} color={'#ffa233'} />
+          </View>
+        </View>
+
+        <View>
+          <View className='flex-row items-center border border-gray-300 rounded-md p-2 backdrop-blur-3xl'>
+            <View className='mx-2'>
+              <Ionicons name='search' size={20} color={'#ffa233'}/>
+            </View>
+            <TextInput 
+            editable={false} 
+            placeholder='Search for a user'/>
+          </View>
+        </View>
+
+        <FlatList data={messages} renderItem={renderItem} />
+      </View>
+      
 
 
     </SafeAreaView>

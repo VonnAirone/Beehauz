@@ -7,14 +7,14 @@ import { getProfile } from '@/api/DataFetching';
 import { UserData } from '@/api/Properties';
 import { downloadAvatar, loadAvatar } from '@/api/ImageFetching';
 import { Images } from '@/app/(tenant)/(aux)/homecomponents';
+import AvatarImage from '@/app/(tenant)/(aux)/avatar';
+import { router } from 'expo-router';
 
 export default function Account() {
   const auth = useAuth();
   const user = auth.session?.user;
-  const [phoneNumber, setPhoneNumber] = useState('')
   const [modalVisible, setModalVisible] = useState(false);
   const [onEditMode, setOnEditMode] = useState(false);
-  const [isChangeMade, setIsChangeMade] = useState(false)
   const [userProfile, setUserProfile] = useState<UserData | null>(null)
 
   useEffect(() => {
@@ -32,73 +32,13 @@ export default function Account() {
   }, [userProfile]);
 
 
-
-  const handlePhoneChange = (text) => {
-    setPhoneNumber(text)
-    setIsChangeMade(!!text)
-  }
-
   async function signOUt() {
     const { error } = await supabase.auth.signOut()
 
     if (error) {
       console.log('Error message', error.message)
     }
-  }
-
-  const Avatar = memo(({ item }: { item: any }) => {
-    const [image, setImage] = useState<string | null>(null);
-  
-    useEffect(() => {
-      if (!image) {
-        downloadAvatar(userProfile?.first_name, item.name, setImage);
-      }
-    }, [userProfile?.first_name, item.name, image]); 
-  
-    if (!image) {
-      return (
-        <View></View>
-      );
-    }
-  
-    return (
-      <Image
-        className='w-full h-full rounded-full'
-        source={{ uri: image }}
-        resizeMode="cover"
-      />
-    );
-  });
-
-  const AvatarDisplay = ({ username }) => {
-    const [images, setImages] = useState([]);
-    const hasFetched = useRef(false);
-  
-    useEffect(() => {
-      if (!hasFetched.current) {
-        const fetchImages = async () => {
-          try {
-            await loadAvatar(username, setImages)
-          } catch (error) {
-            console.error('Error fetching images:', error);
-          }
-        };
-    
-        fetchImages();
-      }
-    }, [username]);
-    
-    if (images.length > 0) {
-      const firstImage = images[0];
-      return (
-        <View className="flex-1">
-          <Avatar 
-          item={{ ...firstImage, username }} />
-        </View>
-      );
-    }}
-
-  
+  } 
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -106,16 +46,15 @@ export default function Account() {
 
         <View className='items-center mt-10'>
           <View className='h-20 w-20 rounded-full'>
-            {/* AVATAR IN HERE */}
+            <AvatarImage userID={user?.id}/>
           </View>
-          <Text className='text-xl font-semibold'>{userProfile?.first_name} {userProfile?.last_name}</Text>
+          <Text className='text-xl font-semibold mt-3'>{userProfile?.first_name} {userProfile?.last_name}</Text>
         </View>
 
-        <View className='flex-row justify-between'>
+        <View className='flex-row justify-between mt-5'>
           <Text className='font-semibold text-yellow'>Personal Information</Text>
           <Pressable 
-          onPress={() => {}}
-          
+          onPress={() => router.push('/ManageProfile')}
           className='flex-row items-center gap-x-1'>
             <Ionicons name='chevron-forward-outline'/>
           </Pressable>
@@ -153,7 +92,6 @@ export default function Account() {
             <View className='relative w-40'>
               <TextInput 
               editable={onEditMode} 
-              onChangeText={handlePhoneChange}
               placeholderTextColor={onEditMode? 'black' : 'gray'} 
               value={userProfile?.phone_number.toString()}
               className='text-right text-xs'/>
@@ -176,16 +114,6 @@ export default function Account() {
               className='text-right text-xs'/>
             </View>
           </View>
-          
-          {onEditMode ? (          
-          <View className='-bottom-10 right-0 absolute'>
-            <Pressable className={`px-8 ${isChangeMade ? 'bg-yellow' : 'bg-slate-300'} py-2 rounded-md`}>
-              <Text>Save</Text>
-            </Pressable>
-          </View>) : (
-          <View className='-bottom-10 right-0 absolute'></View>
-          )}
-
 
         </View>
 
@@ -268,7 +196,7 @@ export default function Account() {
           }}>
 
           <View className='flex-1 justify-center items-center'>
-            <View className='bg-white h-40 w-80 rounded-md justify-center'>
+            <View className='bg-white h-40 w-80 rounded-md justify-center border border-gray-200'>
 
               <Pressable
               onPress={() => setModalVisible(false)} 
@@ -276,22 +204,22 @@ export default function Account() {
                 <Ionicons name='close-outline' size={20}/>
               </Pressable>
 
-              <Text className='text-center font-semibold text-base mb-10'>Are you sure about logging out?</Text>
+              <Text className='text-center font-semibold mb-5'>Are you sure about logging out?</Text>
               <View className='flex-row justify-evenly'>
                 <View className='rounded-md overflow-hidden'>
                   <Pressable 
                   onPress={() => setModalVisible(false)}
                   android_ripple={{color: 'gray'}}
-                  className='border border-gray-200 px-2 py-3 w-32'>
-                    <Text className='text-center'>Cancel</Text>
+                  className='border border-gray-200 rounded-md px-2 py-3 w-32'>
+                    <Text className='text-center font-semibold'>Cancel</Text>
                   </Pressable>
                 </View>
                 <View className='rounded-md overflow-hidden'>
                   <Pressable 
                   onPress={signOUt}
-                  android_ripple={{color: 'yellow'}}
+                  android_ripple={{color: '#fdfdd9'}}
                   className='bg-yellow px-2 py-3 w-32 rounded-md'>
-                    <Text className='text-center'>Logout</Text>
+                    <Text className='text-center font-semibold'>Logout</Text>
                   </Pressable>
                 </View>
 

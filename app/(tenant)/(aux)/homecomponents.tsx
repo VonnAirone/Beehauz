@@ -3,7 +3,7 @@ import { handlePropertyClick } from "@/api/ViewCount";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { memo, useEffect, useRef, useState } from "react";
-import { FlatList as RNFlatList, Pressable, View, Text, Image, ActivityIndicator, FlatList } from "react-native";
+import { FlatList as RNFlatList, Pressable, View, Text, Image, ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
 import AvatarImage from "./avatar";
 import { PropertyData, UserData } from "@/api/Properties";
 
@@ -37,7 +37,7 @@ import { PropertyData, UserData } from "@/api/Properties";
   
     return (
       <Image
-        className='w-full h-full rounded-lg'
+        className='w-full h-full rounded-sm'
         source={{ uri: image }}
         resizeMode="cover"
       />
@@ -126,7 +126,7 @@ import { PropertyData, UserData } from "@/api/Properties";
       <View className='overflow-hidden mr-4'>
         <Pressable onPress={() => handleCardPress(item.property_id)}>
           <View>
-            <View className="h-32 w-32">
+            <View className="h-40 w-40">
               <SingleImageDisplay propertyID={item.property_id}/>
             </View>
   
@@ -342,5 +342,66 @@ import { PropertyData, UserData } from "@/api/Properties";
       </View>
     );
   }
+
+
+  export function Favorites({ data }: { data: PropertyData[]}) {
+
+    const [imagesLoaded, setImagesLoaded] = useState(false);
+    const hasFetched = useRef(false);
+  
+    useEffect(() => {
+      if (!hasFetched.current) {
+        async function fetchData() {
+          try {
+            await loadImages(data, setImagesLoaded);
+          } catch (error) {
+            console.error('Error fetching data:', error);
+          }
+        }
+        fetchData();
+      }
+    }, [data]);
+
+    const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
+      <View className='overflow-hidden'>
+        <View>
+          <View className='h-40 w-80'>
+            <SingleImageDisplay propertyID={item.property_id}/>
+          </View>
+            
+          <View className="mt-2">
+            <View className="flex-row items-end justify-between">
+              <Text className='font-semibold text-xl'>{item.name}</Text>
+              <Text className="font-semibold">{item.price} / month</Text>
+            </View>
+            
+            <View className="flex-row items-center">
+              <Ionicons name="location-outline" color={'#FFA233'}/>
+              <Text>{item.address}</Text>
+            </View>
+
+            <View className="flex-row items-center gap-x-1">
+              <Ionicons name="bed-outline" size={15}/>
+              <Text>{item.available_beds} Beds</Text>
+            </View>
+
+            <TouchableOpacity 
+            onPress={() => handleCardPress(item.property_id)}
+            className="flex-row items-center mt-1">
+              <Text className="text-yellow">View Property</Text>
+              <Ionicons color={"#ffa233"} name="chevron-forward-outline" size={15}/>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    );
+  
+    return <RNFlatList 
+    contentContainerStyle={{alignItems: 'center'}}
+    data={data} 
+    renderItem={renderItem} 
+    showsHorizontalScrollIndicator={false} 
+    horizontal={false} />;
+  };
 
   

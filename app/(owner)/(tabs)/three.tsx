@@ -155,27 +155,33 @@ export default function Messages() {
   }
 
   return (
-    <SafeAreaView className='flex-1 items-center'>
-      <View className='flex-row mt-5 justify-between py-5 w-80'>
-        <View>
-          <Text className='font-semibold text-2xl'>Messages</Text>
-        </View>
+    <SafeAreaView className='flex-1'>
+      <View className='p-5'>
 
-        <View>
-          <Ionicons name='create' size={28} color={'#ffa233'} />
-        </View>
-      </View>
-
-      <View>
-        <View className='flex-row items-center border border-gray-300 rounded-md p-2 w-80 backdrop-blur-3xl bg-white/30'>
-          <View className='mx-2'>
-            <Ionicons name='search' size={20} />
+        <View className='flex-row justify-between mb-4'>
+          <View>
+            <Text className='text-xl font-semibold'>Messages</Text>
           </View>
-          <TextInput editable={false} placeholder='Search for a place' />
-        </View>
-      </View>
 
-      <FlatList data={messages} renderItem={renderItem} />
+          <View>
+            <Ionicons name='create' size={28} color={'#ffa233'} />
+          </View>
+        </View>
+
+        <View>
+          <View className='flex-row items-center border border-gray-300 rounded-md p-2 backdrop-blur-3xl'>
+            <View className='mx-2'>
+              <Ionicons name='search' size={20} color={'#ffa233'}/>
+            </View>
+            <TextInput 
+            editable={false} 
+            placeholder='Search for a user'/>
+          </View>
+        </View>
+
+        <FlatList data={messages} renderItem={renderItem} />
+      </View>
+      
 
 
     </SafeAreaView>

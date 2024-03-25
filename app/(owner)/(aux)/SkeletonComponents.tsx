@@ -34,7 +34,7 @@ export const HomepageSkeleton = () => {
 export const BookingSkeleton = () => {
   return (
     <>
-    <View className='bg-gray-100 rounded-md mb-2 h-3 w-20'></View>
+    <View className='bg-gray-100 mt-3 rounded-md mb-2 h-3 w-20'></View>
     <View className='bg-gray-50 rounded-md mb-1 p-5'>
       <View className='bg-gray-100 h-3 w-20 rounded-md'/>
       <View className='bg-gray-100 h-5 w-32 rounded-md mt-3'/>
