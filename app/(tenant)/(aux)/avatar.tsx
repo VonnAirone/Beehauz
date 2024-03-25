@@ -2,14 +2,14 @@ import React, { memo, useState, useEffect, useRef } from 'react';
 import { View, Image } from 'react-native';
 import { downloadAvatar, loadAvatar } from '@/api/ImageFetching';
 
-const Avatar = memo(({ item, name }: { item: any, name }) => {
+const Avatar = memo(({ item, userID }: { item: any, userID }) => {
   const [image, setImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!image) {
-      downloadAvatar(name, item.name, setImage);
+      downloadAvatar(userID, item.name, setImage);
     }
-  }, [name, item.name, image]); 
+  }, [userID, item.name, image]); 
 
   if (!image) {
     return (
@@ -26,7 +26,7 @@ const Avatar = memo(({ item, name }: { item: any, name }) => {
   );
 });
 
-const AvatarDisplay = ({ username }) => {
+const AvatarDisplay = ({ userID }) => {
   const [images, setImages] = useState([]);
   const hasFetched = useRef(false);
 
@@ -34,7 +34,7 @@ const AvatarDisplay = ({ username }) => {
     if (!hasFetched.current) {
       const fetchImages = async () => {
         try {
-          await loadAvatar(username, setImages)
+          await loadAvatar(userID, setImages)
         } catch (error) {
           console.error('Error fetching images:', error);
         }
@@ -42,23 +42,33 @@ const AvatarDisplay = ({ username }) => {
   
       fetchImages();
     }
-  }, [username]);
+  }, [userID]);
+
+  if (images.length === 0) {
+    return (
+      <View className='border border-gray-200 w-full h-full rounded-full'>
+        <Image
+        className='h-full w-full' 
+        source={require("@/assets/icon.png")}/>
+      </View>
+    )
+  }
   
   if (images.length > 0) {
     const firstImage = images[0];
     return (
-      <View className="flex-1">
+      <View className="w-full h-full">
         <Avatar 
-        name={username}
+        userID={userID}
         item={firstImage} />
       </View>
     );
   }}
 
-const AvatarImage = ({ username }) => {
+const AvatarImage = ({ userID }) => {
   return (
     <View className='flex-1 items-center justify-center'>
-      <AvatarDisplay username={username}/>
+      <AvatarDisplay userID={userID}/>
     </View>
   );
 };

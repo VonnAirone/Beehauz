@@ -1,4 +1,4 @@
-import { Alert, Keyboard, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native'
+import { Alert, Keyboard, Modal, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import BackButton from '@/components/back-button'
@@ -7,24 +7,21 @@ import { Ionicons } from '@expo/vector-icons'
 import { format } from 'date-fns';
 import { useAuth } from '@/utils/AuthProvider'
 import { supabase } from '@/utils/supabase'
-import { useLocalSearchParams } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
+import { PropertyData, UserData } from '@/api/Properties'
+import { fetchPropertyData } from '@/api/DataFetching'
 
-interface DataItem {
-    first_name: string,
-    last_name: string,
-    phone_number: string
-}
-
-//WORKING ON DATABASE AND REALTIME OF VISITS
 export default function PayAVisit() {
     const session = useAuth()?.session;
-    const propertyID = useLocalSearchParams()
-    const [user, setUser] = useState<DataItem | null>(null);
+    const params = useLocalSearchParams()
+    const [user, setUser] = useState<UserData | null>(null);
     const [date, setDate] = useState('');
     const [time, setTime] = useState('')
     const [selectedDateInWords, setSelectedDateInWords] = useState('');
     const currentDate = format(new Date(), 'yyyy-MM-dd');
-
+    const [modalVisible, setModalVisible] = useState(false);
+    const [property, setProperty] = useState<PropertyData | null>(null)
+    
     const handleOnTimeChange = (text) => {
         setTime(text);
     }
@@ -58,14 +55,15 @@ export default function PayAVisit() {
         if (!date || !time) {
             Alert.alert("Missing information", "Please select both time and date of your visit.")
         } else {
+          router.push("/")
           const { data, error } = await supabase
           .from('appointments')
           .insert({
               tenant_id: session?.user.id,
-              property_id: propertyID,
-              appointment_data: date,
+              property_id: params.property_id,
+              appointment_date: date,
               appointment_time: time,
-              status: 'pending',
+              status: 'Pending',
             })
           .select() 
 
@@ -75,7 +73,8 @@ export default function PayAVisit() {
             console.log("Successfully booked a visit.")
           }
         }  
-      }
+    }
+
 
     useEffect(() => {
         getUser()
@@ -84,6 +83,7 @@ export default function PayAVisit() {
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
     <SafeAreaView className='flex-1 p-5'>
+      <View className={`${modalVisible ? 'opacity-20' : ''}`}>
         <BackButton/>
           <View>
             <View className='mt-3'>
@@ -117,14 +117,13 @@ export default function PayAVisit() {
             </View>
               <View className='mt-2'>
                 <Calendar
-
                   theme={{
                     backgroundColor: '#ffffff',
                     calendarBackground: '#ffffff',
                     textSectionTitleColor: '#b6c1cd',
                     selectedDayBackgroundColor: '#00adf5',
                     selectedDayTextColor: '#ffffff',
-                    todayTextColor: '#00adf5',
+                    todayTextColor: '#ffa233',
                     dayTextColor: '#2d4150',}}
                     onDayPress={day => {
                       setDate(day.dateString);
@@ -137,9 +136,9 @@ export default function PayAVisit() {
                   className='border border-gray-300 rounded-md'
                   current={currentDate}/>
               </View>
-              <View className='absolute -bottom-12 right-0 rounded-md overflow-hidden'>
+              <View className='absolute -bottom-12 z-10 right-0 rounded-md overflow-hidden'>
                   <Pressable
-                  android_ripple={{color: 'red'}} 
+                  android_ripple={{color: '#ffa233'}} 
                   onPress={() => clearSelection()} 
                   className='border border-gray-300 p-2 rounded-md bg-white'>
                       <Text>Clear Selection</Text>
@@ -168,13 +167,76 @@ export default function PayAVisit() {
           </View>
         </View>
         
-        <View className='items-center w-full bottom-10'>
-            <Pressable 
-            onPress={handleSubmission}
-            className='bg-yellow p-3 rounded-md w-80'>
-                <Text className='text-white text-center text-base font-semibold'>Confirm your visit</Text>
-            </Pressable>
+        <View className='items-center'>
+          <View className=' rounded-md overflow-hidden'>
+          <Pressable 
+            className='bg-yellow p-3 rounded-md w-80'
+            android_ripple={{color: "#fdfdd9"}}
+            onPress={() => {
+              if (!date || !time) {
+                Alert.alert("Missing information", "Please select both time and date of your visit.");
+              } else {
+                setModalVisible(true);
+              }}}>
+              <Text className='text-white text-center text-base font-semibold'>Confirm your visit</Text>
+              </Pressable>
+          </View>
         </View>
+    </View>
+        <Modal
+          animationType="none"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            Alert.alert('Modal has been closed.');
+            setModalVisible(!modalVisible);
+          }}>
+
+          <View className='flex-1 justify-center items-center'>
+            <View className='bg-white w-80 p-5 rounded-md justify-center border border-gray-200'>
+
+              <Pressable
+              onPress={() => setModalVisible(false)} 
+              className='absolute top-2 right-3'>
+                <Ionicons name='close-outline' size={20}/>
+              </Pressable>
+
+              <Text className='text-lg font-semibold'>Send Visit Request?</Text>
+
+              <Text className='mt-3'>Appointment Details:</Text>
+              <View className='gap-y-1 mt-2'>
+                <Text className='opacity-60'>Property: <Text className='font-medium'>{params?.propertyName}</Text></Text>
+
+                <Text className='opacity-60'>Date of Visit: <Text className='font-medium'>{selectedDateInWords}</Text></Text>
+
+                <Text className='opacity-60'>Time of Visit: <Text className='font-medium'>{time}</Text></Text>
+              </View>
+
+              <View className='flex-row items-center gap-x-3 justify-evenly mt-5'>
+                <View className='overflow-hidden rounded-md w-32'>
+                  <Pressable 
+                  onPress={() => setModalVisible(false)}
+                  android_ripple={{color: '#ffa233'}}
+                  className='p-2 border border-gray-200 rounded-md'>
+                    <Text className='text-center'>Cancel</Text>
+                  </Pressable>
+                </View>
+
+                <View className='overflow-hidden rounded-md w-32'>
+                  <Pressable 
+                  onPress={handleSubmission}
+                  android_ripple={{color: '#fdfdd9'}}
+                  className='p-2 bg-yellow rounded-md'>
+                    <Text className='text-center text-white'>Send Request</Text>
+                  </Pressable>
+                </View>
+
+              </View>
+              
+            </View>
+          </View>
+        </Modal>
+
     </SafeAreaView>
   </TouchableWithoutFeedback>
   )

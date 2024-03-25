@@ -54,10 +54,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="four"
+        name="Tenants"
         options={{
           title: 'Notifications',
-          tabBarIcon: ({ color }) => <TabBarIcon name="notifications-outline" color={color} />,
+          tabBarIcon: ({ color }) => <TabBarIcon name="people-outline" color={color} />,
         }}
       />
       <Tabs.Screen

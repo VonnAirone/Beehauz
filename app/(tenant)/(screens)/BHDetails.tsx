@@ -17,7 +17,7 @@ import LoadingComponent from '@/components/LoadingComponent';
 const screenWidth = Dimensions.get('window').width;
 
 export default function BHDetails() {
-  const user = useAuth()?.session.user;
+  const user = useAuth()?.session?.user;
   let { propertyID } = useLocalSearchParams();
   const [data, setData] = useState<PropertyData | null>(null);
   const [images, setImages] = useState([]);
@@ -114,8 +114,11 @@ export default function BHDetails() {
               />
             </View>
           )}
-          <View className='mx-5 mt-5'>
+          <View className='mx-5 mt-3'>
+            <View className='mt-2'>
               <Text className='text-xl font-semibold'>{data?.name}</Text>
+            </View>
+            
             
             <View>
               <TouchableOpacity 
@@ -149,6 +152,20 @@ export default function BHDetails() {
             </View>
 
             <View className='mt-5'>
+              <Text className='font-semibold'>Payment Terms</Text>
+              
+              <View className='flex-row items-end my-1'>
+                <Text className='text-xs'>Advance Payment: </Text>
+                <Text className='font-semibold text-xs'>Not specified</Text>
+              </View>
+
+              <View className='flex-row items-end'>
+                <Text className='text-xs'>Security Deposit: </Text>
+                <Text className='font-semibold text-xs'>Not specified</Text>
+              </View>
+            </View>
+
+            <View className='mt-5'>
               <View className='flex-row items-center'>
                 <Text className='font-semibold mr-1'>Amenities</Text>
                 <Pressable 
@@ -161,41 +178,9 @@ export default function BHDetails() {
               <Amenities propertyID={propertyID}/>
             </View>
 
-
-            <View className='mt-5'>
-              <Text className='font-semibold'>More Photos</Text>
-
-              {images.length > 0 ? (
-                <View className='h-20 mt-2'>
-                <FlatList
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  data={images}
-                  keyExtractor={(item, index) => index.toString()}
-                  renderItem={({ item }) => 
-                  <View className='h-20 w-32 mr-2 rounded-md'>
-                    <Pressable onPress={() => openImage(item)}>
-                      <Images item={{...item, propertyID}}/>
-                    </Pressable>
-                  </View>}
-                  initialNumToRender={4}
-                  maxToRenderPerBatch={5}
-                  windowSize={7}
-                />
-                </View>
-              ) : (
-                <View style={{ width: screenWidth, height: 20, alignItems: 'center', justifyContent: 'center' }}>
-                  <Image
-                    style={{ width: screenWidth, height: 20 }}
-                    source={require("@/assets/images/no-image-placeholder.png")}
-                    resizeMode="cover"
-                  />
-                </View>
-              )}
-            </View>
-
             <View className='mt-5'>
               <Text className='font-semibold'>Reviews ({propertyReviews?.length})</Text>
+              <Text className='italic text-xs mt-1'>Note: Only previous tenants and currently boarding are allowed to leave reviews for the property.</Text>
 
               <PropertyReviews reviews={propertyReviews}/>
             </View>
@@ -238,7 +223,7 @@ export default function BHDetails() {
         </View>
         
       </ScrollView>
-      <BottomBar price={data?.price} propertyID={propertyID}/>
+      <BottomBar price={data?.price} propertyID={propertyID} propertyName={data?.name}/>
       </View>
       )}
 

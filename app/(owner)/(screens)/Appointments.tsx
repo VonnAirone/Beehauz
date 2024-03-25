@@ -114,37 +114,34 @@ export default function Bookings() {
   return (
     <SafeAreaView className='flex-1 bg-white'
     >
-      <ScrollView>
-      <View>
+      <ScrollView 
+      showsVerticalScrollIndicator={false}
+      className='p-5'>
         <BackButton/>
-      </View>
 
-      <View className='px-10 py-5'>
-            <View className='h-10 w-10'>
-              <LottieView
-              autoPlay
-              loop
-              style={{width: "100%", height: "100%"}}
-              source={require("@/assets/consult.json")}/>
-            </View>
-        <Text className='text-xl'>Appointments</Text>
-      </View>
-
-
-      <View className='px-10'>
-
-      {loading ? (
-        <BookingSkeleton/>
-      ) : (
-      <>
-        <View className='mt-2 flex-row justify-between items-center'>
-          <Text>Requests ({bookings?.filter(item => item.status === 'Pending')?.length})</Text>
-          {/* <Ionicons name='arrow-forward-outline' size={15}/> */}
+        <View className='mt-2'>
+          <View className='h-10 w-10'>
+            <LottieView
+            autoPlay
+            loop
+            style={{width: "100%", height: "100%"}}
+            source={require("@/assets/consult.json")}/>
+          </View>
+          <Text className='text-xl'>Appointments</Text>
         </View>
+        {loading ? (
+          <BookingSkeleton/>
+        ) : (
+        <>
+          <View className='mt-2'>
+            <Text>Requests ({bookings?.filter(item => item.status === 'Pending')?.length})</Text>
+          </View>
 
         <View className='mt-4'>
-          {bookings && bookings.filter(item => item.status === 'Pending').length === 0 ? (
-            <Text>No pending requests</Text>
+          {bookings && bookings?.filter(item => item.status === 'Pending').length === 0 ? (
+            <View className='h-60 items-center justify-center'>
+              <Text>No pending requests</Text>
+            </View>
           ) : (
             <FlatList
               scrollEnabled={false}
@@ -175,11 +172,13 @@ export default function Bookings() {
       </View>
 
       {loading ? (
-        <ActivityIndicator/>
+        <BookingSkeleton/>
       ) : (
         <View className='mt-4'>
-          {bookings && bookings.filter(item => item.status === 'Approved').length === 0 ? (
-            <Text>No pending appointments</Text>
+          {bookings && bookings?.filter(item => item.status === 'Approved').length === 0 ? (
+              <View className='h-60 items-center justify-center'>
+                <Text>No appointments</Text>
+              </View>
           ) : (
             <FlatList
               scrollEnabled={false}
@@ -202,15 +201,17 @@ export default function Bookings() {
       <View className='mt-8 border-2 border-gray-200'></View>
 
       <View className='mt-2 flex-row justify-between items-center'>
-          <Text>History ({bookings.filter(item => ['Finished', 'Rejected', 'Cancelled'].includes(item.status)).length})</Text>
+          <Text>History ({bookings?.filter(item => ['Finished', 'Rejected', 'Cancelled'].includes(item.status)).length})</Text>
           {/* <Ionicons name='arrow-forward-outline' size={15}/> */}
       </View>
       {loading ? (
-        <ActivityIndicator/>
+        <BookingSkeleton/>
       ) : (
         <View className='mt-4'>
-          {bookings && bookings.filter(item => ['Finished', 'Rejected', 'Cancelled'].includes(item.status)).length === 0 ? (
-            <Text>No pending appointments</Text>
+          {bookings && bookings?.filter(item => ['Finished', 'Rejected', 'Cancelled'].includes(item.status)).length === 0 ? (
+            <View className='h-60 items-center justify-center'>
+              <Text>No History</Text>
+            </View>
           ) : (
             <FlatList
               scrollEnabled={false}
@@ -227,14 +228,10 @@ export default function Bookings() {
           )}
         </View>
       )}
-
-      </View>
-
       <View className='h-40'>
 
-      </View>
-          
-      </ScrollView>
-    </SafeAreaView>
+      </View>    
+    </ScrollView>
+  </SafeAreaView>
   )
 }

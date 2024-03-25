@@ -63,36 +63,52 @@ export const DashboardComponents = ({id, properties, tenants, bookings}) => {
   const propertyID = properties && properties.length > 0 ? properties[0]?.property_id : null;
   return (
   <View>
-    <View className='flex-row items-center justify-around mt-10'>
 
+    <View className='overflow-hidden rounded-md mt-3'>
+      <Pressable 
+        onPress={() => router.push({pathname: "/two", params: {property: properties}})} 
+      android_ripple={{color: "#ffa233"}}
+      className='p-4 h-32 bg-gray-50 rounded-md'>
+        <View className='flex-row items-center gap-x-2'>
+          <Ionicons name='storefront' size={18} color={"#ffa233"}/>
+          <Text className='font-semibold text-xs'>Property</Text>
+        </View>
+        
+        <View className='items-center flex-1 justify-center'>
+          {properties ? (
+            <Text className='text-yellow'>{properties[0].name}</Text>   
+          ) : (
+            <TouchableOpacity 
+            onPress={() => router.push("/PropertyCreation")}
+            className='items-center flex-1 '>
+              <Ionicons name='add-circle-outline' size={32}/>
+              <Text>Add a Property</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </Pressable>
+    </View>
+
+    <View className='flex-row items-center justify-around mt-5'>
       <View className='overflow-hidden rounded-md'>
-        <Pressable 
-         onPress={() => router.push({pathname: "/Properties", params: {property: properties}})} 
+        <Pressable
+        onPress={() => router.push({pathname: "/Appointments", params: {property_id: propertyID}})}
         android_ripple={{color: "#ffa233"}}
         className='w-36 p-4 h-32 bg-gray-50 rounded-md'>
           <View className='flex-row items-center gap-x-2'>
-            <Ionicons name='storefront' size={18} color={"#ffa233"}/>
-            <Text className='font-semibold text-xs'>Properties</Text>
+            <Ionicons name='calendar' size={18} color={"#ffa233"}/>
+            <Text className='font-semibold text-xs'>Bookings</Text>
           </View>
           
           <View className='items-center flex-1 justify-center mt-4'>
-            {properties ? (
-              <Text className='text-5xl text-yellow'>{properties ? properties.length : 0}</Text>   
-            ) : (
-              <TouchableOpacity 
-              onPress={() => router.push("/PropertyCreation")}
-              className='items-center flex-1 '>
-                <Ionicons name='add-circle-outline' size={32}/>
-                <Text>Add a Property</Text>
-              </TouchableOpacity>
-            )}
+            <Text className='text-5xl text-yellow'>{bookings ? bookings.length : 0}</Text>
           </View>
         </Pressable>
       </View>
-
+      
       <View className='overflow-hidden rounded-md'>
         <Pressable
-        onPress={() => router.push({pathname: "/Tenants", params: {property_id: propertyID}})}
+        onPress={() => router.push("/four")}
         android_ripple={{color: "#ffa233"}}
         className='w-36 p-4 h-32 bg-gray-50 rounded-md'>
           <View className='flex-row items-center gap-x-2'>
@@ -104,36 +120,7 @@ export const DashboardComponents = ({id, properties, tenants, bookings}) => {
           </View>
         </Pressable>
       </View>
-     
-  </View>
-
-  <View className='flex-row items-center justify-around mt-5'>
-    <View className='overflow-hidden rounded-md'>
-      <Pressable
-      onPress={() => router.push({pathname: "/Appointments", params: {property_id: propertyID}})}
-      android_ripple={{color: "#ffa233"}}
-      className='w-36 p-4 h-32 bg-gray-50 rounded-md'>
-        <View className='flex-row items-center gap-x-2'>
-          <Ionicons name='calendar' size={18} color={"#ffa233"}/>
-          <Text className='font-semibold text-xs'>Bookings</Text>
-        </View>
-        
-        <View className='items-center flex-1 justify-center mt-4'>
-          <Text className='text-5xl text-yellow'>{bookings ? bookings.length : 0}</Text>
-        </View>
-      </Pressable>
     </View>
-    
-    <View className='w-36 p-4 h-32 bg-gray-50 rounded-md'>
-      <View className='flex-row items-center gap-x-2'>
-        <Ionicons name='eye' size={18} color={"#ffa233"}/>
-        <Text className='font-semibold text-xs'>Views</Text>
-      </View>
-      <View className='items-center justify-center flex-1 mt-4'>
-        <Text className='text-5xl text-yellow'>1</Text>
-      </View>
-    </View>
-  </View>
   </View>
   )
 }

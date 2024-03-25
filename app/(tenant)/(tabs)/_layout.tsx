@@ -7,7 +7,7 @@ function TabBarIcon(props: {
   name: React.ComponentProps<typeof Ionicons>['name'];
   color: string;
 }) {
-  return <Ionicons size={28} style={styles.tabBarIcon} {...props}/>;
+  return <Ionicons size={24} style={styles.tabBarIcon} {...props}/>;
 }
 
 export default function TabLayout() {

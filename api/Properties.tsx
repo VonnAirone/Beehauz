@@ -4,8 +4,9 @@ export interface UserData {
     address: string;
     email: string;
     gender: string;
-    phone_number: string;
+    phone_number: number;
     age: string;
+    description: string;
 }
 
 // export type PropertyData = {
@@ -50,6 +51,15 @@ export type PropertyData = {
   longitude: number,
   address: string,
   available_beds: number,
+}
+
+export type PropertyTerms = {
+  property_id: string;
+  advance_payment: string;
+  security_deposit: string;
+  minimum_stay: string;
+  electricity_bill: string;
+  water_bills: string;
 }
 
 

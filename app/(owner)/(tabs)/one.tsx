@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Logo from '@/components/logo'
@@ -8,6 +8,7 @@ import { PropertyData, ReviewData, TenantsData, UserData } from '@/api/Propertie
 import { supabase } from '@/utils/supabase'
 import { HomepageSkeleton } from '../(aux)/SkeletonComponents'
 import { DashboardComponents, PropertyReviews } from '../(aux)/propertycomponents'
+import { Ionicons } from '@expo/vector-icons'
 
 export default function Dashboard() {
   const session = useAuth()
@@ -23,6 +24,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function fetchData() {
+      setLoading(true);
       await getUserProfile(user);
       await getProperties();
 
@@ -133,8 +135,12 @@ export default function Dashboard() {
 
   return (
     <SafeAreaView className='flex-1 p-3'>
-      <View className='items-start'>
+      <View className='flex-row items-center justify-between'>
         <Logo/>
+
+        <Pressable className='p-3 bg-yellow rounded-md'>
+          <Ionicons name='notifications' color={"white"} size={20}/>
+        </Pressable>
       </View>
 
       {loading ? (

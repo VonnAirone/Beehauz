@@ -46,6 +46,14 @@ export async function fetchPropertyData(ownerID: string) {
   return fetchData(query);
 }
 
+export async function fetchFavorites(propertyID: string) {
+  const query = supabase
+    .from('property')
+    .select('*')
+    .eq('property_id', propertyID)
+  return fetchData(query);
+}
+
 export async function fetchFilteredProperties(filterCriteria) {
   const { prices } = filterCriteria;
 
@@ -84,7 +92,8 @@ export async function getProperties(id, setLoading, setProperties) {
     const { data, error } = await supabase
       .from("property")
       .select()
-      .eq("owner_id", id);
+      .eq("owner_id", id)
+      .limit(1)
     
     if (error) {
       console.log("Error fetching properties: ", error.message)
@@ -136,5 +145,22 @@ export const fetchAmenities = async (propertyID, setAmenities) => {
       console.log('Error message', error.message)
   } else {
   setAmenities(data)
+  }
+}
+
+export async function fetchPropertyTerms(propertyID, setPropertyTerms) {
+  try {
+    const { data, error } = await supabase
+    .from('property_terms')
+    .select()
+    .eq('property_id', propertyID.toString())
+
+    if (data) {
+      setPropertyTerms(data[0])
+    } else {
+      console.log("Error fetching property terms: ", error.message)
+    }
+  } catch (error) {
+    console.log("Error fetching property terms: ", error.message)
   }
 }

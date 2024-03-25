@@ -4,10 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/utils/AuthProvider';
 import { supabase } from '@/utils/supabase';
-import { PropertyData, ReviewData } from '@/api/Properties';
+import { PropertyData, PropertyTerms, ReviewData } from '@/api/Properties';
 import { Images } from '@/app/(tenant)/(aux)/homecomponents';
 import { loadImages } from '@/api/ImageFetching';
-import { getPropertyReviews } from '@/api/DataFetching';
+import { fetchPropertyTerms, getPropertyReviews } from '@/api/DataFetching';
 import { PropertyReviews } from '../(aux)/propertycomponents';
 import { router } from 'expo-router';
 import { Amenities } from '@/app/(tenant)/(aux)/detailscomponent';
@@ -23,6 +23,7 @@ export default function BHDetails() {
   const [propertyID, setPropertyID] = useState(0)
   const [propertyReviews, setPropertyReviews] = useState<ReviewData[] | null>(null);
   const [ratings, setRatings] = useState(0)
+  const [terms, setTerms] = useState<PropertyTerms | null>(null)
 
   const openImage = (image) => {
     setSelectedImage(image);
@@ -32,6 +33,7 @@ export default function BHDetails() {
   useEffect(() => {
     getProperties()
     fetchPropertyReviews()
+    fetchPropertyTerms(propertyID, setTerms)
   }, [propertyID]);
 
 
@@ -75,18 +77,15 @@ export default function BHDetails() {
 
   return (
     <SafeAreaView className='flex-1 bg-white'>
-
-
-
       {loading ? (
         <View className='flex-1 justify-center items-center'>
           <Text>Loading...</Text>
         </View>
       ) : (
-        <ScrollView> 
+        <ScrollView showsVerticalScrollIndicator={false}> 
         <View className='overflow-hidden rounded-full absolute z-10 right-5 top-5'>
           <Pressable 
-          onPress={() => router.push("/ManageProperty")}
+          onPress={() => router.push({pathname: "/ManageProperty", params: {propertyID}})}
           android_ripple={{color: '#ffa233'}}
           className='p-5 bg-white rounded-full w-16 h-16 items-center justify-center'>
             <Ionicons name='build' size={20} color={'#ffa233'}/>
@@ -136,7 +135,7 @@ export default function BHDetails() {
             
             <View className='mt-5'>
               <View className='flex-row items-center gap-x-1'>
-                <Text className='text-lg font-semibold'>Description</Text>
+                <Text className='font-semibold'>Description</Text>
               </View>
               <View className='mt-2'>
                 {properties?.description ? (
@@ -152,21 +151,31 @@ export default function BHDetails() {
             </View>
 
             <View className='mt-5'>
+              <Text className='font-semibold'>Payment Terms</Text>
+              
+              <View className='flex-row items-end my-1'>
+                <Text className='text-xs'>Advance Payment: </Text>
+                <Text className='font-semibold text-xs'>{terms?.advance_payment}</Text>
+              </View>
+
+              <View className='flex-row items-end'>
+                <Text className='text-xs'>Security Deposit: </Text>
+                <Text className='font-semibold text-xs'>{terms?.security_deposit}</Text>
+              </View>
+            </View>
+
+            <View className='mt-5'>
               <View className='flex-row items-center'>
-                <Text className='text-lg font-semibold mr-1'>Amenities</Text>  
+                <Text className='font-semibold mr-1'>Amenities</Text>  
               </View>
               <Amenities propertyID={propertyID}/>
             </View>
             
             <View className='mt-5'>
-              <Text className='text-lg font-semibold'>Reviews</Text>
+              <Text className='font-semibold'>Reviews ({propertyReviews?.length})</Text>
 
               <PropertyReviews reviews={propertyReviews}/>
             </View>
-
-            
-
-
           </View>
         </View>
         

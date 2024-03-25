@@ -23,11 +23,11 @@ export const downloadImage = async (propertyID, itemName, setImage) => {
     }
   };
 
-  export const downloadAvatar = async (username, itemName, setImage) => {
+  export const downloadAvatar = async (userID, itemName, setImage) => {
     try {
       const { data } = await supabase.storage
         .from('images')
-        .download(`avatars/${username}/${itemName}`);
+        .download(`avatars/${userID}/${itemName}`);
   
       if (data) {
         const fr = new FileReader();
@@ -56,9 +56,9 @@ export const downloadImage = async (propertyID, itemName, setImage) => {
     }
   };
 
-  export const loadAvatar = async (firstName, setAvatar) => {
+  export const loadAvatar = async (userID, setAvatar) => {
     try {
-      const { data } = await supabase.storage.from('images').list(`avatars/${firstName}`);
+      const { data } = await supabase.storage.from('images').list(`avatars/${userID}`);
       if (data) {
         setAvatar(data);
       } else {
@@ -118,7 +118,7 @@ export const downloadImage = async (propertyID, itemName, setImage) => {
     }
   }
 
-  export async function uploadAvatar(username) {
+  export async function uploadAvatar(userID) {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -146,16 +146,15 @@ export const downloadImage = async (propertyID, itemName, setImage) => {
 
       const { data, error: uploadError } = await supabase.storage
         .from('images')
-        .upload(`avatars/${username}/${newPath}`, arraybuffer, {
+        .upload(`avatars/${userID}/${newPath}`, arraybuffer, {
           contentType: image.mimeType ?? 'image/jpeg',
         });
 
       if (uploadError) {
-        throw uploadError;
+        console.log(uploadError)
+      } else {
+        console.log("Image uploaded successfully. Path:", newPath);
       }
-
-      console.log("Image uploaded successfully. Path:", newPath);
-      // setPath(path)
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert(error.message);
@@ -211,3 +210,49 @@ export const downloadImage = async (propertyID, itemName, setImage) => {
 //     }
 //   }
 // }
+
+export async function uploadImage(propertyID) {
+  try {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: false,
+      allowsEditing: true,
+      quality: 1,
+      exif: false,
+    });
+
+    if (result.canceled || !result.assets || result.assets.length === 0) {
+      console.log('User cancelled image picker.');
+      return;
+    }
+
+    const image = result.assets[0];
+
+    if (!image.uri) {
+      throw new Error('No image uri!');
+    }
+
+    const arraybuffer = await fetch(image.uri).then((res) => res.arrayBuffer());
+
+    const fileExt = image.uri?.split('.').pop()?.toLowerCase() ?? 'jpeg';
+    const newPath = `${Date.now()}.${fileExt}`;
+
+    const { data, error: uploadError } = await supabase.storage
+      .from('images')
+      .upload(`property_images/${propertyID}/${newPath}`, arraybuffer, {
+        contentType: image.mimeType ?? 'image/jpeg',
+      });
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    console.log("Image uploaded successfully. Path:", newPath);
+  } catch (error) {
+    if (error instanceof Error) {
+      Alert.alert(error.message);
+    } else {
+      throw error;
+    }
+  }
+}
