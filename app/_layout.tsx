@@ -1,10 +1,9 @@
 import { AuthProvider, useAuth } from '@/utils/AuthProvider';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Slot, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import { useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
-import { useFontStatus } from '@/utils/FontLoader';
 
 export const unstable_settings = {
   initialRouteName: '(tabs)',

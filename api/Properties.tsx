@@ -17,6 +17,18 @@ export interface UserData {
 //     address: string;
 // }
 
+export interface OwnerData {
+  first_name: string;
+  last_name: string;
+  address: string;
+  email: string;
+  gender: string;
+  phone_number: string;
+  age: string;
+  created_at: string;
+}
+
+
 export type AppointmentData = {
     appointment_id: string;
     tenant_id: string;

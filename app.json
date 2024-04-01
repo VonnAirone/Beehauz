@@ -6,26 +6,22 @@
     "scheme": "com.beehauz",
     "web": {
       "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "output": "static"
     },
     "plugins": [
-      ["expo-router"],
+      ["expo-router", {
+        "asyncRoutes": "development"
+      }
+      ],
       [
         "expo-image-picker",
         {
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
-      ],
-      [
-        "expo-font", 
-        {
-          "font": "/assets/fonts/Poppins-Regular.ttf"
-        }
-      ], [
+      ],[
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow BeehauzApp to use your location."
+          "locationAlwaysAndWhenInUsePermission": "Allow Beehauz to use your location."
         }
       ]
     ],
@@ -37,7 +33,7 @@
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

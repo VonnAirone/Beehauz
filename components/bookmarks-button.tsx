@@ -1,35 +1,26 @@
-import { Pressable, View } from 'react-native'
-import React, { useState, useEffect } from 'react'
-import { Ionicons } from '@expo/vector-icons'
-import { supabase } from '@/utils/supabase'
+import { supabase } from "@/utils/supabase"
 
-export default function Bookmark({ propertyID, tenantID }) {
-  const [bookmarkStatus, setBookmarkStatus] = useState(false)
+export async function checkBookmarkStatus(propertyID, tenantID, setBookmarkStatus) {
+  const { data, error } = await supabase
+    .from('favorites')
+    .select('*')
+    .eq('property_id', propertyID)
+    .eq('tenant_id', tenantID)
 
-  useEffect(() => {
-    async function checkBookmarkStatus() {
-      const { data, error } = await supabase
-        .from('favorites')
-        .select('*')
-        .eq('property_id', propertyID)
-        .eq('tenant_id', tenantID)
+  if (data && data.length > 0) {
+    setBookmarkStatus(true)
+  }
+}
 
-      if (data && data.length > 0) {
-        setBookmarkStatus(true)
-      }
-    }
-    checkBookmarkStatus()
-  }, [propertyID, tenantID])
-
-  async function toggleBookmark() {
+  export async function toggleBookmark(propertyID, tenantID, bookmarkStatus, setBookmarkStatus) {
     if (!bookmarkStatus) {
-      await addToFavorites()
+      await addToFavorites(propertyID, tenantID, setBookmarkStatus)
     } else {
-      await removeFromFavorites()
+      await removeFromFavorites(propertyID, tenantID, setBookmarkStatus)
     }
   }
 
-  async function addToFavorites() {
+  export async function addToFavorites(propertyID, tenantID, setBookmarkStatus) {
     setBookmarkStatus(true)
     const { data, error } = await supabase
       .from('favorites')
@@ -42,7 +33,7 @@ export default function Bookmark({ propertyID, tenantID }) {
     }
   }
 
-  async function removeFromFavorites() {
+  export async function removeFromFavorites(propertyID, tenantID, setBookmarkStatus) {
     setBookmarkStatus(false)
     const { data, error } = await supabase.from('favorites')
       .delete()
@@ -55,12 +46,3 @@ export default function Bookmark({ propertyID, tenantID }) {
       console.log("Successfully removed from favorites")
     }
   }
-
-  return (
-    <Pressable onPress={toggleBookmark}>
-      <View className='flex-row items-center'>
-        <Ionicons name={bookmarkStatus ? 'bookmark' : 'bookmark-outline'} size={28} color={"#ffa233"} />
-      </View>
-    </Pressable>
-  )
-}

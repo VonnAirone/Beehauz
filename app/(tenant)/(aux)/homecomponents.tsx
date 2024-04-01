@@ -1,11 +1,10 @@
-import { downloadImage, loadAvatar, loadImages } from "@/api/ImageFetching";
+import { downloadImage, loadImages } from "@/api/ImageFetching";
 import { handlePropertyClick } from "@/api/ViewCount";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { memo, useEffect, useRef, useState } from "react";
-import { FlatList as RNFlatList, Pressable, View, Text, Image, ActivityIndicator, FlatList, TouchableOpacity } from "react-native";
-import AvatarImage from "./avatar";
-import { PropertyData, UserData } from "@/api/Properties";
+import { FlatList as RNFlatList, Pressable, View, Text, Image, FlatList, TouchableOpacity } from "react-native";
+import { PropertyData } from "@/api/Properties";
 
 
  
@@ -103,7 +102,6 @@ import { PropertyData, UserData } from "@/api/Properties";
     }
   };
 
-  //THIS IS THE POPULAR NOW COMPONENT FOR THE MOST VISITED PROPERTIES
   export function PopularNow({ data }: { data: PropertyData[]}) {
     const [imagesLoaded, setImagesLoaded] = useState(false);
     const hasFetched = useRef(false);
@@ -121,10 +119,12 @@ import { PropertyData, UserData } from "@/api/Properties";
         fetchData();
       }
     }, [data]);
+
   
     const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
-      <View className='overflow-hidden mr-4'>
-        <Pressable onPress={() => handleCardPress(item.property_id)}>
+      <View className='overflow-hidden rounded-md mr-4'>
+        <Pressable
+        onPress={() => handleCardPress(item.property_id)}>
           <View>
             <View className="h-40 w-40">
               <SingleImageDisplay propertyID={item.property_id}/>
@@ -183,7 +183,7 @@ import { PropertyData, UserData } from "@/api/Properties";
     }, [data]);
 
     const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
-      <View className='overflow-hidden mr-4'>
+      <View className='overflow-hidden rounded-md mr-4'>
         <View>
           <Pressable 
           onPress={() => handleCardPress(item.property_id)}>
@@ -191,15 +191,25 @@ import { PropertyData, UserData } from "@/api/Properties";
               <SingleImageDisplay propertyID={item.property_id}/>
             </View>
               
-              <View className="mt-2">
-                <Text className='font-semibold text-xl'>{item.name}</Text>
-                <Text>{item.price}</Text>
-                <View className="flex-row items-center">
-                  <Ionicons name="location-outline" color={'#FFA233'}/>
-                  <Text className="text-yellow">{item.address}</Text>
+            <View className='mt-2'>
+              <View className="flex-row items-center justify-between">
+                <Text className="font-bold text-base">{item.name}</Text>
+                <Text className="font-semibold">{item.price} / month</Text>
+              </View>
+             
+              <View className="flex-row items-center gap-x-1">
+                <Ionicons name="bed-outline"/>
+                <Text className="text-xs">{item.available_beds} Beds</Text>
+              </View>
+
+              <View className="flex-row items-center">
+                <View>
+                  <Ionicons name="location"/>
                 </View>
                 
+                <Text className="text-xs">{item.address}</Text>
               </View>
+            </View>
           </Pressable>
         </View>
       </View>
@@ -286,17 +296,15 @@ import { PropertyData, UserData } from "@/api/Properties";
   ];
   
   const renderItem = ({ item }) => (
-    <View className="overflow-hidden rounded-md">
-      <Pressable 
-      android_ripple={{color: "#ffa233"}}
-      className="flex-row items-center p-2 mr-2 rounded-md">
-        <View className="mr-2">
-          <Image className="w-5 h-5 object-contain" source={item.icon} />
-        </View>
-        <View>
-          <Text className="text-xs">{item.name}</Text>
-        </View>
-      </Pressable>
+    <View className="mr-5 mt-2">
+      <View className="rounded-full items-center overflow-hidden">
+        <TouchableOpacity 
+        className="p-4 border-2 border-yellow rounded-full">
+          <Image className="w-8 h-8 object-contain" source={item.icon} />
+        </TouchableOpacity>
+      </View>
+
+      <Text className="text-xs mt-2">{item.name}</Text>
     </View>
   );
   
@@ -304,44 +312,44 @@ import { PropertyData, UserData } from "@/api/Properties";
       return (
           <View>
               <FlatList
-                  data={servicesData}
-                  renderItem={renderItem}
-                  keyExtractor={item => item.id.toString()}
-                  horizontal={true}
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ paddingVertical: 2, paddingHorizontal: 5 }}
+                data={servicesData}
+                renderItem={renderItem}
+                keyExtractor={item => item.id.toString()}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingVertical: 2, paddingHorizontal: 5 }}
               />
           </View>
       );
   }
 
 
-  export function Avatar({ data }: { data: UserData[]}) {
-    const [imagesLoaded, setImagesLoaded] = useState(false);
-    const hasFetched = useRef(false);
+  // export function Avatar({ data }: { data: UserData[]}) {
+  //   const [imagesLoaded, setImagesLoaded] = useState(false);
+  //   const hasFetched = useRef(false);
   
-    useEffect(() => {
-      setImagesLoaded(true)
-      if (!hasFetched.current) {
-        async function fetchData() {
-          try {
-            await loadAvatar(data, setImagesLoaded);
-          } catch (error) {
-            console.error('Error fetching data:', error);
-          }
-        }
-        fetchData();
-      }
-    }, [data]);
+  //   useEffect(() => {
+  //     setImagesLoaded(true)
+  //     if (!hasFetched.current) {
+  //       async function fetchData() {
+  //         try {
+  //           await loadAvatar(data, setImagesLoaded);
+  //         } catch (error) {
+  //           console.error('Error fetching data:', error);
+  //         }
+  //       }
+  //       fetchData();
+  //     }
+  //   }, [data]);
   
-    const renderItem = ({ item, index }: { item: UserData; index: number }) => (
-      <View >
-        <View style={{ width: 160, height: 144 }}>
-          <AvatarImage username={item.first_name}/>
-        </View>
-      </View>
-    );
-  }
+  //   const renderItem = ({ item, index }: { item: UserData; index: number }) => (
+  //     <View >
+  //       <View style={{ width: 160, height: 144 }}>
+  //         <AvatarImage userID={item.first_name}/>
+  //       </View>
+  //     </View>
+  //   );
+  // }
 
 
   export function Favorites({ data }: { data: PropertyData[]}) {
@@ -363,7 +371,9 @@ import { PropertyData, UserData } from "@/api/Properties";
     }, [data]);
 
     const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
-      <View className='overflow-hidden'>
+      <Pressable
+      onPress={() => handleCardPress(item.property_id)} 
+      className='overflow-hidden'>
         <View>
           <View className='h-40 w-80'>
             <SingleImageDisplay propertyID={item.property_id}/>
@@ -376,7 +386,7 @@ import { PropertyData, UserData } from "@/api/Properties";
             </View>
             
             <View className="flex-row items-center">
-              <Ionicons name="location-outline" color={'#FFA233'}/>
+              <Ionicons name="location" color={'#444'}/>
               <Text>{item.address}</Text>
             </View>
 
@@ -384,16 +394,9 @@ import { PropertyData, UserData } from "@/api/Properties";
               <Ionicons name="bed-outline" size={15}/>
               <Text>{item.available_beds} Beds</Text>
             </View>
-
-            <TouchableOpacity 
-            onPress={() => handleCardPress(item.property_id)}
-            className="flex-row items-center mt-1">
-              <Text className="text-yellow">View Property</Text>
-              <Ionicons color={"#ffa233"} name="chevron-forward-outline" size={15}/>
-            </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </Pressable>
     );
   
     return <RNFlatList 

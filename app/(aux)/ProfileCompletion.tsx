@@ -1,15 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Alert, Keyboard, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, Keyboard, ScrollView, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Glass from 'components/glassmorph';
-import InputField from 'components/input-field';
 import Button from 'components/button';
-import Logo from 'components/logo';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
-import * as Location from "expo-location"
+import BackButton from '@/components/back-button';
+import { Dropdown } from 'react-native-element-dropdown';
 
 export default function TenantRegistration({ email }) {
   const { usertype } = useLocalSearchParams();
@@ -19,6 +16,7 @@ export default function TenantRegistration({ email }) {
   const [address, setAddress] = useState('');
   const [age, setAge] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [gender, setGender] = useState('')
   const [isEmpty, setIsEmpty] = useState(false);
 
   const handleFirstNameChange = (text) => { setFirstName(text); setIsEmpty(false); };
@@ -27,21 +25,6 @@ export default function TenantRegistration({ email }) {
   const handleAgeChange = (num) => setAge(num);
   const handlePhoneNumberChange = (num) => setPhoneNumber(num);
 
-  // useEffect(() => {
-  //   async function getUserLocation() {
-  //     let { status } = await Location.getForegroundPermissionsAsync()
-  //     if (stats !== "granted") {
-  //      console.log("Permission to access location was denied")
-  //      return;
-  //    }
-  //     let location = await Location.getCurrentPositionAsync({});
-  //     setLocation(location)
-  //   }
-  //    
-  //    getUserLocation()
-  //   
-  //    
-  // })
   const updateUserInformation = async () => {
      let {data, error} = await supabase.from('profiles')
      .update({
@@ -50,7 +33,8 @@ export default function TenantRegistration({ email }) {
       email: user?.email,
       age: age,
       address: address,
-      phone_number: phoneNumber
+      phone_number: phoneNumber,
+      gender: gender
     })
     .eq("id", user?.id)
 
@@ -97,112 +81,134 @@ export default function TenantRegistration({ email }) {
     }
   }
 
-//  WORK ON THE KEYBOARD AVOIDING VIEW
+  const genderOptions = [
+    {label: 'Male', value: 'Male'},
+    {label: 'Female', value: 'Female'},
+    {label: 'Do not specify', value: 'Not specified'}
+  ]
+
+  const handleGenderPress = (selectedGender) => {
+    setGender(prevGender => prevGender === selectedGender ? null : selectedGender);
+    
+  };
+  
+
   return (
     <SafeAreaView className="flex-1">
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : -200}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <View className="flex-1">
-            <Pressable
-              onPress={() => router.back()}
-              className="flex-row ml-5 mt-5"
-            >
-              <Ionicons name='chevron-back-outline' size={20} />
-              <Text className="text-lg ml-1">Back</Text>
-            </Pressable>
-
-            <View className="items-center">
-              <Logo />
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <>
+        <ScrollView className="flex-1 p-5">
+          <BackButton/>
+          <View className="mt-10">
+            <View className="mb-5">
+              <Text className="text-xl font-semibold mb-2">COMPLETE YOUR PROFILE INFORMATION</Text>
+              <Text className='text-xs'>To enhance your user experience, kindly fill in the form below.</Text>
             </View>
 
-            <View className="items-center mt-5">
-              <View className="mb-5 w-80 mx-auto">
-                <Glass>
-                  <Text className="text-2xl font-semibold text-center mb-2">COMPLETE YOUR PROFILE INFORMATION</Text>
-                  <Text className="text-center">Please complete your profile for the best user experience.</Text>
-                </Glass>
+            <View className="mt-10">
+              <View className='flex-row items-center justify-between'>
+                <View className='w-40'>
+                  <Text className="mb-1 font-semibold">First name</Text>
+                    <TextInput
+                      clearTextOnFocus
+                      placeholder='Ex. Juan'
+                      value={firstName}
+                      onChangeText={handleFirstNameChange}
+                      className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
+                    />
+                </View>
+                <View className='w-40'>
+                  <Text className="mb-1 font-semibold">Last Name</Text>
+                    <TextInput
+                      placeholder='Ex. Dela Cruz'
+                      clearTextOnFocus
+                      value={lastName}
+                      onChangeText={handleLastNameChange}
+                      className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
+                    />
+                </View>
               </View>
 
-              <View className="flex gap-y-4 w-80">
-                <View className='flex-row items-center justify-between'>
-                  <View>
-                    <Text className="mb-1">First name</Text>
-                      <TextInput
-                        clearTextOnFocus
-                        value={firstName}
-                        onChangeText={handleFirstNameChange}
-                        className='p-2 pl-5 w-36 border-gray-300 focus:border-gray-400 border rounded-md text-sm'
-                      />
-                  </View>
-                  <View>
-                    <Text className="mb-1">Last Name</Text>
-                      <TextInput
-                        clearTextOnFocus
-                        value={lastName}
-                        onChangeText={handleLastNameChange}
-                        className='p-2 pl-5 w-36 border-gray-300 focus:border-gray-400 border rounded-md text-sm'
-                      />
-                  </View>
-                  
-                </View>
+              <View className='mt-4'>
+                <Text className="mb-1 font-semibold">Email Address</Text>
+                <TextInput
+                    clearTextOnFocus
+                    value={user?.email}
+                    editable={false}
+                    className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
+                  />
+              </View>
 
-                <View>
-                  <Text className="mb-1">Email Address</Text>
+              <View className='mt-4'>
+                <Text className="mb-1 font-semibold">Address</Text>
                   <TextInput
-                      clearTextOnFocus
-                      value={user?.email}
-                      editable={false}
-                      className='p-2 pl-5 border-gray-300 focus:border-gray-400 border rounded-md text-sm'
-                    />
+                    clearTextOnFocus
+                    value={address}
+                    placeholder={'(ex. Barangay, Municipality, Province)'}
+                    onChangeText={handleAddressChange}
+                    className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
+                  />
+              </View>
+
+              <View className="mt-4 flex-row">
+                <View className="w-28">
+                  <Text className="mb-1 font-semibold">Age</Text>
+                  <TextInput
+                    clearTextOnFocus
+                    value={age}
+                    placeholder={'Age'}
+                    onChangeText={handleAgeChange}
+                    className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
+                  />
                 </View>
 
-                <View>
-                  <Text className="mb-1">Address</Text>
-                    <TextInput
-                      clearTextOnFocus
-                      value={address}
-                      placeholder={'(ex. Barangay, Municipality, Province)'}
-                      onChangeText={handleAddressChange}
-                      className='p-2 pl-5 border-gray-300 focus:border-gray-400 border rounded-md text-sm'
-                    />
-                </View>
-
-                <View className="flex-row justify-between">
-                  <View className="w-28">
-                    <Text className="mb-1">Age</Text>
-                    <TextInput
-                      clearTextOnFocus
-                      value={age}
-                      placeholder={'Age'}
-                      onChangeText={handleAgeChange}
-                      className='p-2 pl-5 border-gray-300 focus:border-gray-400 border rounded-md text-sm'
+                <View className='grow ml-5'>
+                  <Text className="mb-1 font-semibold">Gender</Text>
+                  <View className='bg-gray-200 rounded-md'>
+                    <Dropdown 
+                      style={{padding: 4}}
+                      data={genderOptions} 
+                      labelField='label' 
+                      valueField='value' 
+                      selectedTextStyle={{fontSize: 12, left: 10}}  
+                      placeholderStyle={{fontSize: 12, left: 10}}
+                      placeholder={gender ? gender : 'Not specified'}
+                      itemTextStyle={{fontSize: 13}}
+                      itemContainerStyle={{backgroundColor: '#e5e7eb', borderColor: 'none'}}
+                      onChange={item => (
+                        handleGenderPress(item.value)
+                      )} 
                     />
                   </View>
-
-                  <View className="w-48">
-                    <Text className="mb-1">Phone Number</Text>
-                    <TextInput
-                      clearTextOnFocus
-                      value={phoneNumber}
-                      placeholder={'+63'}
-                      onChangeText={handlePhoneNumberChange}
-                      className='p-2 pl-5 border-gray-300 focus:border-gray-400 border rounded-md text-sm'
-                    />
-                  </View>
+       
                 </View>
               </View>
 
-              <View className="mt-10">
-                <Button text={"CONFIRM"} onPress={handleSubmission} />
+              <View className='mt-4'>
+                  <Text className="mb-1 font-semibold">Phone Number</Text>
+                  <TextInput
+                    clearTextOnFocus
+                    placeholder='+63 -'
+                    value={phoneNumber}
+                    onChangeText={handlePhoneNumberChange}
+                    className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
+                  />
               </View>
+              
+              <View className='h-20'></View>
+              
             </View>
           </View>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
+
+          
+
+        </ScrollView>
+
+          <View className="bottom-0 p-5">
+            <Button text={"CONFIRM"} onPress={handleSubmission} />
+          </View>
+        </>
+      </TouchableWithoutFeedback>
     </SafeAreaView>
   );
 }

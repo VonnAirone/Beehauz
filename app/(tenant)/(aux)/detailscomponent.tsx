@@ -26,54 +26,30 @@ import { getProfile } from '@/api/DataFetching'
 //     }
 //   }
 
-
-export function Amenities({propertyID}) {
-    const [amenities, setAmenities] = useState([])
-
-    const fetchAmenities = async () => {
-        const {data, error} = await supabase
-        .from('amenities')
-        .select('*')
-        .eq('property_id', propertyID)
-        if (error) {
-            console.log('Error message', error.message)
-        } else {
-        setAmenities(data)
-        }
+export async function fetchAmenities(propertyID, setAmenities) {
+  try {
+    const {data, error} = await supabase
+    .from('amenities')
+    .select('*')
+    .eq('property_id', propertyID)
+    if (error) {
+        console.log('Error message', error.message)
+    } else {
+    setAmenities(data)
     }
-
-    const hasFetched = useRef(false)
-
-    useEffect(() => {
-        if (!hasFetched.current) {
-            fetchAmenities()
-        }
-    }, [propertyID])
-
-    const Amenity = ({ item }) => {
-        const renderItem = ({ item }) => (
-            <View className='mr-2'>
-                <View key={item.amenity_id} className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
-                    <Text className='text-center text-xs'>{item.amenity_name}</Text>
-                </View>
-            </View>
-        );
-
-    return ( <RNFlatList data={item} renderItem={renderItem} showsHorizontalScrollIndicator={false} horizontal={true} />)}
-
-    return (
-        <View>
-            <View className='mt-2'>
-                <Amenity item={amenities}/>
-            </View>
-        </View>
-    )
+  } catch (error) {
+    console.log("Error fetching amenities: ", error.message)
+  }
 }
+
+
 
 export function BottomBar ({price, propertyID, propertyName}) {
   const [isBooking, setIsBooking] = useState(false)
     return (
-        <View className='absolute bottom-0 left-0 z-50 w-full h-16 bg-yellow py-2 px-6 flex-row items-center justify-between'>
+        <View
+        style={{backgroundColor: "#444"}} 
+        className='absolute bottom-0 left-0 z-50 w-full h-16 py-2 px-6 flex-row items-center justify-between'>
 
         <View>
           <Text className='text-white'>Rental Price</Text>
@@ -173,69 +149,5 @@ export function AmenitiesModal ({hideModal}) {
         </View>
       </View>
     </Modal>
-  )
-}
-
-interface OwnerData {
-  first_name: string;
-  last_name: string;
-  address: string;
-  email: string;
-  gender: string;
-  phone_number: string;
-  age: string;
-  created_at: string;
-}
-
-import moment from 'moment';
-
-export function OwnerInformation({owner_id}) {
-  const [ownerData, setOwnerData] = useState<OwnerData | null>(null);
-
-  useEffect(() => {
-    async function getOwnerData() {
-      try {
-        const data = await getProfile(owner_id.toString())
-
-        if (data) {
-          setOwnerData(data)
-        }
-      } catch (error) {
-        console.log("Error fetching owner data", error.message)
-      }
-    }
-
-    getOwnerData()
-  }, [ownerData])
-
-  const formatDate = (date) => {
-    return moment(date).format('MMMM YYYY');
-  };
-
-
-  return (
-    <View className='mt-3 bg-gray-50 p-3 rounded-md'>
-      <View className='flex-row items-center gap-x-3 justify-between'>
-        <View className='gap-y-1'>
-
-          <Text>Name of Owner: <Text className='font-semibold'>{ownerData?.first_name} {ownerData?.last_name}</Text></Text>
-
-          <Text>Joined last {formatDate(ownerData?.created_at)}</Text>
-
-          <Text className='text-gray-500 text-xs'>Response time: within an hour</Text>
-        </View>
-      </View>
-
-
-      <View className='w-40 self-end mt-4 overflow-hidden rounded-md'>
-        <Pressable 
-        className='p-2 rounded-md flex-row items-center border border-yellow'
-        android_ripple={{color: "#FDFDD9"}}
-        onPress={() => router.push({pathname: "/OwnerProfile", params: {owner_id : owner_id}})}>
-          <Text className='text-yellow'>View Owner details</Text>
-          <Ionicons name='chevron-forward-outline' size={20} color={"#ffa233"}/>
-        </Pressable>
-      </View>
-    </View>
   )
 }

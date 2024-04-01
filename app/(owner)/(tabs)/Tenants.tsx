@@ -137,7 +137,7 @@ export default function Tenants() {
           </Pressable>
         </View>
 
-        <View className='flex-row items-center border border-gray-300 rounded-md p-2 backdrop-blur-3xl'>
+        <View className='flex-row items-center border border-gray-100  rounded-md p-2 backdrop-blur-3xl'>
           <View className='mx-2'>
             <Ionicons name='search' size={20} color={'#ffa233'}/>
           </View>
