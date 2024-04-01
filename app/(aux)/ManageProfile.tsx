@@ -1,36 +1,47 @@
-import { View, Text, ScrollView, Pressable, TextInput, Alert } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { View, Text, ScrollView, Pressable, TextInput, Alert, Image } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import BackButton from '@/components/back-button'
 import { Ionicons } from '@expo/vector-icons'
 import { useAuth } from '@/utils/AuthProvider'
 import { UserData } from '@/api/Properties'
 import { getProfile } from '@/api/DataFetching'
-import AvatarImage from '../(tenant)/(aux)/avatar'
 import { uploadAvatar } from '@/api/ImageFetching'
 import { supabase } from '@/utils/supabase'
+import { router } from 'expo-router'
 
 export default function ManageProfile() {
   const user = useAuth()?.session?.user;
   const [allowEdit, setAllowEdit] = useState(false)
   const [userData, setUserData] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(false)
+  const [avatarLoading, setAvatarLoading] = useState(false)
+  const [avatar, setAvatar] = useState(null);
+  const [reloadData, setReloadData] = useState(false);
+  const hasFetched = useRef(false)
 
   useEffect(() => {
-    async function fetchUserData () {
-      try {
-        const data = await getProfile(user?.id)
-
-        if (data) {
-          setUserData(data)
-        }
-      } catch (error) {
-        console.log("Error fetching user information: ", error.message)
+    if (!hasFetched.current) {
+      async function fetchData() {
+        await fetchUserData();
+        await fetchAvatar();
       }
+  
+      fetchData();
+      hasFetched.current = true;
     }
+  }, []); 
 
-    fetchUserData()
-  }, [user])
+  async function fetchUserData() {
+    try {
+      setLoading(true)
+      const data = await getProfile(user?.id)
+      if (data) {
+        setUserData(data)
+      }
+    } catch (error) {
+      console.log("Error fetching user information: ", error.message)
+    }
+  }
 
   const handleChangeText = (key, value) => {
     setUserData(prevData => ({
@@ -69,20 +80,80 @@ export default function ManageProfile() {
     }
   }
 
+  const fetchAvatar = async () => {
+    try {
+      setLoading(true)
+      const { data } = await supabase.storage.from('images').list(`avatars/${user?.id}`);
+      if (data && data.length > 0) {
+        const lastAvatar = data[data.length - 1];
+        const avatarURL = await downloadAvatar(user?.id, lastAvatar.name);
+        setAvatar(avatarURL);
+      } else {
+        console.log('No avatar found');
+      }
+    } catch (error) {
+      console.error('Error loading avatar:', error.message);
+    } finally {
+      setLoading(false)
+    }
+  };
+
+  const downloadAvatar = async (userID, itemName) => {
+    try {
+      const { data } = await supabase.storage
+        .from('images')
+        .download(`avatars/${userID}/${itemName}`);
+      
+      if (data) {
+        const fr = new FileReader();
+        fr.readAsDataURL(data);
+        fr.onload = () => {
+          setAvatar(fr.result);
+        };
+      } else {
+        console.log('No data for avatar');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error downloading avatar:', error.message);
+      return null;
+    }
+  };
+
+  async function changeProfile() {
+    await uploadAvatar(user?.id);
+    setAvatar(null);
+    fetchAvatar();
+  }
 
   return (
     <SafeAreaView className='flex-1'>
       <ScrollView className='p-5' showsVerticalScrollIndicator={false}>
-        <BackButton/>
-
+          <View>
+            <Pressable onPress={() => router.back()}>
+              <View className='flex-row items-center '>
+                  <Ionicons name='chevron-back-outline' size={20}/>
+                  <Text>Back</Text>
+              </View>
+            </Pressable>
+        </View>
         <View className='items-center bg-yellow rounded-md mt-2 h-32 mb-6'>
             <View className='absolute -bottom-10 rounded-full border-2 border-yellow bg-white overflow-hidden'>
               <Pressable 
-              onPress={() => uploadAvatar(user?.id)}
+              onPress={changeProfile}
               android_ripple={{color: "#ffa233"}}>
-                <View className='opacity-20 h-28 w-28'>
-                    <AvatarImage userID={user?.id}/>
+                {loading ? (
+                  <View className='h-28 w-28 justify-center items-center'>
+                    {/* <ActivityIndicator size={'large'}/> */}
                   </View>
+                  
+                ) : (
+                  <View className='opacity-40 h-28 w-28'> 
+                    {avatar && 
+                    <Image source={{ uri: avatar }} style={{ width: 100, height: 100 }} 
+                    />} 
+                  </View>
+               )}
                   <View className='absolute self-center top-10'>
                     <Ionicons name='camera' color={'#ffa233'} size={32}/>
                   </View>
@@ -166,8 +237,6 @@ export default function ManageProfile() {
               </Pressable>
             </View>
           )}
-
-
       </ScrollView>
     </SafeAreaView>
   )

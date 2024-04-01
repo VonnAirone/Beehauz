@@ -2,22 +2,24 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Text, View, Image, FlatList, Dimensions, ScrollView, Pressable, Modal, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { fetchPropertyDetailsData, getPropertyReviews } from '@/api/DataFetching';
+import { fetchPropertyDetailsData, getOwnerData, getPropertyReviews } from '@/api/DataFetching';
 import { loadImages } from '@/api/ImageFetching';
 import BackButton from '@/components/back-button';
 import { Ionicons } from '@expo/vector-icons';
-import { Amenities, AmenitiesModal, BottomBar, OwnerInformation } from '../(aux)/detailscomponent';
-import Bookmark from '@/components/bookmarks-button';
-import { useAuth } from '@/utils/AuthProvider';
+import { AmenitiesModal, BottomBar, fetchAmenities } from '../(aux)/detailscomponent';
 import { Cover, Images } from '../(aux)/homecomponents';
-import { PropertyData, ReviewData } from '@/api/Properties';
+import { PropertyData, ReviewData, OwnerData } from '@/api/Properties';
 import { PropertyReviews } from '@/app/(owner)/(aux)/propertycomponents';
 import LoadingComponent from '@/components/LoadingComponent';
+import { checkBookmarkStatus, toggleBookmark } from '@/components/bookmarks-button';
+import { useAuth } from '@/utils/AuthProvider';
+import moment from 'moment';
 
 const screenWidth = Dimensions.get('window').width;
 
 export default function BHDetails() {
-  const user = useAuth()?.session?.user;
+  const user = useAuth()?.session.user;
+  const [bookmarkStatus, setBookmarkStatus] = useState()
   let { propertyID } = useLocalSearchParams();
   const [data, setData] = useState<PropertyData | null>(null);
   const [images, setImages] = useState([]);
@@ -28,29 +30,45 @@ export default function BHDetails() {
   const hasFetched = useRef(false);
   const [ratings, setRatings] = useState(0)
   const [propertyReviews, setPropertyReviews] = useState<ReviewData[] | null>(null);
+  const [amenities, setAmenities] = useState([]);
+  const [ownerData, setOwnerData] = useState<OwnerData | null>(null);
+  const [prefetchedImages, setPrefetchedImages] = useState([]);
 
+  const formatDate = (date) => {
+    return moment(date).format('MMMM YYYY');
+  };
+  
   const openImage = (image) => {
     setSelectedImage(image);
     setShowImageModal(true)
   }
 
   useEffect(() => {
-    if (!hasFetched.current) {
-    async function fetchData() {
-      setLoading(true);
-      try {
-        const fetchedData = await fetchPropertyDetailsData(propertyID.toString());
-        setData(fetchedData);
-        await loadImages(propertyID, setImages);
-        await fetchPropertyReviews();
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
+    if (!hasFetched.current && propertyID) {
+      async function fetchData() {
+        setLoading(true);
+        try {
+          const fetchedData = await fetchPropertyDetailsData(propertyID.toString());
+          setData(fetchedData);
+          await checkBookmarkStatus(propertyID, user?.id, setBookmarkStatus);
+          await loadImages(propertyID, setImages);
+          await fetchPropertyReviews();
+          await fetchAmenities(propertyID, setAmenities);
+          await getOwnerData(fetchedData?.owner_id, setOwnerData);
+          await prefetchImages();
+
+          setLoading(false);
+          hasFetched.current = true;
+        } catch (error) {
+          console.error('Error fetching data:', error);
+          setLoading(false);
+        }
       }
+
+      fetchData();
     }
-    fetchData();
-  }}, [propertyID]);
+  }, [propertyID, user?.id]); 
+  
 
   const fetchPropertyReviews = async () => {
     try {
@@ -63,8 +81,18 @@ export default function BHDetails() {
       console.error('Error fetching property reviews:', error);
       setPropertyReviews(null);
     }
+  };
 
-    setLoading(false)
+  const prefetchImages = async () => {
+    const promises = images.map(async (image) => {
+      try {
+        await Image.prefetch(image.uri);
+      } catch (error) {
+        console.error('Error prefetching image:', error);
+      }
+    });
+    await Promise.all(promises);
+    setPrefetchedImages(images);
   };
 
 
@@ -86,35 +114,46 @@ export default function BHDetails() {
         <View className={`${showAmenitiesModal ? 'opacity-20 z-0' : ''}`}>
           <View className='flex-row items-center justify-between p-5'>
             <BackButton/>
-            <Bookmark propertyID={propertyID} tenantID={user?.id}/>
+            <Pressable onPress={() => toggleBookmark(propertyID, user?.id, bookmarkStatus, setBookmarkStatus)}>
+              <View className='flex-row items-center'>
+                <Ionicons name={bookmarkStatus ? 'bookmark' : 'bookmark-outline'} size={26} color={"#444"} />
+              </View>
+            </Pressable>
           </View>
 
-          {images.length > 0 ? (
-            <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-              data={images}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item }) => 
-              <View className='w-screen h-60'> 
-                <Pressable onPress={() => openImage(item)}>
-                  <Cover item={{...item, propertyID}} />
-                </Pressable>
-              </View>}
-              initialNumToRender={4}
-              maxToRenderPerBatch={5}
-              windowSize={7}
-            />
-          ) : (
-            <View style={{ width: screenWidth, height: 200, alignItems: 'center', justifyContent: 'center' }}>
-              <Image
-                style={{ width: screenWidth, height: 200 }}
-                source={require("@/assets/images/no-image-placeholder.png")}
-                resizeMode="cover"
+          <View>
+            {images.length > 0 ? (
+              <FlatList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+                data={images}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item }) => 
+                <View className='w-screen h-60'> 
+                  <Pressable onPress={() => openImage(item)}>
+                  <View>
+                  <Cover item={{ ...item, propertyID }} />
+                  </View>
+
+                  </Pressable>
+                </View>}
+                initialNumToRender={4}
+                maxToRenderPerBatch={5}
+                windowSize={7}
               />
-            </View>
-          )}
-          <View className='mx-5 mt-3'>
+            ) : (
+              <View style={{ width: screenWidth, height: 200, alignItems: 'center', justifyContent: 'center' }}>
+                <Image
+                  style={{ width: screenWidth, height: 200 }}
+                  source={require("@/assets/images/no-image-placeholder.png")}
+                  resizeMode="cover"
+                />
+              </View>
+            )}
+          </View>
+
+          
+          <View className='p-5'>
             <View className='mt-2'>
               <Text className='text-xl font-semibold'>{data?.name}</Text>
             </View>
@@ -124,13 +163,13 @@ export default function BHDetails() {
               <TouchableOpacity 
               onPress={() => router.push({pathname: "/MapView", params: {latitude: data.latitude, longitude: data.longitude}})}
               className='flex-row items-center gap-x-1'>
-                <Ionicons name='location-outline' size={15} color={'#FF8B00'}/>
+                <Ionicons name='location' size={15} color={"#444"}/>
                 <Text className='text-base'>Catungan 1, Sibalom, Antique</Text>
               </TouchableOpacity>
             </View>
 
             <View className='flex-row items-center gap-x-1'>
-              <Ionicons name='star' size={15} color={'#FF8B00'}/>
+              <Ionicons name='star' size={15} color={"#444"}/>
               <Text> <Text className='font-semibold'>{ratings}</Text> stars / <Text className='font-semibold'>{propertyReviews?.length}</Text> {propertyReviews?.length > 0 ? 'review' : 'reviews'}</Text>
             </View>
  
@@ -151,7 +190,7 @@ export default function BHDetails() {
               </View>
             </View>
 
-            <View className='mt-5'>
+            <View className='mt-10'>
               <Text className='font-semibold'>Payment Terms</Text>
               
               <View className='flex-row items-end my-1'>
@@ -175,7 +214,42 @@ export default function BHDetails() {
                 </Pressable >  
               </View>
 
-              <Amenities propertyID={propertyID}/>
+              <FlatList 
+              data={amenities} 
+              renderItem={({item,index}) =>
+              <View className='mr-2'>
+              <View key={item.amenity_id} className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
+                  <Text className='text-center text-xs'>{item.amenity_name}</Text>
+              </View>
+              </View>} showsHorizontalScrollIndicator={false} horizontal={true} />
+            </View>
+
+            <View className='mt-5'>
+              <Pressable onPress={() => router.push({pathname: "/OwnerProfile", params: {owner_id : data?.owner_id}})}>
+              <View className='mt-3 bg-gray-50 p-3 rounded-md'>
+                  <View className='flex-row items-center gap-x-3 justify-between'>
+                    <View className='gap-y-1'>
+
+                      <Text>Name of Owner: <Text className='font-semibold'>{ownerData?.first_name} {ownerData?.last_name}</Text></Text>
+
+                      <Text>Joined last {formatDate(ownerData?.created_at)}</Text>
+
+                      <Text className='text-gray-500 text-xs'>Response time: within an hour</Text>
+                    </View>
+                  </View>
+
+
+                  <View className='w-40 self-end mt-4 overflow-hidden rounded-md'>
+                    <Pressable 
+                    className='p-2 rounded-md flex-row items-center'
+                    android_ripple={{color: "#444"}}
+                    onPress={() => router.push({pathname: "/OwnerProfile", params: {owner_id : data?.owner_id}})}>
+                      <Text>View Owner details</Text>
+                      <Ionicons name='chevron-forward-outline' size={20} color={"#444"}/>
+                    </Pressable>
+                  </View>
+                </View>
+              </Pressable>
             </View>
 
             <View className='mt-5'>
@@ -185,14 +259,7 @@ export default function BHDetails() {
               <PropertyReviews reviews={propertyReviews}/>
             </View>
 
-            <View className='mt-5'>
-              <Text className='font-semibold'>More Details:</Text>
-              <Pressable onPress={() => router.push({pathname: "/OwnerProfile", params: {owner_id : data?.owner_id}})}>
-                <OwnerInformation owner_id={data?.owner_id}/>
-              </Pressable>
-            </View>
-
-            <View className='h-20'/>
+            <View className='h-16'/>
 
             {showImageModal && (
             <Modal

@@ -8,9 +8,9 @@ const StarRatingComponent = ({ rating }) => {
         const stars = [];
         for (let i = 1; i <= 5; i++) {
             if (i <= rating) {
-                stars.push(<Ionicons key={i} name="star" size={10} color="#ffa233" />);
+                stars.push(<Ionicons key={i} name="star" size={10} color={"#444"} />);
             } else {
-                stars.push(<Ionicons key={i} name="star-outline" size={10} color="#ffa233" />);
+                stars.push(<Ionicons key={i} name="star-outline" size={10} color={"#444"} />);
             }
         }
         return stars;

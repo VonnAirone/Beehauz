@@ -164,3 +164,15 @@ export async function fetchPropertyTerms(propertyID, setPropertyTerms) {
     console.log("Error fetching property terms: ", error.message)
   }
 }
+
+export async function getOwnerData(ownerID, setOwnerData) {
+  try {
+    const data = await getProfile(ownerID)
+
+    if (data) {
+      setOwnerData(data)
+    }
+  } catch (error) {
+    console.log("Error fetching owner data", error.message)
+  }
+}

@@ -7,13 +7,15 @@ import { fetchPropertyData, getProfile } from '@/api/DataFetching'
 import { SingleImageDisplay } from '../(aux)/homecomponents'
 import { supabase } from '@/utils/supabase'
 import StarRatingComponent from '../(aux)/starrating'
-import { Link, useLocalSearchParams } from 'expo-router'
+import { Link, router, useLocalSearchParams } from 'expo-router'
 import AvatarImage from '../(aux)/avatar'
 import { PropertyData, ReviewData, UserData } from '@/api/Properties'
 import LoadingComponent from '@/components/LoadingComponent'
+import { useAuth } from '@/utils/AuthProvider'
 
 
 export default function OwnerProfile() {
+    const user = useAuth()?.session.user;
     const [propertyList, setPropertyList] = useState<PropertyData[] | null>(null);
     const [ownerData, setOwnerData] = useState<UserData | null>(null);
     const [ownerReviews, setOwnerReviews] = useState<ReviewData[] | null>(null);
@@ -23,7 +25,7 @@ export default function OwnerProfile() {
     let { owner_id } = useLocalSearchParams();
     const hasFetched = useRef(null)
 
-    //working on realtime changes in review table
+
     useEffect(() => {
         fetchData();     
         const unsubscribe = listenToRealTimeChanges();
@@ -112,12 +114,43 @@ export default function OwnerProfile() {
         }
     }
 
+    async function ContactOwner() {
+      try {
+        const { data, error } = await supabase
+        .from('chat_rooms')
+        .select('*')
+        .contains('users', [user?.id, owner_id]);
+
+        if (data[0]?.room_id) {
+          router.push({
+            pathname: "/Chatbox", 
+            params: { room_id: data[0]?.room_id, sender_id: user?.id, receiver_id: owner_id }
+          });
+        } else {
+          const { data, error} = await supabase
+          .from("chat_rooms")
+          .insert([ {'users': [user?.id, owner_id]}])
+
+          if (data) {
+            router.push({
+              pathname: "/Chatbox", 
+              params: { sender_id: user?.id, receiver_id: owner_id }
+            });
+          }
+        }
+      } catch(error) {
+          console.log("Error fetching room ID: ", error.message)
+      }
+    }
+
+
   return (
     <SafeAreaView className='flex-1'>
         
       {loading ? (
         <LoadingComponent/>
       ) : (
+        <View>
         <ScrollView 
         showsVerticalScrollIndicator={false}
         className='p-5'>
@@ -126,7 +159,7 @@ export default function OwnerProfile() {
         <View>
           <View className='items-center bg-yellow rounded-md mt-2 h-32 mb-6'>
             <View className='absolute -bottom-10 rounded-full border-2 border-yellow bg-white h-28 w-28'>
-                <AvatarImage username={ownerData?.first_name}/>
+                <AvatarImage userID={ownerData?.first_name}/>
             </View>
           </View>
 
@@ -246,7 +279,20 @@ export default function OwnerProfile() {
               </View>
             </View>
         </View>
+        <View className='h-20'/>
         </ScrollView>
+
+        <View className='bottom-5 right-5 absolute'>
+          <View className='rounded-full overflow-hidden '>
+            <Pressable 
+            onPress={() => ContactOwner()}
+            android_ripple={{color: "#fdfdd9"}}
+            className='p-5 bg-yellow rounded-full'>
+              <Ionicons name='chatbubble' size={32} color={"white"}/>
+            </Pressable>
+          </View>
+        </View>
+      </View>
       )}
     </SafeAreaView>
   )

@@ -8,8 +8,8 @@ export const Filters = [
 ];
 
 export const locationsData = [
-  { id: 1, name: 'UA Main Campus' },
-  { id: 2, name: 'SAC' },
+  { id: 1, name: 'University of Antique' },
+  { id: 2, name: `Saint Anthony's College` },
   { id: 3, name: 'More Soon...' },
 ];
 
@@ -20,11 +20,11 @@ export const pricesData = [
 ];
 
 export const ratingsData = [
-  { id: 1, rating: 1 },
-  { id: 2, rating: 2 },
-  { id: 3, rating: 3 },
-  { id: 4, rating: 4 },
-  { id: 5, rating: 5 },
+  { id: 1, rating: '1' },
+  { id: 2, rating: '2' },
+  { id: 3, rating: '3' },
+  { id: 4, rating: '4' },
+  { id: 5, rating: '5' },
 ];
 
 export async function fetchNearbyMe(latitude, longitude, setNearbyProperties) {
@@ -101,6 +101,33 @@ export async function fetchNearbySAC(setNearbyProperties) {
   }
 }
 
+
+export async function fetchPropertiesByPriceRange(minPrice, maxPrice) {
+  try {
+    const { data, error } = await supabase
+      .from('property')
+      .select()
+      .gte('price', minPrice)
+      .lte('price', maxPrice);
+
+    if (error) {
+      console.error('Error fetching properties:', error.message);
+      return null;
+    }
+
+    if (data) {
+      return data;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error fetching properties:', error.message);
+    return null;
+  }
+}
+
+
+
 export async function fetchCheapProperties(setCheapProperties) {
   try {
     const minPrice = 500
@@ -128,61 +155,7 @@ export async function fetchCheapProperties(setCheapProperties) {
   }
 }
 
-export async function fetchAverageProperties(setCheapProperties) {
-  try {
-    const minPrice = 1000
-    const maxPrice = 1500
-
-    const { data, error } = await supabase
-      .from('property')
-      .select()
-      .gte('price', minPrice)
-      .lte('price', maxPrice);
-
-    if (error) {
-      console.error('Error fetching cheap properties:', error.message);
-      return null;
-    }
-
-    if (data) {
-      setCheapProperties(data)
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Error fetching cheap properties:', error.message);
-    return null;
-  }
-}
-
-export async function fetchExpensiveProperties(setCheapProperties) {
-  try {
-    const minPrice = 1500
-    const maxPrice = 5000
-
-    const { data, error } = await supabase
-      .from('property')
-      .select()
-      .gte('price', minPrice)
-      .lte('price', maxPrice);
-
-    if (error) {
-      console.error('Error fetching cheap properties:', error.message);
-      return null;
-    }
-
-    if (data) {
-      setCheapProperties(data)
-    }
-
-    return null;
-  } catch (error) {
-    console.error('Error fetching cheap properties:', error.message);
-    return null;
-  }
-}
-
-export async function fetchPropertiesByTotalRating() {
+export async function fetchPropertiesByAverageRating(averageRating) {
   try {
     const { data: reviews, error: reviewsError } = await supabase
       .from('property_reviews')
@@ -206,16 +179,19 @@ export async function fetchPropertiesByTotalRating() {
       propertyRatingMap.set(property_id, totalRating + rating);
     });
 
-    const sortedProperties = Array.from(propertyRatingMap.entries()).sort(
-      ([, ratingA], [, ratingB]) => ratingB - ratingA
-    );
+    const filteredProperties = [];
 
-    const propertyIds = sortedProperties.map(([propertyId]) => propertyId);
+    for (const [propertyId, totalRating] of propertyRatingMap.entries()) {
+      const average = totalRating / reviews.filter(review => review.property_id === propertyId).length;
+      if (Math.round(average) === averageRating) {
+        filteredProperties.push(propertyId);
+      }
+    }
 
     const { data: properties, error: propertiesError } = await supabase
       .from('property')
       .select()
-      .in('property_id', propertyIds);
+      .in('property_id', filteredProperties);
 
     if (propertiesError) {
       console.error('Error fetching properties:', propertiesError.message);
@@ -224,7 +200,8 @@ export async function fetchPropertiesByTotalRating() {
 
     return properties;
   } catch (error) {
-    console.error('Error fetching properties by total rating:', error.message);
+    console.error('Error fetching properties by average rating:', error.message);
     return null;
   }
 }
+

@@ -1,11 +1,12 @@
 import { Text, View, Pressable, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
-import React, { useState } from 'react';
-import { router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
 import Button from 'components/button';
 import { supabase } from 'utils/supabase';
 import TermsAndPolicies from '../(aux)/Terms and Policies';
 import { Ionicons } from '@expo/vector-icons';
 import { CheckEmail, Logo, TextInputField } from '../(tenant)/(aux)/logincomponent';
+import { makeRedirectUri } from 'expo-auth-session';
+import { router } from 'expo-router';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -21,6 +22,9 @@ export default function Login() {
   const [isRevealed, setIsRevealed] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [action, setAction] = useState('')
+  const [users, setUsers] = useState([])
+  const [userEmails, setUserEmails] = useState([])
+  const redirectTo = makeRedirectUri()
 
   const handleEmailChange = (text) => {
     setEmail(text);
@@ -50,6 +54,13 @@ export default function Login() {
     return isValidEmailFormat;
   };
   
+
+  async function signInWithFacebook() {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'facebook',
+    })
+  }
+  
   
 
   const handleSubmission = async () => {
@@ -62,7 +73,6 @@ export default function Login() {
   
       if (emailIsEmpty || passwordIsEmpty) {
         setIsFormEmpty(true);
-        // If form is incomplete, return early to avoid proceeding with submission
         return;
       } else {
         setIsFormEmpty(false);
@@ -74,8 +84,15 @@ export default function Login() {
           }
           setLoading(true);
 
-          if(isNotRegistered) {
-            setLoading(true)
+          if (isNotRegistered) {
+            setLoading(true);
+          
+            if (userEmails.includes(email)) {
+              Alert.alert("Email address provided has already been registered.");
+              setLoading(false);
+              return;
+            }
+          
             const { error } = await supabase.auth.signUp({
               email: email,
               password: password,
@@ -84,18 +101,20 @@ export default function Login() {
                   profileCompleted: false,
                   usertype: ''
                 },
-                emailRedirectTo: 'http://192.168.110.181:8081'
+                emailRedirectTo: redirectTo
               }
             });
-  
+          
             if (error) {
               Alert.alert('Error creating account', error.message);
-              setEmail('')
-              setPassword('')
+              setEmail('');
+              setPassword('');
             } else {
+              setEmail('');
+              setPassword('');
+              router.push("/ConfirmEmail");
               Alert.alert('Account created successfully!');
             }
-            // setShowModal(true)
           } else {
             const { error } = await supabase.auth.signInWithPassword({
               email: email,
@@ -121,30 +140,31 @@ export default function Login() {
     }
   };
 
-  const LoginWithFacebook = async () => {
+  async function fetchUsers() {
     try {
-      setLoading(true)
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'facebook',
-      })
-
+      const { data, error } = await supabase.from('profiles').select('*');
+  
       if (error) {
-        throw new Error(error.message)
-      } else {
-        Alert.alert("Logged in successfully!")
+        console.log("Error retrieving users: ", error.message);
+        return;
+      }
+  
+      if (data) {
+        const userEmails = data.map(user => user.email);
+        setUserEmails(userEmails);
       }
     } catch (error) {
-      console.log('Error logging in', error.message);
-      Alert.alert('Error logging in', error.message)
-    } finally {
-      setLoading(false)
-      router.replace('/(tenant)/(tabs)/home')
+      console.log("Error retrieving users: ", error.message);
     }
   }
+  
+  
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
-  // useEffect(() => {
-  //   checkEmailAvailability()
-  // })
+  
+
 
   return (
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -211,7 +231,7 @@ export default function Login() {
 
 
           {/* Submit Button */}
-          <View className='mb-5'>
+          <View className='mb-5 w-80'>
             <Button onPress={handleSubmission} text={isNotRegistered ? 'CREATE ACCOUNT' : loading ? 'LOADING' : 'LOGIN'} />
           </View>
 
@@ -224,11 +244,12 @@ export default function Login() {
           {/* Social Media Login Buttons */}
           <View className='flex-row justify-center my-5'>
             <View className='mx-5'>
-              <Pressable>
+              <Pressable
+              onPress={() => signInWithFacebook()}>
                 <Ionicons 
                 name='logo-facebook' 
                 size={40} 
-                color={"#ffa233"}/>
+                color={"#444"}/>
               </Pressable>
             </View>
 
@@ -237,7 +258,7 @@ export default function Login() {
                 <Ionicons 
                 name='logo-google' 
                 size={40}
-                color={"#ffa233"}/>
+                color={"#444"}/>
               </Pressable>
             </View>
 
@@ -246,7 +267,7 @@ export default function Login() {
                 <Ionicons 
                 name='logo-instagram' 
                 size={40}
-                color={"#ffa233"}/>
+                color={"#444"}/>
               </Pressable>
             </View>
           </View>

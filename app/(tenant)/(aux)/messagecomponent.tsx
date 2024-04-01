@@ -102,76 +102,14 @@ export async function fetchLastMessage(roomId) {
   }
 }
 
-// import { fetchPropertyData, getProfile } from "@/api/DataFetching";
+export async function fetchRoomID (userID, ownerID, setRoomID) {
+  const { data, error } = await supabase
+    .from('chat_rooms')
+    .select('*')
+    .contains('users', [userID, ownerID]);
 
-// export async function handleNewMessage(userID: string, newMessage: DataItem, setMessages: React.Dispatch<React.SetStateAction<DataItem[]>>) {
-//   try {
-//     if (newMessage.receiver_id === userID || newMessage.sender_id === userID) {
-//       const updatedMessages = await fetchUserMessages(userID);
-//       const latestMessage = updatedMessages.find((message) => message.message_id === newMessage.message_id);
-//       if (latestMessage) {
-//         setMessages((prevMessages) => [...prevMessages, latestMessage]);
-//       }
-//     }
-//   } catch (error) {
-//     console.error('Error handling new message:', error);
-//   }
-// }
-
-
-// export async function fetchSenderData(senderIds: string[]) {
-//   try {
-//     const profilePromises = senderIds.map(async (userId) => {
-//       const profileData = await getProfile(userId);
-//       let name = profileData?.name || '';
-//       let gender = profileData?.gender || '';
-//       let propertyName = '';
-  
-//       if (profileData && profileData.user_type === 'Owner') {
-//         const propertyData = await fetchPropertyData(userId);
-//         propertyName = propertyData?.name || '';
-//       }
-  
-//       return { name, gender, propertyName };
-//     });
-  
-//     const resolvedProfiles = await Promise.all(profilePromises);
-  
-//     return resolvedProfiles.reduce((acc, profile, index) => {
-//       acc[senderIds[index]] = profile;
-//       return acc;
-//     }, {});
-//   } catch (error) {
-//     console.error('Error fetching sender data:', error);
-//     return {};
-//   }
-// }
-
-// export async function fetchReceiverData(receiverIds: string[]) {
-//   try {
-//     const profilePromises = receiverIds.map(async (userId) => {
-//       const profileData = await getProfile(userId);
-//       let name = profileData?.name || '';
-//       let gender = profileData?.gender || '';
-//       let propertyName = '';
-  
-//       if (profileData && profileData.user_type === 'Owner') {
-//         const propertyData = await fetchPropertyData(userId);
-//         propertyName = propertyData?.name || '';
-//       }
-  
-//       return { name, gender, propertyName };
-//     });
-  
-//     const resolvedProfiles = await Promise.all(profilePromises);
-  
-//     return resolvedProfiles.reduce((acc, profile, index) => {
-//       acc[receiverIds[index]] = profile;
-//       return acc;
-//     }, {});
-//   } catch (error) {
-//     console.error('Error fetching sender data:', error);
-//     return {};
-//   }
-// }
-
+    setRoomID(data[0]?.room_id)
+  if (error) {
+    console.error('Error fetching room ID:', error);
+  }
+}

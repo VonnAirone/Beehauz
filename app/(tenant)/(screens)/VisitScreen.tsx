@@ -1,15 +1,14 @@
-import { Alert, Keyboard, Modal, Pressable, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native'
+import { Alert, Keyboard, Modal, Pressable, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import BackButton from '@/components/back-button'
-import {Calendar} from 'react-native-calendars'
 import { Ionicons } from '@expo/vector-icons'
-import { format } from 'date-fns';
+import { format } from 'date-fns'
 import { useAuth } from '@/utils/AuthProvider'
 import { supabase } from '@/utils/supabase'
 import { router, useLocalSearchParams } from 'expo-router'
-import { PropertyData, UserData } from '@/api/Properties'
-import { fetchPropertyData } from '@/api/DataFetching'
+import { UserData } from '@/api/Properties'
+import { Calendar } from 'react-native-calendars'
 
 export default function PayAVisit() {
     const session = useAuth()?.session;
@@ -20,7 +19,6 @@ export default function PayAVisit() {
     const [selectedDateInWords, setSelectedDateInWords] = useState('');
     const currentDate = format(new Date(), 'yyyy-MM-dd');
     const [modalVisible, setModalVisible] = useState(false);
-    const [property, setProperty] = useState<PropertyData | null>(null)
     
     const handleOnTimeChange = (text) => {
         setTime(text);
@@ -55,21 +53,22 @@ export default function PayAVisit() {
         if (!date || !time) {
             Alert.alert("Missing information", "Please select both time and date of your visit.")
         } else {
-          router.push("/")
           const { data, error } = await supabase
           .from('appointments')
           .insert({
               tenant_id: session?.user.id,
-              property_id: params.property_id,
+              property_id: params.propertyID,
               appointment_date: date,
               appointment_time: time,
               status: 'Pending',
+              type: 'Visit'
             })
           .select() 
 
           if (error) {
               console.error('Error submitting visit request:', error);
           } else {
+            setModalVisible(false)
             console.log("Successfully booked a visit.")
           }
         }  
@@ -79,7 +78,7 @@ export default function PayAVisit() {
     useEffect(() => {
         getUser()
     }, [])
-    
+
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
     <SafeAreaView className='flex-1 p-5'>
@@ -115,6 +114,7 @@ export default function PayAVisit() {
                 </View>
               </View>
             </View>
+
               <View className='mt-2'>
                 <Calendar
                   theme={{

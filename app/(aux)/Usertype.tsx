@@ -6,6 +6,8 @@ import { router } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { useAuth } from '@/utils/AuthProvider'
 import { supabase } from '@/utils/supabase'
+import BackButton from '@/components/back-button'
+import { makeRedirectUri } from 'expo-auth-session'
 
 export default function Usertype() {
     const user = useAuth().session?.user
@@ -35,9 +37,7 @@ export default function Usertype() {
         }
     }
 
-    // useEffect(() => {
-    //     console.log()
-    // })
+
 
   return (
     <SafeAreaView className='flex-1 bg-white'>
@@ -82,73 +82,47 @@ export default function Usertype() {
             </View>
         )}
         
+        <View className={`flex-1 ${showModal && 'opacity-20'} p-5`}>
+          <BackButton/>
 
-
-        <View className={`flex-1 ${showModal && 'opacity-20'}`}>
-
-            <Pressable 
-              onPress={() => router.back()}
-              className='flex-row ml-5 mt-5'>
-                <Ionicons name='chevron-back-outline' size={20}/>
-                <Text className='text-lg ml-1'>Back</Text>
-              </Pressable>
-
-            <View className='items-center'>
-                <Logo/>
-            </View>
-
-        
-        <View className='flex-col items-center mt-20 mb-20'>
-            <Text className='text-3xl my-2'>
+          <View className='flex-col items-center mt-10 mb-20'>
+            <Text className='text-3xl my-2 font-semibold'>
             Type of Account
             </Text>
             
-            <Text className='w-60 text-center my-2'>
-            Choose the type of your account, be careful. To change it is impossible
+            <Text className='w-80 text-center my-2'>
+            Please select your account type thoughtfully, as changes cannot be made once chosen.
             </Text>
-        </View>
-        
-        {/* router.push({pathname: "/(tenant)/(screens)/BHDetails", params: {propertyID: propertyID}}) */}
+          </View>
         
         <View className='gap-10 items-center'>
-        <View className='w-80 border border-gray-200 rounded-md overflow-hidden'>
+          <View className='w-80 bg-orange-100 rounded-md overflow-hidden'>
                 <Pressable 
                 onPress={() => confirmUsertype("Tenant")}
-                // onPress={() =>  router.push({pathname: "/ProfileCompletion", params: {usertype: 'Tenant'}})}
                 className='p-5 h-40 rounded-md flex-row items-center justify-between' 
                 android_ripple={{color: '#FCA311'}}>
                     <View>
                         <Text className='text-lg font-semibold'>I AM A TENANT</Text>
 
-                        <Text className='w-40 mt-10'>Find boarding houses online, make reservations, and manage bookings</Text>
-                    </View>
-
-                    <View>
-                        <Image className='w-32 h-32' source={require("assets/images/tenant.jpg")}/>
+                        <Text className='mt-5'>Find boarding houses online, make reservations, and manage bookings</Text>
                     </View>
 
                 </Pressable>
             </View>
 
-            <View className='w-80 border border-gray-200 rounded-md overflow-hidden'>
+            <View className='w-80 bg-gray-100 rounded-md overflow-hidden'>
                 <Pressable 
                 onPress={() => confirmUsertype("Owner")}
-                // onPress={() =>  router.push({pathname: "/(auth)/ProfileCompletion", params: {usertype: 'Owner'}})}
                 className='p-5 h-40 rounded-md flex-row items-center justify-between' 
                 android_ripple={{color: '#FCA311'}}>
                     <View>
                         <Text className='text-lg font-semibold'>I AM AN OWNER</Text>
 
-                        <Text className='w-40 mt-10'>Streamline your operations and attract quality tenants</Text>
+                        <Text className='mt-5'>Streamline your operations and attract quality tenants</Text>
                     </View>
-
-                    <View>
-                        <Image className='w-32 h-32' source={require("assets/images/owner.jpg")}/>
-                    </View>
-
                 </Pressable>
             </View>
-        </View>
+          </View>
         </View>
     </SafeAreaView>
   )

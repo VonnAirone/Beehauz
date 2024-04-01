@@ -9,8 +9,6 @@ export default function LoadingComponent() {
       autoPlay
       style={{width: 40, height: 40}}
       source={require("@/assets/bee.json")}/>
-
-      <Text>Loading...</Text>
     </View>
   )
 }
