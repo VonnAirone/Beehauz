@@ -1,4 +1,4 @@
-import { View, Text, TextInput, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Pressable } from 'react-native'
+import { View, Text, TextInput, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Pressable, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import LottieView from 'lottie-react-native'
 import { Ionicons } from '@expo/vector-icons'
@@ -43,7 +43,8 @@ export default function PropertyCreation() {
     } catch (error) {
       console.log("Error creating property: ", error.message)
     } finally {
-      console.log("Succesfully created your property!")
+      Alert.alert("Succesfully created your property!")
+      router.push("/two")
       setLoading(false)
     }
   }
@@ -65,22 +66,14 @@ export default function PropertyCreation() {
   return (
     <KeyboardAvoidingView className='flex-1' behavior='height'>
       <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-        <SafeAreaView className='p-10 flex-1'>
-        <View className='absolute top-5'>
+        <SafeAreaView className='p-5 flex-1'>
+        <View>
           <BackButton/> 
         </View>
 
         <View className='mt-10'>
         <View className='flex-row items-center'>
-            <View className='h-12 w-12'>
-              <LottieView
-              autoPlay
-              loop
-              style={{width: "100%", height: "100%"}}
-              source={require("@/assets/home.json")}/>
-            </View>
-            
-              <Text className='text-lg w-52 ml-3'>You are one step away to manage your own property.</Text>
+          <Text className='text-lg font-semibold'>You are one step away to manage your own property.</Text>
         </View>
         <Text className='mt-2'>Please fill in the necessary informations.</Text>
       </View>
@@ -91,7 +84,7 @@ export default function PropertyCreation() {
             <Text>Property Name:</Text>
             <TextInput
             onChangeText={handleNameChange}
-            className='py-2 px-5 rounded-md border border-gray-300'/>
+            className='py-2 px-5 rounded-md bg-gray-200'/>
           </View>
 
           <View className='gap-y-2 mt-2'>
@@ -103,7 +96,7 @@ export default function PropertyCreation() {
             </View>
 
             {showModal && (
-            <View className='bg-white shadow-sm rounded-md border border-gray-300 absolute w-full p-3 z-10 top-5'>
+            <View className='shadow-sm rounded-md bg-gray-200  absolute w-full p-3 z-10 top-5'>
               <Pressable 
               onPress={() => setShowModal(false)}
               className='absolute -top-4 right-0'>
@@ -118,9 +111,10 @@ export default function PropertyCreation() {
             <View className='flex-row gap-x-2'>
               <View className='overflow-hidden rounded-md'>
                 <Pressable
+                style={{backgroundColor: "#444"}}
                 onPress={() => router.push("/(owner)/(screens)/MapView")}
-                android_ripple={{color: "#fdffd9"}} 
-                className='grow bg-yellow items-center rounded-md justify-center w-14'>
+                android_ripple={{color: "white"}} 
+                className='grow items-center rounded-md justify-center w-14'>
                   <Ionicons name='location-outline' size={20} color={"white"}/>
                 </Pressable>
               </View>
@@ -128,7 +122,7 @@ export default function PropertyCreation() {
               
               <TextInput
               onChangeText={handleAddressChange}
-              className='py-2 px-5 rounded-md border border-gray-300 grow'/>
+              className='py-2 px-5 rounded-md bg-gray-200 grow'/>
             </View>
           </View>
 
@@ -141,16 +135,18 @@ export default function PropertyCreation() {
             <TextInput
             onChangeText={handleDescriptionChange}
             placeholder='Tell us about your property.'
-            className='py-2 px-5 rounded-md border border-gray-300'/>
+            multiline
+            className='py-2 px-5 rounded-md bg-gray-200'/>
           </View>
       </View>
         
         <View className='overflow-hidden rounded-md mt-10'>
           <Pressable
+          style={{backgroundColor: "#444"}}
           onPress={createProperty}
           android_ripple={{color: '#fdffd9'}} 
           className='p-4 flex-row items-center justify-center gap-x-1 bg-yellow rounded-md'>
-            <Text className='text-white'>{loading ? "Loading" : "Save"}</Text>
+            <Text className='text-white'>{loading ? "LOADING" : "CREATE PROPERTY"}</Text>
             <Ionicons name='create-outline' size={15} color={"white"}/>
           </Pressable>
         </View>

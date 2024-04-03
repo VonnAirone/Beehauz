@@ -42,10 +42,35 @@ export default function TenantRegistration({ email }) {
         Alert.alert("Error updating user information:", error.message)
       } else {
         if (usertype === "Tenant") {
-          router.push("/(tenant)/(tabs)/home")
+          try {
+            const { data, error } = await supabase.from('tenants').insert({ 'tenant_id': user?.id, 'date_joined': Date.now() });
+        
+            if (error) {
+              throw error;
+            }
+        
+            if (data) {
+              router.push("/(tenant)/(tabs)/home");
+            }
+          } catch (error) {
+            console.log("Error inserting tenant: ", error.message);
+
+          }
         } else {
-          router.push("/(owner)/(tabs)/one")
-        }
+          try {
+            const { data, error } = await supabase.from('owners').insert({ 'owner_id': user?.id });
+        
+            if (error) {
+              throw error;
+            }
+        
+            if (data) {
+              router.push("/(owner)/(tabs)/Dashboard");
+            }
+          } catch (error) {
+            console.log("Error inserting owner: ", error.message);
+          }
+        }        
       }
   }
   
@@ -114,7 +139,7 @@ export default function TenantRegistration({ email }) {
                       placeholder='Ex. Juan'
                       value={firstName}
                       onChangeText={handleFirstNameChange}
-                      className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
+                      className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
                     />
                 </View>
                 <View className='w-40'>
@@ -124,7 +149,7 @@ export default function TenantRegistration({ email }) {
                       clearTextOnFocus
                       value={lastName}
                       onChangeText={handleLastNameChange}
-                      className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
+                      className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
                     />
                 </View>
               </View>
@@ -135,7 +160,7 @@ export default function TenantRegistration({ email }) {
                     clearTextOnFocus
                     value={user?.email}
                     editable={false}
-                    className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
+                    className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
                   />
               </View>
 
@@ -146,7 +171,7 @@ export default function TenantRegistration({ email }) {
                     value={address}
                     placeholder={'(ex. Barangay, Municipality, Province)'}
                     onChangeText={handleAddressChange}
-                    className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
+                    className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
                   />
               </View>
 
@@ -158,13 +183,13 @@ export default function TenantRegistration({ email }) {
                     value={age}
                     placeholder={'Age'}
                     onChangeText={handleAgeChange}
-                    className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
+                    className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
                   />
                 </View>
 
                 <View className='grow ml-5'>
                   <Text className="mb-1 font-semibold">Gender</Text>
-                  <View className='bg-gray-200 rounded-md'>
+                  <View className='bg-gray-100 rounded-md'>
                     <Dropdown 
                       style={{padding: 4}}
                       data={genderOptions} 
@@ -174,7 +199,7 @@ export default function TenantRegistration({ email }) {
                       placeholderStyle={{fontSize: 12, left: 10}}
                       placeholder={gender ? gender : 'Not specified'}
                       itemTextStyle={{fontSize: 13}}
-                      itemContainerStyle={{backgroundColor: '#e5e7eb', borderColor: 'none'}}
+                      itemContainerStyle={{backgroundColor: '#F3F4F6', borderColor: 'none'}}
                       onChange={item => (
                         handleGenderPress(item.value)
                       )} 
@@ -191,7 +216,7 @@ export default function TenantRegistration({ email }) {
                     placeholder='+63 -'
                     value={phoneNumber}
                     onChangeText={handlePhoneNumberChange}
-                    className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
+                    className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
                   />
               </View>
               

@@ -38,6 +38,7 @@ export default function Dashboard() {
     }
     
     fetchData();
+    subscribeToRealTimeChanges();
   }, [propertyID]);
   
   async function getUserProfile(id: string) {
@@ -94,6 +95,24 @@ export default function Dashboard() {
     }
 }
 
+async function subscribeToRealTimeChanges() {
+  const channels = supabase
+    .channel('property-creation')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'property' },
+      (payload) => {
+        console.log('Change received!', payload);
+        getProperties()
+      }
+    )
+    .subscribe();
+
+  return () => {
+    channels.unsubscribe();
+  };
+}
+
   async function getTenants() {
     try {
       const { data, error } = await supabase
@@ -139,7 +158,7 @@ export default function Dashboard() {
         <Logo/>
 
         <Pressable className='p-3 bg-yellow rounded-md'>
-          <Ionicons name='notifications' color={"white"} size={20}/>
+          <Ionicons name='notifications' color={"#444"} size={20}/>
         </Pressable>
       </View>
 
@@ -147,10 +166,10 @@ export default function Dashboard() {
         <HomepageSkeleton/>
       ) : (
         <View className='p-5'>
-        <Text className='text-4xl'>Hello <Text>{userProfile?.first_name}</Text></Text>
+        <Text className='text-2xl'>Hello <Text className='font-semibold'>{userProfile?.first_name}</Text></Text>
 
-        <View className='mt-2'>
-          <Text>This is what we have for you today.</Text>
+        <View className='mb-4'>
+          <Text className='text-xs'>This is what we have for you today.</Text>
         </View>
 
         <DashboardComponents id={user} properties={properties} tenants={tenants} bookings={bookings}/>

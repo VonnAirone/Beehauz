@@ -130,18 +130,20 @@ export default function ManageProfile() {
     <SafeAreaView className='flex-1'>
       <ScrollView className='p-5' showsVerticalScrollIndicator={false}>
           <View>
-            <Pressable onPress={() => router.back()}>
+            <Pressable onPress={() => router.push("/(tenant)/(tabs)/account")}>
               <View className='flex-row items-center '>
                   <Ionicons name='chevron-back-outline' size={20}/>
                   <Text>Back</Text>
               </View>
             </Pressable>
         </View>
-        <View className='items-center bg-yellow rounded-md mt-2 h-32 mb-6'>
-            <View className='absolute -bottom-10 rounded-full border-2 border-yellow bg-white overflow-hidden'>
+        <View 
+        style={{backgroundColor: "#444"}}
+        className='items-center rounded-md mt-2 h-32 mb-6'>
+            <View className='absolute -bottom-10 rounded-full border-2 border-gray-200 bg-white overflow-hidden'>
               <Pressable 
               onPress={changeProfile}
-              android_ripple={{color: "#ffa233"}}>
+              android_ripple={{color: "#444"}}>
                 {loading ? (
                   <View className='h-28 w-28 justify-center items-center'>
                     {/* <ActivityIndicator size={'large'}/> */}
@@ -150,12 +152,12 @@ export default function ManageProfile() {
                 ) : (
                   <View className='opacity-40 h-28 w-28'> 
                     {avatar && 
-                    <Image source={{ uri: avatar }} style={{ width: 100, height: 100 }} 
+                    <Image source={{ uri: avatar }} style={{ width: "100%", height: "100%" }} 
                     />} 
                   </View>
                )}
                   <View className='absolute self-center top-10'>
-                    <Ionicons name='camera' color={'#ffa233'} size={32}/>
+                    <Ionicons name='camera' color={'#444'} size={32}/>
                   </View>
               </Pressable>
             </View>
@@ -173,7 +175,7 @@ export default function ManageProfile() {
               <Text className='font-semibold'>First Name</Text>
               <TextInput 
               onChangeText={(text) => handleChangeText('first_name', text)}
-              className='w-full border border-gray-200 rounded-md py-2 px-5'
+              className='w-full border bg-gray-100 border-gray-200  rounded-md py-2 px-5'
               editable={allowEdit}
               value={userData?.first_name}/>
           </View>
@@ -182,7 +184,7 @@ export default function ManageProfile() {
             <Text className='font-semibold'>Last Name</Text>
             <TextInput 
             onChangeText={(text) => handleChangeText('last_name', text)}
-            className='w-full border border-gray-200 rounded-md py-2 px-5'
+            className='w-full border bg-gray-100 border-gray-200  rounded-md py-2 px-5'
             editable={allowEdit}
             value={userData?.last_name}/>
           </View>
@@ -191,7 +193,7 @@ export default function ManageProfile() {
         
         <View className='gap-y-2 mt-2'>
           <Text className='font-semibold'>Description</Text>
-          <TextInput className='w-full border border-gray-200 rounded-md py-2 px-5'
+          <TextInput className='w-full border bg-gray-100 border-gray-200  rounded-md py-2 px-5'
           onChangeText={(text) => handleChangeText('description', text)} 
           editable={allowEdit}
           multiline
@@ -201,14 +203,14 @@ export default function ManageProfile() {
 
         <View className='gap-y-2 mt-2'>
           <Text className='font-semibold'>Email</Text>
-          <TextInput className='w-full border border-gray-200 rounded-md py-2 px-5'
+          <TextInput className='w-full border bg-gray-100 border-gray-200 rounded-md py-2 px-5'
           editable={false}
           value={userData?.email}/>
         </View>
         
         <View className='gap-y-2 mt-2'>
           <Text className='font-semibold'>Phone Number</Text>
-          <TextInput className='w-full border border-gray-200 rounded-md py-2 px-5'
+          <TextInput className='w-full border bg-gray-100 border-gray-200  rounded-md py-2 px-5'
           onChangeText={(text) => handleChangeText('phone_number', text)} 
           editable={allowEdit}
           value={userData?.phone_number.toString()}/>
@@ -218,11 +220,13 @@ export default function ManageProfile() {
           <Text className='font-semibold'>Address</Text>
 
           <View className='flex-row items-center gap-x-2'>
-            <View className='p-3 rounded-md bg-yellow'>
+            <View 
+            style={{backgroundColor: "#444"}}
+            className='p-3 rounded-md'>
               <Ionicons name='location' color={"white"} size={20}/>
             </View>
             
-            <TextInput className='grow border border-gray-200 rounded-md py-2 px-5'
+            <TextInput className='grow border bg-gray-100 border-gray-200  rounded-md py-2 px-5'
             onChangeText={(text) => handleChangeText('address', text)} 
             value={userData?.address}/>
           </View>

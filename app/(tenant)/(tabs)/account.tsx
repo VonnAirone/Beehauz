@@ -130,7 +130,7 @@ export default function Account() {
 
 
         <View className='gap-y-3 mt-3 mb-10'>
-          <View className='flex-row justify-between rounded-md bg-gray-200 p-3'>
+          <View className='flex-row justify-between rounded-md bg-gray-100 p-3'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='mail-outline' size={18}/>
               <Text className='font-semibold'>Email</Text>
@@ -144,7 +144,7 @@ export default function Account() {
             </View>
           </View>
 
-          <View className='flex-row justify-between rounded-md bg-gray-200 p-3'>
+          <View className='flex-row justify-between rounded-md bg-gray-100 p-3'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='phone-portrait-outline' size={18}/>
               <Text className='font-semibold'>Phone</Text>
@@ -160,7 +160,7 @@ export default function Account() {
             </View>
           </View>
 
-          <View className='flex-row justify-between rounded-md bg-gray-200 p-3'>
+          <View className='flex-row justify-between rounded-md bg-gray-100 p-3'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='location-outline' size={18}/>
               <Text className='font-semibold'>Location</Text>
@@ -186,7 +186,7 @@ export default function Account() {
             <Pressable 
             onPress={() => router.push("/Transactions")}
             android_ripple={{color: 'f1f1f1'}} 
-            className='rounded-md bg-gray-200  p-3'>
+            className='rounded-md bg-gray-100  p-3'>
               <View className='flex-row justify-between items-center'>
                 <View className='flex-row items-center gap-x-2'>
                   <Ionicons name='document-text-outline' size={18}/>
@@ -201,7 +201,7 @@ export default function Account() {
           </View>
 
           <View className='rounded-md overflow-hidden'>
-            <Pressable android_ripple={{color: 'f1f1f1'}} className='rounded-md bg-gray-200 p-3'>
+            <Pressable android_ripple={{color: 'f1f1f1'}} className='rounded-md bg-gray-100 p-3'>
               <View className='flex-row justify-between items-center'>
                 <View className='flex-row items-center gap-x-2'>
                   <Ionicons name='information-circle-outline' size={18}/>
@@ -216,7 +216,7 @@ export default function Account() {
           </View>
          
          <View className='rounded-md overflow-hidden'>
-          <Pressable android_ripple={{color: 'f1f1f1'}} className='rounded-md bg-gray-200  p-3'>
+          <Pressable android_ripple={{color: 'f1f1f1'}} className='rounded-md bg-gray-100  p-3'>
               <View className='flex-row justify-between items-center'>
                 <View className='flex-row items-center gap-x-2'>
                   <Ionicons name='star-half-outline' size={18}/>
@@ -234,7 +234,7 @@ export default function Account() {
           <Pressable
             onPress={() => setModalVisible(true)}
             android_ripple={{color: 'f1f1f1'}} 
-            className='rounded-md bg-gray-200  p-3'>
+            className='rounded-md bg-gray-100  p-3'>
               <View className='flex-row justify-between items-center'>
                 <View className='flex-row items-center gap-x-2'>
                   <Ionicons name='log-out-outline' size={18}/>

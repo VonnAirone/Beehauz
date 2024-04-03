@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Text, View, Alert, TextInput, Pressable, FlatList, ScrollView } from 'react-native';
+import { Text, View, Alert, TextInput, Pressable, FlatList, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/utils/AuthProvider';
 import { supabase } from '@/utils/supabase';
@@ -24,6 +24,7 @@ export default function BHDetails() {
   const [amenities, setAmenities] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [allowEdit, setAllowEdit] = useState(false);
+  const [uploading, setUploading] = useState(false)
   
   const handleChangeText = (key, value) => {
     setData(prevData => ({
@@ -39,20 +40,20 @@ export default function BHDetails() {
     }));
   };
 
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const fetchedData = await fetchPropertyDetailsData(propertyID)
-        setData(fetchedData)
-        await loadImages(propertyID, setImages)
-        await fetchAmenities(propertyID, setAmenities)
-        await fetchPropertyTerms(propertyID, setPropertyTerms)
-      } catch (error) {
-        console.log("Error fetching data: ", error.message)
-      }
+  async function fetchData() {
+    try {
+      const fetchedData = await fetchPropertyDetailsData(propertyID)
+      setData(fetchedData)
+      await loadImages(propertyID, setImages)
+      await fetchAmenities(propertyID, setAmenities)
+      await fetchPropertyTerms(propertyID, setPropertyTerms)
+      setLoading(false)
+    } catch (error) {
+      console.log("Error fetching data: ", error.message)
     }
-    
+  }
+
+  useEffect(() => {  
     fetchData()
   }, [user?.id, propertyID]);
 
@@ -60,6 +61,7 @@ export default function BHDetails() {
     const propertyData = {
       name: data.name,
       description: data?.description,
+      address: data?.address
     };
 
     const terms = {
@@ -93,6 +95,7 @@ export default function BHDetails() {
         if (termsError) {
           console.log("Error updating property details: ", termsError.message)
         } else {
+          fetchData()
           Alert.alert("Succesfully updated property details.")
           setLoading(false)
         }
@@ -103,6 +106,13 @@ export default function BHDetails() {
       Alert.alert('Error', 'Failed to update property details. Please try again later.');
     }
   };
+
+  async function uploadPropertyImage() {
+    setUploading(true)
+    await uploadImage(propertyID)
+    await loadImages(propertyID, setImages)
+    setUploading(false)
+  }
  
 
   return (
@@ -139,11 +149,15 @@ export default function BHDetails() {
             <Text className='font-semibold'>Address</Text>
 
             <View className='flex-row items-center gap-x-2'>
-              <View className='p-3 rounded-md bg-yellow'>
+              <Pressable 
+              style={{backgroundColor: "#444"}}
+              className='p-3 rounded-md'>
                 <Ionicons name='location' color={"white"} size={20}/>
-              </View>
+              </Pressable>
               
-              <TextInput className='grow border border-gray-200 rounded-md py-2 px-5'
+              <TextInput 
+              className='grow border border-gray-200 rounded-md py-2 px-5'
+              onChangeText={(text) => handleChangeText('address', text)}
               editable={allowEdit} 
               multiline
               value={data?.address}/>
@@ -175,10 +189,21 @@ export default function BHDetails() {
 
             {allowEdit && (
               <Pressable 
-              onPress={uploadImage}
-              className='bg-gray-50 rounded-md flex-row items-center p-3 gap-x-2 justify-center'>
-                <Ionicons name='camera-outline'/>
-                <Text>Add Property Image</Text>
+              disabled={uploading}
+              onPress={uploadPropertyImage}
+              className='bg-gray-50 rounded-md p-3'>
+                {uploading ? (
+                    <View className='flex-row items-center justify-center gap-x-2'>
+                      <Text>Uploading</Text>
+                      <ActivityIndicator/>
+                    </View>
+                ) : (
+                  <View className='flex-row items-center justify-center gap-x-2'>
+                    <Ionicons name='camera-outline'/>
+                    <Text>Add Property Image</Text>
+                  </View>
+                )}
+
               </Pressable>
             )}
 
@@ -254,7 +279,11 @@ export default function BHDetails() {
             <Pressable 
             onPress={() => setShowModal(false)}
             className='bg-gray-50 border  p-3 rounded-md absolute z-10 w-full flex-row items-center justify-between'>
-              <Text className='text-xs'>Amenities typically refer to the facilities and services provided to the residents for their comfort, convenience, and daily living needs.</Text>
+              <View className='w-72'>
+                <Text className='text-xs'>Amenities typically refer to the facilities and services provided to the residents for their comfort, convenience, and daily living needs.</Text>
+                <Text className='mt-2 text-xs italic'>Ex. Wi-Fi, Common CR, Private Bathroom, Kitchen, Laundry Area</Text>
+              </View>
+
               <Ionicons name='close-outline' size={15}/>
             </Pressable>
             )}
@@ -282,8 +311,10 @@ export default function BHDetails() {
 
             <View className='pt-10'>
               <Pressable 
+              android_ripple={{color: "white"}}
+              style={{backgroundColor: "#444"}}
               onPress={handleUpdateProperty}
-              className='bg-yellow rounded-md p-3'>
+              className='rounded-md p-3'>
                 <Text className='text-center text-white'>{loading ? 'Loading' : 'Save Changes'}</Text>
               </Pressable>
             </View>
