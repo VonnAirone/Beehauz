@@ -16,10 +16,10 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarLabel:() => {return null},
-        tabBarActiveTintColor: '#ffa233',
+        tabBarActiveTintColor: '#444',
       }}>
       <Tabs.Screen
-        name="one"
+        name="Dashboard"
         options={{
           title: 'Dashboard',
           tabBarIcon: ({ color }) => <TabBarIcon name="grid-outline" color={color} />,

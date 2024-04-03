@@ -43,45 +43,41 @@ export default function Usertype() {
     <SafeAreaView className='flex-1 bg-white'>
 
 
-        {showModal && (
-            <View className='flex-1 absolute h-screen items-center justify-center w-full z-10'>
-                <View>
-                    <View className='absolute z-10 top-3 right-3'>
-                        <Pressable onPress={() => setShowModal(false)}>
-                            <Ionicons name='close-outline' size={15}/>
-                        </Pressable>
-                    </View>
-                    <View className='bg-white border border-gray-200 py-10 w-72 rounded-md items-center'>
-                        <View className=''>
-                            <Text className='text-base'>Do you wish to proceed as <Text className='uppercase font-semibold text-lg'>{usertype}</Text> ?</Text>
-                        </View>
+      {showModal && (
+        <View className='flex-1 absolute h-screen items-center justify-center w-full z-10'>
+          <View>
+            <View className='bg-gray-100 p-5 rounded-md items-center'>
+              <View className=''>
+                <Text className='text-base'>Do you wish to proceed as <Text className='uppercase font-semibold text-lg'>{usertype}</Text> ?</Text>
+              </View>
 
 
 
-                        <View className='flex-row gap-x-5 mt-4'>
-                            <View className='rounded-md overflow-hidden'>
-                                <Pressable 
-                                android_ripple={{color: '#FFA233'}}
-                                onPress={() => setShowModal(false)}
-                                className='w-24 py-3 border border-yellow rounded-md'>
-                                    <Text className='text-center'>Cancel</Text>
-                                </Pressable>
-                            </View>
-
-                            <View className='rounded-md overflow-hidden'>
-                                <Pressable 
-                                android_ripple={{color: '#FDFDD9'}}
-                                onPress={updateUsertype}
-                                className='w-24 py-3 bg-yellow rounded-md'>
-                                    <Text className='text-center'>{loading ? 'Loading' : 'Yes'}</Text>
-                                </Pressable>
-                            </View>
-                        </View>
-                    </View>
+              <View className='flex-row gap-x-5 mt-4'>
+                <View className='rounded-md overflow-hidden'>
+                  <Pressable 
+                  android_ripple={{color: '#FFA233'}}
+                  onPress={() => setShowModal(false)}
+                  className='w-24 py-3 border border-yellow rounded-md'>
+                      <Text className='text-center font-semibold'>CANCEL</Text>
+                  </Pressable>
                 </View>
+
+                <View className='rounded-md overflow-hidden'>
+                  <Pressable 
+                  style={{backgroundColor: "#444"}}
+                  android_ripple={{color: '#FDFDD9'}}
+                  onPress={updateUsertype}
+                  className='w-24 py-3 rounded-md'>
+                      <Text className='text-center text-white font-semibold'>{loading ? 'Loading' : 'YES'}</Text>
+                  </Pressable>
+                </View>
+              </View>
             </View>
-        )}
-        
+          </View>
+        </View>
+      )}
+      
         <View className={`flex-1 ${showModal && 'opacity-20'} p-5`}>
           <BackButton/>
 
@@ -127,5 +123,3 @@ export default function Usertype() {
     </SafeAreaView>
   )
 }
-
-const styles = StyleSheet.create({})

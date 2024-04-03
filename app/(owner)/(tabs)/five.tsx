@@ -97,20 +97,16 @@ export default function Account() {
         <View
         className='mt-10 flex-row items-center'>
           <View className='h-20 w-20 rounded-md'>
-            {avatar ? (
-              <Image 
+            {avatar && 
+            <Image 
             className='rounded-md'
             source={{ uri: avatar }} 
             style={{ width: '100%', height: "100%" }} 
-            resizeMode='cover'/>
-            ) : (
-              <View className='h-full w-full bg-slate-200 rounded-md'></View>
-            )
-            }
+            resizeMode='cover'/>}
           </View>
 
           <View className='ml-4'>
-            <Text className='font-medium italic'>Tenant</Text>
+            <Text className='font-medium italic'>Owner</Text>
             <Text className='font-semibold text-xl'>{userProfile?.first_name} {userProfile?.last_name}</Text>
             <Text className='text-xs'>{userProfile?.gender}</Text>
             <Text className='text-xs'>{userProfile?.age}</Text>
@@ -134,7 +130,7 @@ export default function Account() {
 
 
         <View className='gap-y-3 mt-3 mb-10'>
-          <View className='flex-row justify-between rounded-md bg-gray-200 p-3'>
+          <View className='flex-row justify-between rounded-md bg-gray-50 p-3'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='mail-outline' size={18}/>
               <Text className='font-semibold'>Email</Text>
@@ -148,7 +144,7 @@ export default function Account() {
             </View>
           </View>
 
-          <View className='flex-row justify-between rounded-md bg-gray-200 p-3'>
+          <View className='flex-row justify-between rounded-md bg-gray-50 p-3'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='phone-portrait-outline' size={18}/>
               <Text className='font-semibold'>Phone</Text>
@@ -164,7 +160,7 @@ export default function Account() {
             </View>
           </View>
 
-          <View className='flex-row justify-between rounded-md bg-gray-200 p-3'>
+          <View className='flex-row justify-between rounded-md bg-gray-100 p-3'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='location-outline' size={18}/>
               <Text className='font-semibold'>Location</Text>
@@ -190,7 +186,7 @@ export default function Account() {
             <Pressable 
             onPress={() => router.push("/Transactions")}
             android_ripple={{color: 'f1f1f1'}} 
-            className='rounded-md bg-gray-200  p-3'>
+            className='rounded-md bg-gray-100  p-3'>
               <View className='flex-row justify-between items-center'>
                 <View className='flex-row items-center gap-x-2'>
                   <Ionicons name='document-text-outline' size={18}/>
@@ -205,7 +201,7 @@ export default function Account() {
           </View>
 
           <View className='rounded-md overflow-hidden'>
-            <Pressable android_ripple={{color: 'f1f1f1'}} className='rounded-md bg-gray-200 p-3'>
+            <Pressable android_ripple={{color: 'f1f1f1'}} className='rounded-md bg-gray-100 p-3'>
               <View className='flex-row justify-between items-center'>
                 <View className='flex-row items-center gap-x-2'>
                   <Ionicons name='information-circle-outline' size={18}/>
@@ -220,7 +216,7 @@ export default function Account() {
           </View>
          
          <View className='rounded-md overflow-hidden'>
-          <Pressable android_ripple={{color: 'f1f1f1'}} className='rounded-md bg-gray-200  p-3'>
+          <Pressable android_ripple={{color: 'f1f1f1'}} className='rounded-md bg-gray-100  p-3'>
               <View className='flex-row justify-between items-center'>
                 <View className='flex-row items-center gap-x-2'>
                   <Ionicons name='star-half-outline' size={18}/>
@@ -238,7 +234,7 @@ export default function Account() {
           <Pressable
             onPress={() => setModalVisible(true)}
             android_ripple={{color: 'f1f1f1'}} 
-            className='rounded-md bg-gray-200  p-3'>
+            className='rounded-md bg-gray-100  p-3'>
               <View className='flex-row justify-between items-center'>
                 <View className='flex-row items-center gap-x-2'>
                   <Ionicons name='log-out-outline' size={18}/>

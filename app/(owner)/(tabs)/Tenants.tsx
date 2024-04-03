@@ -1,4 +1,4 @@
-import { Alert, FlatList, Keyboard, Pressable, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
+import { Alert, FlatList, Keyboard, Pressable, Text, TextInput, View, TouchableWithoutFeedback } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '@/utils/supabase';
@@ -8,6 +8,7 @@ import { useAuth } from '@/utils/AuthProvider';
 import { Ionicons } from '@expo/vector-icons';
 import debounce from 'lodash/debounce';
 import AvatarImage from '@/app/(tenant)/(aux)/avatar';
+import { router } from 'expo-router';
 
 export default function Tenants() {
   const user = useAuth();
@@ -17,6 +18,7 @@ export default function Tenants() {
   const [propertyID, setPropertyID] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<UserData[]>([]);
+  const [showModal, setShowModal] = useState(false)
 
   async function getTenants() {
     try {
@@ -127,19 +129,55 @@ export default function Tenants() {
   }
 
   return (
-    <TouchableWithoutFeedback className='bg-slate-300 flex-1' onPress={() => Keyboard.dismiss}>
+    <TouchableWithoutFeedback 
+    onPress={() => Keyboard.dismiss()}
+    className='bg-gray-500 flex-1'>
     <SafeAreaView className='flex-1'>
+
+      {showModal && (
+        <View className='bg-gray-200 h-60 w-80 items-center justify-center rounded-md absolute self-center top-64 z-10'>
+        <Pressable 
+        onPress={() => setShowModal(false)}
+        className='absolute top-3 right-3'>
+          <Ionicons name='close' size={20} color={"#444"}/>
+        </Pressable>
+        <Text className='text-center font-medium mb-4 text-lg'>Add New Tenants</Text>
+        <View className='overflow-hidden rounded-md w-60 mb-4'>
+          <Pressable
+          onPress={() => router.push("/TenantsList")}
+          android_ripple={{color: 'white'}}
+          style={{backgroundColor: "#444"}} 
+          className='p-3 rounded-md'>
+            <Text className='text-white text-center'>Select from Existing Tenants</Text>
+          </Pressable>
+        </View>
+
+        <View className='overflow-hidden rounded-md w-60'>
+          <Pressable
+          android_ripple={{color: '#444'}}
+          className='p-3 rounded-md border border-gray-700'>
+            <Text className='text-center'>Add New Tenant</Text>
+          </Pressable>
+        </View>
+        </View>
+      )}
+     
+      
       <View className='p-5'>
         <View className='mb-4 flex-row items-center justify-between'>
           <Text className='font-semibold text-xl'>Manage your Tenants</Text>
-          <Pressable className='p-3 bg-yellow rounded-md'>
+          <Pressable 
+          onPress={() => setShowModal(!showModal)}
+          android_ripple={{color: "white"}}
+          style={{backgroundColor: "#444"}}
+          className='p-3 rounded-md'>
             <Ionicons name='person-add' color={"white"} size={20}/>
           </Pressable>
         </View>
 
-        <View className='flex-row items-center border border-gray-100  rounded-md p-2 backdrop-blur-3xl'>
+        <View className='flex-row items-center bg-gray-50  rounded-md p-2 backdrop-blur-3xl'>
           <View className='mx-2'>
-            <Ionicons name='search' size={20} color={'#ffa233'}/>
+            <Ionicons name='search' size={20} color={'#444'}/>
           </View>
           <TextInput
             placeholder='Search for a user'
@@ -156,7 +194,8 @@ export default function Tenants() {
           </View>
         ) : (
           <View className='gap-y-2 mt-2'>
-            <FlatList
+            {tenants && tenants.length !== 0 ? (
+              <FlatList
               data={tenantsProfiles}
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item, index }) => (
@@ -201,11 +240,27 @@ export default function Tenants() {
                 </View>
               )}
             />
+            ) : (
+              <View className='text-xs'>
+                <Text>No tenants have been added to the property.</Text>
+                <View className='mt-4'>
+                  <Text>To add new tenants, follow the steps provided:</Text>
+                  <Text>1. Select the Add Tenant Icon above</Text>
+                  <Text>2. Select between <Text className='font-medium uppercase'>Select from existing tenants</Text> or <Text className='font-medium uppercase'>Add new tenants</Text>.</Text>
+
+                  <Text className='mt-2'><Text className='font-medium uppercase'>Select from existing tenants</Text> shows a list of registered tenants in the app.</Text>
+                  
+                  <Text className='mt-2'><Text className='font-medium uppercase'>Add new tenants</Text> allows you to add individuals who are currently boarding in your property but are not yet registered in the app.</Text>
+                </View>
+              </View>
+            )}
+            
           </View>
         )}
 
           
       </View>
+      
     </SafeAreaView>
   </TouchableWithoutFeedback>
   );

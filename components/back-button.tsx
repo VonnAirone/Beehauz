@@ -17,5 +17,3 @@ export default function BackButton() {
     </View>
   )
 }
-
-const styles = StyleSheet.create({})

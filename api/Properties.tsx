@@ -1,4 +1,5 @@
 export interface UserData {
+    id: string;
     first_name: string;
     last_name: string;
     address: string;
@@ -7,6 +8,7 @@ export interface UserData {
     phone_number: number;
     age: string;
     description: string;
+    date_joined: string;
 }
 
 // export type PropertyData = {

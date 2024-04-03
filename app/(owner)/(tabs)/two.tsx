@@ -7,10 +7,9 @@ import { supabase } from '@/utils/supabase';
 import { PropertyData, PropertyTerms, ReviewData } from '@/api/Properties';
 import { Images } from '@/app/(tenant)/(aux)/homecomponents';
 import { loadImages } from '@/api/ImageFetching';
-import { fetchPropertyTerms, getPropertyReviews } from '@/api/DataFetching';
+import { fetchAmenities, fetchPropertyTerms, getPropertyReviews } from '@/api/DataFetching';
 import { PropertyReviews } from '../(aux)/propertycomponents';
 import { router } from 'expo-router';
-import { Amenities } from '@/app/(tenant)/(aux)/detailscomponent';
 
 
 export default function BHDetails() {
@@ -24,6 +23,7 @@ export default function BHDetails() {
   const [propertyReviews, setPropertyReviews] = useState<ReviewData[] | null>(null);
   const [ratings, setRatings] = useState(0)
   const [terms, setTerms] = useState<PropertyTerms | null>(null)
+  const [amenities, setAmenities] = useState([])
 
   const openImage = (image) => {
     setSelectedImage(image);
@@ -31,11 +31,19 @@ export default function BHDetails() {
   }
 
   useEffect(() => {
-    getProperties()
-    fetchPropertyReviews()
-    fetchPropertyTerms(propertyID, setTerms)
-  }, [propertyID]);
+    
+    fetchData()
+    subscribeToTermsChanges()
+    subscribeToPropertyChanges()
+  }, []);
 
+
+  
+  async function fetchData() {
+    await getProperties();
+
+    setLoading(false)
+  }
 
   const fetchPropertyReviews = async () => {
     try {
@@ -48,31 +56,72 @@ export default function BHDetails() {
       console.error('Error fetching property reviews:', error);
       setPropertyReviews(null);
     }
-
-    setLoading(false)
   };
+
+  async function subscribeToTermsChanges() {
+    const channels = supabase
+      .channel('property-creation')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'property_terms' },
+        (payload) => {
+          console.log('Change received!', payload);
+          fetchData()
+        }
+      )
+      .subscribe();
+  
+    return () => {
+      channels.unsubscribe();
+    };
+  }
+
+  async function subscribeToPropertyChanges() {
+    const channels = supabase
+      .channel('property-creation')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'property' },
+        (payload) => {
+          console.log('Change received!', payload);
+          fetchData()
+        }
+      )
+      .subscribe();
+  
+    return () => {
+      channels.unsubscribe();
+    };
+  }
 
   async function getProperties() {
     try {
-      const { data, error } = await supabase.from("property")
-      .select()
-      .eq("owner_id", user?.id)
-      
-      
+      const { data, error } = await supabase
+        .from("property")
+        .select()
+        .eq("owner_id", user?.id);
+        
       if (error) {
-        console.log("Error fetching properties: ", error.message)
+        console.log("Error fetching properties: ", error.message);
         return;
       }
   
       if (data && data.length > 0) {
-        setProperties(data[0]);
-        setPropertyID(data[0]?.property_id);
-        await loadImages(propertyID, setImages);
+        const property = data[0];
+        setProperties(property);
+        await setPropertyID(property?.property_id);
+        if (property?.property_id) {
+          await loadImages(property?.property_id, setImages);
+          await fetchPropertyReviews();
+          await fetchPropertyTerms(property?.property_id, setTerms);
+          await fetchAmenities(property?.property_id, setAmenities);
+        }
       }
     } catch (error) {
-      console.log("Error fetching properties: ", error.message)
+      console.log("Error fetching properties: ", error.message);
     }
   }
+  
   
 
   return (
@@ -86,13 +135,13 @@ export default function BHDetails() {
         <View className='overflow-hidden rounded-full absolute z-10 right-5 top-5'>
           <Pressable 
           onPress={() => router.push({pathname: "/ManageProperty", params: {propertyID}})}
-          android_ripple={{color: '#ffa233'}}
+          android_ripple={{color: '#444'}}
           className='p-5 bg-white rounded-full w-16 h-16 items-center justify-center'>
-            <Ionicons name='build' size={20} color={'#ffa233'}/>
+            <Ionicons name='build' size={20} color={'#444'}/>
           </Pressable>
         </View>
         <View>
-          {images.length > 0 ? (
+          {images?.length > 0 ? (
             <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -130,7 +179,7 @@ export default function BHDetails() {
 
             <View className='flex-row items-center gap-x-1'>
               <Ionicons name='star' size={15} color={'#FF8B00'}/>
-              <Text> <Text className='font-semibold'>{ratings}</Text> stars / <Text className='font-semibold'>{propertyReviews.length}</Text> {propertyReviews.length > 0 ? 'review' : 'reviews'}</Text>
+              <Text> <Text className='font-semibold'>{ratings}</Text> stars / <Text className='font-semibold'>{propertyReviews?.length}</Text> {propertyReviews?.length > 0 ? 'review' : 'reviews'}</Text>
             </View>
             
             <View className='mt-5'>
@@ -153,14 +202,24 @@ export default function BHDetails() {
             <View className='mt-5'>
               <Text className='font-semibold'>Payment Terms</Text>
               
-              <View className='flex-row items-end my-1'>
+              <View className='flex-row items-end mt-1'>
                 <Text className='text-xs'>Advance Payment: </Text>
-                <Text className='font-semibold text-xs'>{terms?.advance_payment}</Text>
+                <Text className='font-semibold text-xs'>{terms ? terms?.advance_payment : 'Not specified'}</Text>
               </View>
 
-              <View className='flex-row items-end'>
+              <View className='flex-row items-end mt-1'>
                 <Text className='text-xs'>Security Deposit: </Text>
-                <Text className='font-semibold text-xs'>{terms?.security_deposit}</Text>
+                <Text className='font-semibold text-xs'>{terms ? terms?.security_deposit : 'Not specified'}</Text>
+              </View>
+
+              <View className='flex-row items-end mt-1'>
+                <Text className='text-xs'>Electricity Bill: </Text>
+                <Text className='font-semibold text-xs'>{terms ? terms?.electricity_bill : 'Not specified'}</Text>
+              </View>
+
+              <View className='flex-row items-end mt-1'>
+                <Text className='text-xs'>Water Bill: </Text>
+                <Text className='font-semibold text-xs'>{terms ? terms?.water_bills : 'Not specified'}</Text>
               </View>
             </View>
 
@@ -168,13 +227,25 @@ export default function BHDetails() {
               <View className='flex-row items-center'>
                 <Text className='font-semibold mr-1'>Amenities</Text>  
               </View>
-              <Amenities propertyID={propertyID}/>
+
+              <FlatList 
+              data={amenities} 
+              renderItem={({item,index}) =>
+              <View className='mr-2'>
+              <View key={item.amenity_id} className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
+                  <Text className='text-center text-xs'>{item.amenity_name}</Text>
+              </View>
+              </View>} showsHorizontalScrollIndicator={false} horizontal={true} />
             </View>
             
             <View className='mt-5'>
               <Text className='font-semibold'>Reviews ({propertyReviews?.length})</Text>
-
-              <PropertyReviews reviews={propertyReviews}/>
+              <Text className='italic text-xs mt-1'>Note: Only previous tenants and currently boarding are allowed to leave reviews for the property.</Text>
+              
+              <View className='mt-2'>
+                <PropertyReviews reviews={propertyReviews}/>
+              </View>
+              
             </View>
           </View>
         </View>

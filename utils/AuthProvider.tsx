@@ -1,6 +1,5 @@
 import React from 'react';
 import { useContext, useEffect, useState, createContext } from 'react';
-
 import { AuthSession } from '@supabase/supabase-js';
 import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import { supabase } from './supabase';
@@ -41,9 +40,9 @@ export function AuthProvider({ children }: Props) {
         router.replace('/Usertype')
       } else {
         if (session?.user.user_metadata.usertype == "Tenant") {
-          router.replace("/home")
+          router.replace("/(tenant)/(tabs)/home")
         } else {
-          router.replace("/one")
+          router.replace("/(owner)/(tabs)/Dashboard")
         }
 
         

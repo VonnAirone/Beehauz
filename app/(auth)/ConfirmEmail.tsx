@@ -1,20 +1,10 @@
 import { View, Text, Pressable, Linking } from 'react-native'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import Logo from '@/components/logo'
-import { useAuth } from '@/utils/AuthProvider'
-import { router } from 'expo-router'
 
 export default function ConfirmEmail() {
-
-  const authenticationStatus = useAuth()?.session.user.role;
-
-  useEffect(() => {
-    if (authenticationStatus === 'authenticated') {
-      router.replace("/Usertype")
-    }
-  })
 
   const openEmail = async () => {
     const gmailUrl = 'https://mail.google.com/mail/u/?authuser=user@gmail.com';

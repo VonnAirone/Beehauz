@@ -52,27 +52,27 @@ export default function OwnerProfile() {
     }
 
     async function fetchData() {
-        if(!hasFetched.current) {
-            try {
-                const [profileData, propertyData, ownerReviews] = await Promise.all([
-                    getUserProfile(owner_id.toString()),
-                    fetchOwnerProperties(),
-                    getReviews(),
-                ]);
-                setOwnerData(profileData);
-                setPropertyList(propertyData);
-                setOwnerReviews(ownerReviews);
-    
-                const tenant_id = ownerReviews.map(review => review.tenant_id);
-                const tenantData = await Promise.all(tenant_id.map(id => getProfile(id)));
-                const usernames = tenantData.map(tenant => tenant.name);
-                setReviewUsernames(usernames);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            } finally {
-                setLoading(false);
-            }
+      if(!hasFetched.current) {
+        try {
+          const [profileData, propertyData, ownerReviews] = await Promise.all([
+              getUserProfile(owner_id.toString()),
+              fetchOwnerProperties(),
+              getReviews(),
+          ]);
+          setOwnerData(profileData);
+          setPropertyList(propertyData);
+          setOwnerReviews(ownerReviews);
+
+          const tenant_id = ownerReviews.map(review => review.tenant_id);
+          const tenantData = await Promise.all(tenant_id.map(id => getProfile(id)));
+          const usernames = tenantData.map(tenant => tenant.name);
+          setReviewUsernames(usernames);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);  
         }
+      }
     }
 
     async function getUserProfile(id: string) {

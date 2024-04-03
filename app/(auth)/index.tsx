@@ -7,6 +7,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { CheckEmail, Logo, TextInputField } from '../(tenant)/(aux)/logincomponent';
 import { makeRedirectUri } from 'expo-auth-session';
 import { router } from 'expo-router';
+import * as Linking from 'expo-linking'
+import * as QueryParams from 'expo-auth-session/build/QueryParams'
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -24,8 +26,7 @@ export default function Login() {
   const [action, setAction] = useState('')
   const [users, setUsers] = useState([])
   const [userEmails, setUserEmails] = useState([])
-  const redirectTo = makeRedirectUri()
-
+  
   const handleEmailChange = (text) => {
     setEmail(text);
     setIsFormEmpty(false);
@@ -101,7 +102,7 @@ export default function Login() {
                   profileCompleted: false,
                   usertype: ''
                 },
-                emailRedirectTo: redirectTo
+                emailRedirectTo: "com.beehauz://Usertype"
               }
             });
           
@@ -169,21 +170,6 @@ export default function Login() {
   return (
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View className='justify-center items-center relative bg-white h-full'>
-      
-        <View className='z-10 items-center'>
-
-            {showModal && (
-              <View className='absolute top-40'>
-                <Pressable 
-                  onPress={() => setShowModal(false)}
-                  className='absolute right-3 top-3 z-20'>
-                  <Ionicons name='close' size={20}/>
-                </Pressable>
-
-                <CheckEmail email={email} actionType={action}/>
-              </View>
-            )}
-        </View>
 
         <View className={`justify-center items-center z-0 ${showModal && 'opacity-40'}`}>
           <Logo/>
@@ -218,7 +204,7 @@ export default function Login() {
 
             <View className='absolute -bottom-2 w-80'>
               {!isNotRegistered ? (
-                <Pressable onPress={() => setShowModal(!showModal)}>
+                <Pressable onPress={() => router.push("/SendResetPasswordLink")}>
                     <Text className='text-right text-xs right-1'>Forgot Password?</Text>
                 </Pressable>
               ) : (
