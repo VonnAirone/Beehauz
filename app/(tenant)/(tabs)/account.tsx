@@ -1,5 +1,5 @@
 import { Pressable, SafeAreaView, Text, View, Modal, Alert, TextInput, TouchableWithoutFeedback, Keyboard, Image } from 'react-native';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
@@ -10,22 +10,21 @@ import { Link, router } from 'expo-router';
 export default function Account() {
   const auth = useAuth();
   const user = auth.session?.user;
-  const [phoneNumber, setPhoneNumber] = useState('')
   const [modalVisible, setModalVisible] = useState(false);
-  const [onEditMode, setOnEditMode] = useState(false);
-  const [isChangeMade, setIsChangeMade] = useState(false)
   const [userProfile, setUserProfile] = useState<UserData | null>(null)
   const [avatar, setAvatar] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useLayoutEffect(() => {
-    async function fetchData() {
-      await getUserProfile();
-      await fetchAvatar();
-    }
-
+  useEffect(() => {
     fetchData();
+    subscribeToChanges();
   }, []); 
+
+  async function fetchData() {
+    await getUserProfile();
+    await fetchAvatar();
+  }
+
 
   async function getUserProfile() {
     try {
@@ -35,6 +34,24 @@ export default function Account() {
         console.log("Error fetching owner", error.message);
         throw error;
     }
+  }
+
+  async function subscribeToChanges() {
+    const channels = supabase
+      .channel('profile-update')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles' },
+        (payload) => {
+          console.log('Change received!', payload);
+          fetchData()
+        }
+      )
+      .subscribe();
+  
+    return () => {
+      channels.unsubscribe();
+    };
   }
 
   const fetchAvatar = async () => {
@@ -77,10 +94,6 @@ export default function Account() {
     }
   };
 
-  const handlePhoneChange = (text) => {
-    setPhoneNumber(text)
-    setIsChangeMade(!!text)
-  }
 
   async function signOUt() {
     const { error } = await supabase.auth.signOut()
@@ -106,7 +119,7 @@ export default function Account() {
           </View>
 
           <View className='ml-4'>
-            <Text className='font-medium italic'>Tenant</Text>
+            <Text className='font-medium italic'>Owner</Text>
             <Text className='font-semibold text-xl'>{userProfile?.first_name} {userProfile?.last_name}</Text>
             <Text className='text-xs'>{userProfile?.gender}</Text>
             <Text className='text-xs'>{userProfile?.age}</Text>
@@ -118,19 +131,10 @@ export default function Account() {
             <Link href={"/ManageProfile"}>
               <Ionicons name='chevron-forward-outline'/>
             </Link>
-          
-
         </View>
-
-          {onEditMode && (
-          <View className='self-center absolute top-10 p-3 rounded-md bg-yellow'>
-            <Text className='text-center'>On Edit Mode</Text>
-          </View>
-          )}
-
-
+        
         <View className='gap-y-3 mt-3 mb-10'>
-          <View className='flex-row justify-between rounded-md bg-gray-100 p-3'>
+          <View className='flex-row justify-between rounded-md bg-gray-50 p-3'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='mail-outline' size={18}/>
               <Text className='font-semibold'>Email</Text>
@@ -144,7 +148,7 @@ export default function Account() {
             </View>
           </View>
 
-          <View className='flex-row justify-between rounded-md bg-gray-100 p-3'>
+          <View className='flex-row justify-between rounded-md bg-gray-50 p-3'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='phone-portrait-outline' size={18}/>
               <Text className='font-semibold'>Phone</Text>
@@ -153,14 +157,12 @@ export default function Account() {
             <View className='relative w-40'>
               <TextInput 
               editable={false} 
-              onChangeText={handlePhoneChange}
-              placeholderTextColor={onEditMode? 'black' : 'gray'} 
               value={userProfile?.phone_number.toString()}
               className='text-right text-xs'/>
             </View>
           </View>
 
-          <View className='flex-row justify-between rounded-md bg-gray-100 p-3'>
+          <View className='flex-row justify-between rounded-md bg-gray-50 p-3'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='location-outline' size={18}/>
               <Text className='font-semibold'>Location</Text>
@@ -169,7 +171,6 @@ export default function Account() {
             <View>
               <TextInput 
               editable={false}
-              placeholderTextColor={onEditMode? 'black' : 'gray'}
               value={userProfile?.address}
               className='text-right text-xs'/>
             </View>
@@ -186,7 +187,7 @@ export default function Account() {
             <Pressable 
             onPress={() => router.push("/Transactions")}
             android_ripple={{color: 'f1f1f1'}} 
-            className='rounded-md bg-gray-100  p-3'>
+            className='rounded-md p-4'>
               <View className='flex-row justify-between items-center'>
                 <View className='flex-row items-center gap-x-2'>
                   <Ionicons name='document-text-outline' size={18}/>
@@ -201,7 +202,7 @@ export default function Account() {
           </View>
 
           <View className='rounded-md overflow-hidden'>
-            <Pressable android_ripple={{color: 'f1f1f1'}} className='rounded-md bg-gray-100 p-3'>
+            <Pressable android_ripple={{color: 'f1f1f1'}} className='rounded-md p-4'>
               <View className='flex-row justify-between items-center'>
                 <View className='flex-row items-center gap-x-2'>
                   <Ionicons name='information-circle-outline' size={18}/>
@@ -216,7 +217,7 @@ export default function Account() {
           </View>
          
          <View className='rounded-md overflow-hidden'>
-          <Pressable android_ripple={{color: 'f1f1f1'}} className='rounded-md bg-gray-100  p-3'>
+          <Pressable android_ripple={{color: 'f1f1f1'}} className='rounded-md p-4'>
               <View className='flex-row justify-between items-center'>
                 <View className='flex-row items-center gap-x-2'>
                   <Ionicons name='star-half-outline' size={18}/>
@@ -234,7 +235,7 @@ export default function Account() {
           <Pressable
             onPress={() => setModalVisible(true)}
             android_ripple={{color: 'f1f1f1'}} 
-            className='rounded-md bg-gray-100  p-3'>
+            className='rounded-md p-4'>
               <View className='flex-row justify-between items-center'>
                 <View className='flex-row items-center gap-x-2'>
                   <Ionicons name='log-out-outline' size={18}/>

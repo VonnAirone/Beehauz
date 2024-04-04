@@ -128,6 +128,11 @@ export default function Tenants() {
     )
   }
 
+  const navigateToTenantsList = () => {
+    setShowModal(false)
+    router.push({pathname: "/TenantsList", params: {propertyID}})
+  }
+
   return (
     <TouchableWithoutFeedback 
     onPress={() => Keyboard.dismiss()}
@@ -135,7 +140,7 @@ export default function Tenants() {
     <SafeAreaView className='flex-1'>
 
       {showModal && (
-        <View className='bg-gray-200 h-60 w-80 items-center justify-center rounded-md absolute self-center top-64 z-10'>
+        <View className='bg-gray-50 border border-gray-200 h-60 w-80 items-center justify-center rounded-md absolute self-center top-64 z-10'>
         <Pressable 
         onPress={() => setShowModal(false)}
         className='absolute top-3 right-3'>
@@ -144,7 +149,7 @@ export default function Tenants() {
         <Text className='text-center font-medium mb-4 text-lg'>Add New Tenants</Text>
         <View className='overflow-hidden rounded-md w-60 mb-4'>
           <Pressable
-          onPress={() => router.push("/TenantsList")}
+          onPress={navigateToTenantsList}
           android_ripple={{color: 'white'}}
           style={{backgroundColor: "#444"}} 
           className='p-3 rounded-md'>
@@ -163,13 +168,13 @@ export default function Tenants() {
       )}
      
       
-      <View className='p-5'>
+      <View className={`${showModal ? ('opacity-20') : ('')} p-5`}>
         <View className='mb-4 flex-row items-center justify-between'>
           <Text className='font-semibold text-xl'>Manage your Tenants</Text>
           <Pressable 
+          style={{backgroundColor: "#444"}}
           onPress={() => setShowModal(!showModal)}
           android_ripple={{color: "white"}}
-          style={{backgroundColor: "#444"}}
           className='p-3 rounded-md'>
             <Ionicons name='person-add' color={"white"} size={20}/>
           </Pressable>
@@ -245,12 +250,12 @@ export default function Tenants() {
                 <Text>No tenants have been added to the property.</Text>
                 <View className='mt-4'>
                   <Text>To add new tenants, follow the steps provided:</Text>
-                  <Text>1. Select the Add Tenant Icon above</Text>
-                  <Text>2. Select between <Text className='font-medium uppercase'>Select from existing tenants</Text> or <Text className='font-medium uppercase'>Add new tenants</Text>.</Text>
+                  <Text className='mt-2'>1. Select the Add Tenant Icon above</Text>
+                  <Text className='mt-2'>2. Select between <Text className='font-medium uppercase'>Select from existing tenants</Text> or <Text className='font-medium uppercase'>Add new tenants</Text>.</Text>
 
-                  <Text className='mt-2'><Text className='font-medium uppercase'>Select from existing tenants</Text> shows a list of registered tenants in the app.</Text>
+                  <Text className='mt-4 italic'><Text className='font-medium uppercase bg-gray-800 text-white'>Select from existing tenants</Text> shows a list of registered tenants in the app.</Text>
                   
-                  <Text className='mt-2'><Text className='font-medium uppercase'>Add new tenants</Text> allows you to add individuals who are currently boarding in your property but are not yet registered in the app.</Text>
+                  <Text className='mt-4 italic'><Text className='font-medium uppercase bg-gray-800 text-white'>Add new tenants</Text> allows you to add individuals who are currently boarding in your property but are not yet registered in the app.</Text>
                 </View>
               </View>
             )}

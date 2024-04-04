@@ -44,10 +44,7 @@ export function AuthProvider({ children }: Props) {
         } else {
           router.replace("/(owner)/(tabs)/Dashboard")
         }
-
-        
       }
-      
     }
   }, [session, segments, authInitialized, navigationState?.key]);
 
