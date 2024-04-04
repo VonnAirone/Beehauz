@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, Pressable, TextInput, Alert, Image } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { useAuth } from '@/utils/AuthProvider'
@@ -14,21 +14,18 @@ export default function ManageProfile() {
   const [allowEdit, setAllowEdit] = useState(false)
   const [userData, setUserData] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(false)
-  const [avatarLoading, setAvatarLoading] = useState(false)
   const [avatar, setAvatar] = useState(null);
-  const [reloadData, setReloadData] = useState(false);
-  const hasFetched = useRef(false)
 
   useEffect(() => {
-    if (!hasFetched.current) {
+    // if (!hasFetched.current) {
       async function fetchData() {
         await fetchUserData();
         await fetchAvatar();
       }
   
       fetchData();
-      hasFetched.current = true;
-    }
+    //   hasFetched.current = true;
+    // }
   }, []); 
 
   async function fetchUserData() {
@@ -42,6 +39,8 @@ export default function ManageProfile() {
       console.log("Error fetching user information: ", error.message)
     }
   }
+
+  
 
   const handleChangeText = (key, value) => {
     setUserData(prevData => ({
@@ -57,7 +56,8 @@ export default function ManageProfile() {
       last_name: userData?.last_name,
       description: userData?.description,
       phone_number: userData?.phone_number,
-      address: userData?.address
+      address: userData?.address,
+      updated_at: new Date(Date.now()).toUTCString()
     }
 
     try {
@@ -122,15 +122,20 @@ export default function ManageProfile() {
 
   async function changeProfile() {
     await uploadAvatar(user?.id);
-    setAvatar(null);
-    fetchAvatar();
+    if (avatar) {
+      await updateProfile();
+      setAvatar(null);
+      fetchAvatar();
+    } else {
+      console.log("No avatar uploaded.");
+    }
   }
-
+  
   return (
     <SafeAreaView className='flex-1'>
       <ScrollView className='p-5' showsVerticalScrollIndicator={false}>
           <View>
-            <Pressable onPress={() => router.push("/(tenant)/(tabs)/account")}>
+            <Pressable onPress={() => router.back()}>
               <View className='flex-row items-center '>
                   <Ionicons name='chevron-back-outline' size={20}/>
                   <Text>Back</Text>
@@ -175,7 +180,7 @@ export default function ManageProfile() {
               <Text className='font-semibold'>First Name</Text>
               <TextInput 
               onChangeText={(text) => handleChangeText('first_name', text)}
-              className='w-full border bg-gray-100 border-gray-200  rounded-md py-2 px-5'
+              className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
               editable={allowEdit}
               value={userData?.first_name}/>
           </View>
@@ -184,7 +189,7 @@ export default function ManageProfile() {
             <Text className='font-semibold'>Last Name</Text>
             <TextInput 
             onChangeText={(text) => handleChangeText('last_name', text)}
-            className='w-full border bg-gray-100 border-gray-200  rounded-md py-2 px-5'
+            className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
             editable={allowEdit}
             value={userData?.last_name}/>
           </View>
@@ -193,7 +198,7 @@ export default function ManageProfile() {
         
         <View className='gap-y-2 mt-2'>
           <Text className='font-semibold'>Description</Text>
-          <TextInput className='w-full border bg-gray-100 border-gray-200  rounded-md py-2 px-5'
+          <TextInput className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
           onChangeText={(text) => handleChangeText('description', text)} 
           editable={allowEdit}
           multiline
@@ -203,14 +208,37 @@ export default function ManageProfile() {
 
         <View className='gap-y-2 mt-2'>
           <Text className='font-semibold'>Email</Text>
-          <TextInput className='w-full border bg-gray-100 border-gray-200 rounded-md py-2 px-5'
+          <TextInput className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
           editable={false}
           value={userData?.email}/>
+        </View>
+
+        <View className="mt-4 flex-row">
+          <View className="w-28">
+            <Text className="mb-1 font-semibold">Age</Text>
+            <TextInput
+              editable={allowEdit}
+              clearTextOnFocus
+              value={userData?.age.toString()}
+              className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+            />
+          </View>
+
+          <View className='grow ml-5'>
+            <Text className="mb-1 font-semibold">Gender</Text>
+            <TextInput
+              editable={allowEdit}
+              clearTextOnFocus
+              value={userData?.gender}
+              className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+            />
+  
+          </View>
         </View>
         
         <View className='gap-y-2 mt-2'>
           <Text className='font-semibold'>Phone Number</Text>
-          <TextInput className='w-full border bg-gray-100 border-gray-200  rounded-md py-2 px-5'
+          <TextInput className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
           onChangeText={(text) => handleChangeText('phone_number', text)} 
           editable={allowEdit}
           value={userData?.phone_number.toString()}/>
@@ -226,11 +254,26 @@ export default function ManageProfile() {
               <Ionicons name='location' color={"white"} size={20}/>
             </View>
             
-            <TextInput className='grow border bg-gray-100 border-gray-200  rounded-md py-2 px-5'
+            <TextInput 
+            editable={allowEdit}
+            className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs grow'
             onChangeText={(text) => handleChangeText('address', text)} 
             value={userData?.address}/>
           </View>
         </View>
+
+
+        <View className='pt-10'>
+          <Pressable 
+          android_ripple={{color: "white"}}
+          style={{backgroundColor: "#444"}}
+          onPress={updateProfile}
+          className='rounded-md p-3'>
+            <Text className='text-center text-white'>{loading ? 'Loading' : 'Save Changes'}</Text>
+          </Pressable>
+        </View>
+
+        <View className='h-10'></View>
 
           {allowEdit && (
             <View className='pt-8'>

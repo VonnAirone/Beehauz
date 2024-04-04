@@ -7,9 +7,10 @@ import { TenantsData, UserData } from '@/api/Properties'
 import { getProfile } from '@/api/DataFetching'
 import { Ionicons } from '@expo/vector-icons'
 import AvatarImage from '@/app/(tenant)/(aux)/avatar'
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 
 export default function TenantsList() {
+  const propertyID = useLocalSearchParams()
   const [tenants, setTenants] = useState([])
   const [tenantsProfiles, setTenantsProfiles] = useState<UserData[] | null>(null);
   
@@ -40,8 +41,27 @@ export default function TenantsList() {
     }
   }
 
+  async function subscribeToChanges() {
+    const channels = supabase
+      .channel('status-update')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tenants' },
+        (payload) => {
+          console.log('Change received!', payload);
+          fetchTenants()
+        }
+      )
+      .subscribe();
+  
+    return () => {
+      channels.unsubscribe();
+    };
+  }
+
   useEffect(() => {
     fetchTenants()
+    subscribeToChanges()
     
   }, [])
   return (
@@ -78,10 +98,10 @@ export default function TenantsList() {
                     <Text>{item.first_name}</Text>
                   </View>
                 </View>
-                <View className="flex-row items-center gap-x-1">
+                <View className={`flex-row items-center gap-x-1 p-2 rounded-md ${tenants && tenants[index]?.status === "Available" ? "bg-green-200" : "bg-gray-100"}`}>
                   <Ionicons
                     name='ellipse'
-                    color={tenants && tenants[index]?.status === "Active" ? "green" : "gray"}
+                    color={tenants && tenants[index]?.status === "Available" ? "green" : "gray"}
                   />
                   <Text className='text-xs'>{tenants && tenants[index]?.status}</Text>
                 </View>
