@@ -109,7 +109,7 @@ export default function Tenants() {
 
   const SkeletonComponent = () => {
     return (
-      <View className='bg-gray-100 mt-2 rounded-md p-5 shadow-2xl'>
+      <View className='bg-gray-200 mt-2 rounded-md p-5 shadow-2xl'>
         <View className='flex-row items-center justify-between'>
           <View className='flex-row items-center gap-x-2'>
             <View className=' bg-gray-300 h-12 w-12 rounded-full'/>
@@ -207,7 +207,7 @@ export default function Tenants() {
                 <View key={index} className="overflow-hidden rounded-md">
                   <Pressable
                     android_ripple={{ color: "#ffa233" }}
-                    className="p-5 bg-gray-100 shadow-lg rounded-md"
+                    className="p-5 bg-gray-200 shadow-lg rounded-md"
                   >
                   <View className='flex-row justify-between items-center'>
                     <View className='flex-row items-center gap-x-2'>

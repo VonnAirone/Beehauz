@@ -126,7 +126,7 @@ const Chatbox = () => {
             <Ionicons name="chevron-back" size={20}/>
           </Pressable>
           <Pressable onPress={() => router.push({pathname: "/OwnerProfile", params: {owner_id: roomData?.receiver_id}})}>
-            <Text className="ml-5 font-semibold">{roomData?.username}</Text>
+            <Text className="ml-5 font-semibold">{roomData?.first_name}</Text>
             <Text className="ml-5 text-xs">Owner of {propertyName}</Text>
           </Pressable>
           

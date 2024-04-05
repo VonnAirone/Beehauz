@@ -2,13 +2,13 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Text, View, Image, FlatList, Dimensions, ScrollView, Pressable, Modal, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { fetchPropertyDetailsData, getOwnerData, getPropertyReviews } from '@/api/DataFetching';
+import { fetchPropertyDetailsData, fetchPropertyTerms, getOwnerData, getPropertyReviews } from '@/api/DataFetching';
 import { loadImages } from '@/api/ImageFetching';
 import BackButton from '@/components/back-button';
 import { Ionicons } from '@expo/vector-icons';
-import { AmenitiesModal, BottomBar, fetchAmenities } from '../(aux)/detailscomponent';
-import { Cover, Images } from '../(aux)/homecomponents';
-import { PropertyData, ReviewData, OwnerData } from '@/api/Properties';
+import { BottomBar, fetchAmenities } from '../(aux)/detailscomponent';
+import { Images } from '../(aux)/homecomponents';
+import { PropertyData, ReviewData, OwnerData, PropertyTerms } from '@/api/Properties';
 import { PropertyReviews } from '@/app/(owner)/(aux)/propertycomponents';
 import LoadingComponent from '@/components/LoadingComponent';
 import { checkBookmarkStatus, toggleBookmark } from '@/components/bookmarks-button';
@@ -32,7 +32,7 @@ export default function BHDetails() {
   const [propertyReviews, setPropertyReviews] = useState<ReviewData[] | null>(null);
   const [amenities, setAmenities] = useState([]);
   const [ownerData, setOwnerData] = useState<OwnerData | null>(null);
-  const [prefetchedImages, setPrefetchedImages] = useState([]);
+  const [terms, setTerms] = useState<PropertyTerms | null>(null)
 
   const formatDate = (date) => {
     return moment(date).format('MMMM YYYY');
@@ -50,18 +50,19 @@ export default function BHDetails() {
         try {
           const fetchedData = await fetchPropertyDetailsData(propertyID.toString());
           setData(fetchedData);
+
           await checkBookmarkStatus(propertyID, user?.id, setBookmarkStatus);
           await loadImages(propertyID, setImages);
           await fetchPropertyReviews();
           await fetchAmenities(propertyID, setAmenities);
           await getOwnerData(fetchedData?.owner_id, setOwnerData);
-          await prefetchImages();
+          await fetchPropertyTerms(propertyID, setTerms);
 
-          setLoading(false);
           hasFetched.current = true;
         } catch (error) {
           console.error('Error fetching data:', error);
-          setLoading(false);
+        } finally {
+          setLoading(false)
         }
       }
 
@@ -83,17 +84,6 @@ export default function BHDetails() {
     }
   };
 
-  const prefetchImages = async () => {
-    const promises = images.map(async (image) => {
-      try {
-        await Image.prefetch(image.uri);
-      } catch (error) {
-        console.error('Error prefetching image:', error);
-      }
-    });
-    await Promise.all(promises);
-    setPrefetchedImages(images);
-  };
 
 
   return (
@@ -105,9 +95,60 @@ export default function BHDetails() {
         <ScrollView showsVerticalScrollIndicator={false}>
           <View>
             {showAmenitiesModal && (
-            <View className='z-20'>
-              <AmenitiesModal hideModal={() => setShowAmenitiesModal(false)}/>
-            </View>
+           <Modal 
+           transparent={true}
+           animationType='slide'
+           className='transparent w-96 rounded-md flex-1 z-10'>
+             <View className="flex-1 justify-center items-center bg-opacity-50 p-5 ">
+               <View className='bg-white items-center justify-center w-full shadow shadow-black rounded-md'>
+                  <View className='absolute right-3 top-3'>
+                    <Pressable onPress={() => setShowAmenitiesModal(false)}>
+                      <Ionicons name='close' size={20} color={'#444'}/>
+                    </Pressable>
+                  </View>
+                 <View className='p-5'>
+                   <View>
+                     <Text className='text-2xl'>What is an <Text className='font-semibold uppercase'>Amenity</Text></Text>
+                   </View>
+       
+                   <View className='mt-2'>
+                     <Text className='text-base'>
+                     An amenity is a feature or service that enhances the comfort, convenience, or enjoyment of a particular place.
+                     </Text>
+                   </View>
+       
+                   <View className='mt-8'>
+                     <Text className='font-semibold text-lg'>Examples of Amenities</Text>
+                   </View>
+       
+                   <View className='flex-row flex-wrap gap-x-2 gap-y-2 mt-1'>
+                       <View className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
+                           <Text className='text-center'>Wifi</Text>
+                       </View>
+       
+                       <View className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
+                           <Text className='text-center'>Common CR</Text>
+                       </View>
+       
+                       
+                       <View className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
+                           <Text className='text-center'>Laundry Area</Text>
+                       </View>
+       
+                                   
+                       <View className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
+                           <Text className='text-center'>Kitchen Area</Text>
+                       </View>
+       
+                                               
+                       <View className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
+                           <Text className='text-center'>Rooms</Text>
+                       </View>
+                   </View>
+                 </View>
+               </View>
+             </View>
+           </Modal>
            )}
           </View>
                 
@@ -132,7 +173,7 @@ export default function BHDetails() {
                 <View className='w-screen h-60'> 
                   <Pressable onPress={() => openImage(item)}>
                   <View>
-                  <Cover item={{ ...item, propertyID }} />
+                    <Images item={{...item, propertyID}}/>
                   </View>
 
                   </Pressable>
@@ -190,17 +231,27 @@ export default function BHDetails() {
               </View>
             </View>
 
-            <View className='mt-10'>
+            <View className='mt-5'>
               <Text className='font-semibold'>Payment Terms</Text>
               
-              <View className='flex-row items-end my-1'>
+              <View className='flex-row items-end mt-1'>
                 <Text className='text-xs'>Advance Payment: </Text>
-                <Text className='font-semibold text-xs'>Not specified</Text>
+                <Text className='font-semibold text-xs'>{terms ? terms?.advance_payment : 'Not specified'}</Text>
               </View>
 
-              <View className='flex-row items-end'>
+              <View className='flex-row items-end mt-1'>
                 <Text className='text-xs'>Security Deposit: </Text>
-                <Text className='font-semibold text-xs'>Not specified</Text>
+                <Text className='font-semibold text-xs'>{terms ? terms?.security_deposit : 'Not specified'}</Text>
+              </View>
+
+              <View className='flex-row items-end mt-1'>
+                <Text className='text-xs'>Electricity Bill: </Text>
+                <Text className='font-semibold text-xs'>{terms ? terms?.electricity_bill : 'Not specified'}</Text>
+              </View>
+
+              <View className='flex-row items-end mt-1'>
+                <Text className='text-xs'>Water Bill: </Text>
+                <Text className='font-semibold text-xs'>{terms ? terms?.water_bills : 'Not specified'}</Text>
               </View>
             </View>
 
@@ -243,7 +294,7 @@ export default function BHDetails() {
                     <Pressable 
                     className='p-2 rounded-md flex-row items-center'
                     android_ripple={{color: "#444"}}
-                    onPress={() => router.push({pathname: "/OwnerProfile", params: {owner_id : data?.owner_id}})}>
+                    onPress={() => router.push({pathname: "/(tenant)/(screens)/OwnerProfile", params: {owner_id : data?.owner_id}})}>
                       <Text>View Owner details</Text>
                       <Ionicons name='chevron-forward-outline' size={20} color={"#444"}/>
                     </Pressable>

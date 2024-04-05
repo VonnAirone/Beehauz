@@ -155,7 +155,7 @@ export default function ManageProfile() {
                   </View>
                   
                 ) : (
-                  <View className='opacity-40 h-28 w-28'> 
+                  <View className='h-28 w-28'> 
                     {avatar && 
                     <Image source={{ uri: avatar }} style={{ width: "100%", height: "100%" }} 
                     />} 
@@ -180,7 +180,7 @@ export default function ManageProfile() {
               <Text className='font-semibold'>First Name</Text>
               <TextInput 
               onChangeText={(text) => handleChangeText('first_name', text)}
-              className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+              className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
               editable={allowEdit}
               value={userData?.first_name}/>
           </View>
@@ -189,7 +189,7 @@ export default function ManageProfile() {
             <Text className='font-semibold'>Last Name</Text>
             <TextInput 
             onChangeText={(text) => handleChangeText('last_name', text)}
-            className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+            className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
             editable={allowEdit}
             value={userData?.last_name}/>
           </View>
@@ -198,7 +198,7 @@ export default function ManageProfile() {
         
         <View className='gap-y-2 mt-2'>
           <Text className='font-semibold'>Description</Text>
-          <TextInput className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+          <TextInput className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
           onChangeText={(text) => handleChangeText('description', text)} 
           editable={allowEdit}
           multiline
@@ -208,7 +208,7 @@ export default function ManageProfile() {
 
         <View className='gap-y-2 mt-2'>
           <Text className='font-semibold'>Email</Text>
-          <TextInput className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+          <TextInput className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
           editable={false}
           value={userData?.email}/>
         </View>
@@ -220,7 +220,7 @@ export default function ManageProfile() {
               editable={allowEdit}
               clearTextOnFocus
               value={userData?.age.toString()}
-              className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+              className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
             />
           </View>
 
@@ -230,7 +230,7 @@ export default function ManageProfile() {
               editable={allowEdit}
               clearTextOnFocus
               value={userData?.gender}
-              className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+              className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
             />
   
           </View>
@@ -238,7 +238,7 @@ export default function ManageProfile() {
         
         <View className='gap-y-2 mt-2'>
           <Text className='font-semibold'>Phone Number</Text>
-          <TextInput className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+          <TextInput className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
           onChangeText={(text) => handleChangeText('phone_number', text)} 
           editable={allowEdit}
           value={userData?.phone_number.toString()}/>
@@ -256,7 +256,7 @@ export default function ManageProfile() {
             
             <TextInput 
             editable={allowEdit}
-            className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs grow'
+            className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs grow'
             onChangeText={(text) => handleChangeText('address', text)} 
             value={userData?.address}/>
           </View>

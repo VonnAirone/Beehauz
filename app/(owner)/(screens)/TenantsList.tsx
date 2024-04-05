@@ -98,7 +98,7 @@ export default function TenantsList() {
                     <Text>{item.first_name}</Text>
                   </View>
                 </View>
-                <View className={`flex-row items-center gap-x-1 p-2 rounded-md ${tenants && tenants[index]?.status === "Available" ? "bg-green-200" : "bg-gray-100"}`}>
+                <View className={`flex-row items-center gap-x-1 p-2 rounded-md ${tenants && tenants[index]?.status === "Available" ? "bg-green-200" : "bg-gray-200"}`}>
                   <Ionicons
                     name='ellipse'
                     color={tenants && tenants[index]?.status === "Available" ? "green" : "gray"}

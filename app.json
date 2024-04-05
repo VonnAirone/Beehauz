@@ -45,6 +45,10 @@
       "bundleIdentifier": "com.aironevonn.beehauzapp"
     },
     "android": {
+      "icon": "./assets/icon.png",
+      "splash": {
+        "image": "./assets/splash.png"
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"

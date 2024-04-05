@@ -7,8 +7,8 @@ export default function LoadingComponent() {
     <View className='flex-1 items-center justify-center'>
       <LottieView
       autoPlay
-      style={{width: 40, height: 40}}
-      source={require("@/assets/bee.json")}/>
+      style={{width: 60, height: 60}}
+      source={require("@/assets/loading.json")}/>
     </View>
   )
 }

@@ -1,46 +1,52 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 const BookingItem = ({ item, profile, formatDate, onApprove, onReject }) => {
   return (
-    <View className='bg-gray-50 rounded-md p-5'>
-      <Text>Type: {item.type}</Text>
+    <View className='p-5'>
 
-      <View>
-        <Text className='text-xl'>{profile?.first_name} {profile?.last_name}</Text>
-        <Text>{profile?.address}</Text>
-        <Text>{profile?.phone_number}</Text>
+      <View className='flex-row items-start justify-between'>
+        <View className='mt-2'>
+          <Text>Tenant Details: </Text>
+          <Text className='text-xl font-medium mt-2'>{profile?.first_name} {profile?.last_name}</Text>
+          <Text className='text-xs'>{profile?.address}</Text>
+          <Text className='text-xs'>{profile?.phone_number}</Text>
+        </View>
+
+        <View className='bg-gray-200 rounded-md w-24 items-center p-1'>
+          <Text>{item.type} Request</Text>
+        </View>
       </View>
 
-      <View className='border-b-2 bg-gray-100 my-3'></View>
-
-      <View >
+      <View className='bg-gray-50 mt-4 p-3'>
         <View>
-          <Text>Appointment details:</Text>
+          <Text className='font-semibold'>Appointment details:</Text>
           <Text>{formatDate(item.appointment_date)}</Text>
           <Text>{item.appointment_time}</Text>
         </View>
-        <Text className='mt-2'>Are you available at this time?</Text>
-        <View className='flex-row items-center justify-between mt-1'>
+        <Text className='mt-4 text-center'>Are you available at this time?</Text>
+        <View className='flex-row items-center justify-between mt-2'>
           <View className='w-32 overflow-hidden rounded-md'>
             <Pressable
               android_ripple={{color: ""}} 
-              className='flex-row items-center justify-center gap-x-1 bg-green-500 py-3 rounded-md'
-              onPress={() => onApprove(item.appointment_id)}
+              className='flex-row items-center justify-center border border-gray-200 py-3 rounded-md'
+              onPress={() => onReject(item.appointment_id)}
             >
-              <Ionicons name='thumbs-up-outline'/>
-              <Text>Approve</Text>
+              <Ionicons name='thumbs-down-outline'/>
+              <Text className='ml-1'>Unavailable</Text>
             </Pressable>
           </View>
           <View className='w-32 overflow-hidden rounded-md'>
             <Pressable 
+              style={{backgroundColor: "#444"}}
               android_ripple={{color: ""}}
-              className='flex-row items-center justify-center gap-x-1 bg-red-500 py-3 rounded-md'
-              onPress={() => onReject(item.appointment_id)}
+              className='flex-row items-center justify-center py-3 rounded-md'
+              onPress={() => onApprove(item.appointment_id)}
             >
-              <Ionicons name='thumbs-down-outline'/>
-              <Text>Not available</Text>
+              <Ionicons name='thumbs-up-outline' color={'white'}/>
+              <Text className='ml-1 text-white'>Approve</Text>
             </Pressable>
           </View>
         </View>
@@ -54,45 +60,38 @@ export default BookingItem;
 
 export const Appointments = ({ item, profile, formatDate, onApprove, onReject }) => {
   return (
-    <View className='bg-gray-100 rounded-md p-5'>
-    <Text>Type: {item.type}</Text>
+    <View className='bg-gray-50 rounded-md p-5'>
 
-    <View>
-      <Text className='text-xl'>{profile?.first_name} {profile?.last_name}</Text>
-      <Text>{profile?.address}</Text>
-      <Text>{profile?.phone_number}</Text>
+    <View className='flex-row items-start justify-between'>
+      <View className='mt-2'>
+        <Text>Tenant Details: </Text>
+        <Text className='text-xl font-medium mt-2'>{profile?.first_name} {profile?.last_name}</Text>
+        <Text className='text-xs'>{profile?.address}</Text>
+        <Text className='text-xs'>{profile?.phone_number}</Text>
+      </View>
+
+      <View className='bg-gray-200 rounded-md w-24 items-center p-1'>
+        <Text>{item.type} Request</Text>
+      </View>
     </View>
 
-    <View className='border-b-2 bg-gray-100 my-3'></View>
-
-    <View >
+    <View className='bg-gray-50 mt-4 p-3'>
       <View>
-        <Text>Appointment details:</Text>
+        <Text className='font-semibold'>Appointment details:</Text>
         <Text>{formatDate(item.appointment_date)}</Text>
         <Text>{item.appointment_time}</Text>
       </View>
-      <Text className='mt-2'>Update Status:</Text>
-      <View className='flex-row items-center justify-between mt-1'>
-        <View className='w-32 overflow-hidden rounded-md'>
-          <Pressable
-            android_ripple={{color: ""}} 
-            className='flex-row items-center justify-center gap-x-1 bg-green-500 py-3 rounded-md'
-            onPress={() => onApprove(item.appointment_id)}
-          >
-            <Ionicons name='checkmark-outline'/>
-            <Text>Complete</Text>
-          </Pressable>
-        </View>
-        <View className='w-32 overflow-hidden rounded-md'>
-          <Pressable 
-            android_ripple={{color: ""}}
-            className='flex-row items-center justify-center gap-x-1 bg-red-500 py-3 rounded-md'
-            onPress={() => onReject(item.appointment_id)}
-          >
-            <Ionicons name='close-outline'/>
-            <Text>Cancel</Text>
-          </Pressable>
-        </View>
+      <Text className='mt-4 text-center'>Update appointment status:</Text>
+      <View className='overflow-hidden rounded-md mt-2'>
+        <Pressable 
+          style={{backgroundColor: "#444"}}
+          android_ripple={{color: ""}}
+          className='flex-row items-center justify-center py-3 rounded-md'
+          onPress={() => onApprove(item.appointment_id)}
+        >
+          <Ionicons name='checkmark-outline' color={'white'}/>
+          <Text className='ml-1 text-white'>Completed</Text>
+        </Pressable>
       </View>
     </View>
   </View>
@@ -102,18 +101,31 @@ export const Appointments = ({ item, profile, formatDate, onApprove, onReject })
 
 export const History = ({ item, profile, formatDate}) => {
   return (
-    <View className='bg-gray-50 p-5 rounded-md mb-3'>
-    <View>
-      <Text className='text-xl'>{profile?.first_name} {profile?.last_name}</Text>
-    </View>
-    <View >
+    <View className='bg-gray-50 p-5 rounded-md mb-3 flex-row items-start justify-between'>
       <View>
-        <Text>Appointment details:</Text>
-        <Text>{formatDate(item.appointment_date)}</Text>
-        <Text>{item.appointment_time}</Text>
+        <Text className='font-semibold'>{profile?.first_name} {profile?.last_name}</Text>
+        <Text className='mt-3'>Appointment details:</Text>
+        <Text className='text-xs'>{formatDate(item.appointment_date)}</Text>
+        <Text className='text-xs'>{item.appointment_time}</Text>
       </View>
-      <Text className='mt-2'>Status: {item.status}</Text>
+
+      <View className='items-end'>
+        <View 
+        className={`rounded-md w-24 items-center p-1
+        ${item.status === 'Rejected' && ('bg-gray-200')}
+        ${item.status === 'Finished' && ('bg-green-200')}
+        `}>
+          <Text>{item.status}</Text>
+        </View>
+
+        <Pressable 
+        onPress={() => router.push({pathname: "/(owner)/(screens)/TenantProfile", params: {tenant_id : profile?.id}})}
+        className='flex-row items-center top-10'>
+          <Text className='text-xs mr-1'>View Tenant Profile</Text>
+          <Ionicons name='chevron-forward'/>
+        </Pressable>
+      </View>
+     
     </View>
-  </View>
   )
 }

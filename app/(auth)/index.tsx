@@ -63,6 +63,7 @@ export default function Login() {
   }
   
   
+  
 
   const handleSubmission = async () => {
     try {
@@ -231,7 +232,8 @@ export default function Login() {
           <View className='flex-row justify-center my-5'>
             <View className='mx-5'>
               <Pressable
-              onPress={() => signInWithFacebook()}>
+              android_ripple={{color: 'white'}}
+              onPress={signInWithFacebook}>
                 <Ionicons 
                 name='logo-facebook' 
                 size={40} 

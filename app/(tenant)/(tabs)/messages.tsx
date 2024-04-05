@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Text, FlatList, TextInput, View} from "react-native";
+import { Text, FlatList, TextInput, View, Pressable} from "react-native";
 import { fetchUserMessages, subscribeToRealTimeMessages } from "../(aux)/messagecomponent";
 import { useAuth } from "@/utils/AuthProvider";
 import { Ionicons } from "@expo/vector-icons";
@@ -11,7 +11,6 @@ export default function Messages() {
   const userID = session?.session.user.id;
   const [userMessages, setUserMessages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('')
 
   useEffect(() => {
     async function fetchData() {
@@ -46,20 +45,29 @@ export default function Messages() {
   return (
     <SafeAreaView className="flex-1">
       <View className="p-5">
-        <View className='flex-row justify-between mb-4'>
+        <View className='flex-row items-center justify-between mb-4'>
           <View>
             <Text className='text-xl font-semibold'>Messages</Text>
           </View>
 
-          <View>
-            <Ionicons name='create' size={28} color={'#ffa233'} />
-          </View>
+          <Pressable 
+          style={{backgroundColor: "#444"}}
+          onPress={() => {}}
+          android_ripple={{color: "white"}}
+          className='p-3 rounded-md'>
+            <Ionicons name='create' color={"white"} size={20}/>
+          </Pressable>
         </View>
 
-        <View className="bg-white rounded-md p-2">
-          <TextInput
-            placeholder={'Search for a message'}
-          />
+        <View>
+          <View className='flex-row items-center bg-gray-50 rounded-md p-2 backdrop-blur-3xl'>
+            <View className='mx-2'>
+              <Ionicons name='search' size={20} color={'#444'}/>
+            </View>
+            <TextInput 
+            editable={false} 
+            placeholder='Search for a user'/>
+          </View>
         </View>
 
         <View className="mt-5">

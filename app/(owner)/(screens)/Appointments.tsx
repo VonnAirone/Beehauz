@@ -119,22 +119,12 @@ export default function Bookings() {
       className='p-5'>
         <BackButton/>
 
-        <View className='mt-2'>
-          <View className='h-10 w-10'>
-            <LottieView
-            autoPlay
-            loop
-            style={{width: "100%", height: "100%"}}
-            source={require("@/assets/consult.json")}/>
-          </View>
-          <Text className='text-xl'>Appointments</Text>
-        </View>
         {loading ? (
           <BookingSkeleton/>
         ) : (
         <>
           <View className='mt-2'>
-            <Text>Requests ({bookings?.filter(item => item.status === 'Pending')?.length})</Text>
+            <Text className='font-semibold'>Requests ({bookings?.filter(item => item.status === 'Pending')?.length})</Text>
           </View>
 
         <View className='mt-4'>
@@ -166,43 +156,42 @@ export default function Bookings() {
 
       <View className='mt-8 border-2 border-gray-200'></View>
 
-      <View className='mt-2 flex-row justify-between items-center'>
-          <Text>Appointments ({bookings?.filter(item => item.status === 'Approved')?.length})</Text>
-          {/* <Ionicons name='arrow-forward-outline' size={15}/> */}
-      </View>
-
       {loading ? (
         <BookingSkeleton/>
       ) : (
-        <View className='mt-4'>
-          {bookings && bookings?.filter(item => item.status === 'Approved').length === 0 ? (
-              <View className='h-60 items-center justify-center'>
-                <Text>No appointments</Text>
-              </View>
-          ) : (
-            <FlatList
-              scrollEnabled={false}
-              data={bookings?.filter(item => item.status === 'Approved')}
-              keyExtractor={(item, index) => index.toString()}
-              renderItem={({ item, index }) => (
-                <Appointments 
-                  item={item} 
-                  profile={bookingProfile[index]} 
-                  formatDate={formatDate} 
-                  onApprove={(appointment_id) => updateAppointmentStatus('Finished', appointment_id)}
-                  onReject={(appointment_id) => updateAppointmentStatus('Cancelled', appointment_id)}
-                />
-              )}
-            />
-          )}
-        </View>
+        <>
+          <View className='mt-2 flex-row justify-between items-center'>
+            <Text className='font-semibold'>Appointments ({bookings?.filter(item => item.status === 'Approved')?.length})</Text>
+          </View>
+          <View className='mt-4'>
+            {bookings && bookings?.filter(item => item.status === 'Approved').length === 0 ? (
+                <View className='h-60 items-center justify-center'>
+                  <Text>No appointments</Text>
+                </View>
+            ) : (
+              <FlatList
+                scrollEnabled={false}
+                data={bookings?.filter(item => item.status === 'Approved')}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item, index }) => (
+                  <Appointments 
+                    item={item} 
+                    profile={bookingProfile[index]} 
+                    formatDate={formatDate} 
+                    onApprove={(appointment_id) => updateAppointmentStatus('Finished', appointment_id)}
+                    onReject={(appointment_id) => updateAppointmentStatus('Cancelled', appointment_id)}
+                  />
+                )}
+              />
+            )}
+          </View>
+        </>
       )}
 
       <View className='mt-8 border-2 border-gray-200'></View>
 
       <View className='mt-2 flex-row justify-between items-center'>
-          <Text>History ({bookings?.filter(item => ['Finished', 'Rejected', 'Cancelled'].includes(item.status)).length})</Text>
-          {/* <Ionicons name='arrow-forward-outline' size={15}/> */}
+          <Text className='font-semibold'>History ({bookings?.filter(item => ['Finished', 'Rejected', 'Cancelled'].includes(item.status)).length})</Text>
       </View>
       {loading ? (
         <BookingSkeleton/>

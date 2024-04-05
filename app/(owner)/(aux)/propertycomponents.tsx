@@ -89,15 +89,15 @@ export const DashboardComponents = ({id, properties, tenants, bookings}) => {
       </Pressable>
     </View>
 
-    <View className='flex-row items-center justify-evenly mt-5 gap-x-4'>
-      <View className='overflow-hidden rounded-md grow'>
+    <View className='flex-row items-center justify-between mt-5'>
+      <View className='overflow-hidden rounded-md w-36'>
         <Pressable
         onPress={() => router.push({pathname: "/Appointments", params: {property_id: propertyID}})}
         android_ripple={{color: "#444"}}
-        className='grow p-4 h-32 bg-gray-50 rounded-md'>
+        className='p-4 h-32 bg-gray-50 rounded-md'>
           <View className='flex-row items-center gap-x-2'>
             <Ionicons name='calendar' size={18} color={"#444"}/>
-            <Text className='font-semibold text-xs'>Bookings</Text>
+            <Text className='font-semibold text-xs'>Appointments</Text>
           </View>
           
           <View className='items-center flex-1 justify-center mt-4'>
@@ -106,7 +106,7 @@ export const DashboardComponents = ({id, properties, tenants, bookings}) => {
         </Pressable>
       </View>
       
-      <View className='overflow-hidden rounded-md grow'>
+      <View className='overflow-hidden rounded-md w-36'>
         <Pressable
         onPress={() => router.push("/(owner)/(tabs)/Tenants")}
         android_ripple={{color: "#444"}}

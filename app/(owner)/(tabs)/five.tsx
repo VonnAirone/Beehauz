@@ -10,16 +10,12 @@ import { Link, router } from 'expo-router';
 export default function Account() {
   const auth = useAuth();
   const user = auth.session?.user;
-  const [phoneNumber, setPhoneNumber] = useState('')
   const [modalVisible, setModalVisible] = useState(false);
-  const [onEditMode, setOnEditMode] = useState(false);
-  const [isChangeMade, setIsChangeMade] = useState(false)
   const [userProfile, setUserProfile] = useState<UserData | null>(null)
   const [avatar, setAvatar] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-
     fetchData();
     subscribeToChanges();
   }, []); 
@@ -98,10 +94,6 @@ export default function Account() {
     }
   };
 
-  const handlePhoneChange = (text) => {
-    setPhoneNumber(text)
-    setIsChangeMade(!!text)
-  }
 
   async function signOUt() {
     const { error } = await supabase.auth.signOut()
@@ -139,17 +131,8 @@ export default function Account() {
             <Link href={"/ManageProfile"}>
               <Ionicons name='chevron-forward-outline'/>
             </Link>
-          
-
         </View>
-
-          {onEditMode && (
-          <View className='self-center absolute top-10 p-3 rounded-md bg-yellow'>
-            <Text className='text-center'>On Edit Mode</Text>
-          </View>
-          )}
-
-
+        
         <View className='gap-y-3 mt-3 mb-10'>
           <View className='flex-row justify-between rounded-md bg-gray-50 p-3'>
             <View className='flex-row items-center gap-x-2'>
@@ -174,8 +157,6 @@ export default function Account() {
             <View className='relative w-40'>
               <TextInput 
               editable={false} 
-              onChangeText={handlePhoneChange}
-              placeholderTextColor={onEditMode? 'black' : 'gray'} 
               value={userProfile?.phone_number.toString()}
               className='text-right text-xs'/>
             </View>
@@ -190,7 +171,6 @@ export default function Account() {
             <View>
               <TextInput 
               editable={false}
-              placeholderTextColor={onEditMode? 'black' : 'gray'}
               value={userProfile?.address}
               className='text-right text-xs'/>
             </View>
@@ -237,7 +217,10 @@ export default function Account() {
           </View>
          
          <View className='rounded-md overflow-hidden'>
-          <Pressable android_ripple={{color: 'f1f1f1'}} className='rounded-md p-4'>
+          <Pressable 
+          onPress={() => router.push("/(owner)/(screens)/MapView")}
+          android_ripple={{color: 'f1f1f1'}} 
+          className='rounded-md p-4'>
               <View className='flex-row justify-between items-center'>
                 <View className='flex-row items-center gap-x-2'>
                   <Ionicons name='star-half-outline' size={18}/>

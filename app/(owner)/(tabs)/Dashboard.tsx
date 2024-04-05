@@ -1,14 +1,14 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
+import { Pressable, ScrollView, Text, View, Image} from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Logo from '@/components/logo'
 import { useAuth } from '@/utils/AuthProvider'
 import { getProfile } from '@/api/DataFetching'
 import { PropertyData, ReviewData, TenantsData, UserData } from '@/api/Properties'
 import { supabase } from '@/utils/supabase'
-import { HomepageSkeleton } from '../(aux)/SkeletonComponents'
 import { DashboardComponents, PropertyReviews } from '../(aux)/propertycomponents'
 import { Ionicons } from '@expo/vector-icons'
+import MapView, { Callout, Marker, MarkerAnimated } from 'react-native-maps'
 
 export default function Dashboard() {
   const session = useAuth()
@@ -20,8 +20,30 @@ export default function Dashboard() {
   const [propertyID, setPropertyID] = useState(0)
   const [loading, setLoading] = useState(true)
   const [propertyReviews, setPropertyReviews] = useState<ReviewData[] | null>(null);
-  const hasFetched = useRef(false)
+  const [latitude, setLatitude] = useState(() => undefined);
+  const [longitude, setLongitude] = useState(() => undefined);
+  const [markerPosition, setMarkerPosition] = useState({ latitude: 10.7913309, longitude: 122.0068165 });
+  
 
+  async function subscribeToBookingChanges() {
+    const channels = supabase
+      .channel('realtime-booking-channel')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'appointments' },
+        (payload) => {
+          console.log('Change received!', payload);
+          fetchBookings();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channels.unsubscribe();
+    };
+  }
+
+  
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
@@ -38,7 +60,8 @@ export default function Dashboard() {
     }
     
     fetchData();
-    subscribeToRealTimeChanges();
+    subscribeToPropertyChanges();
+    subscribeToBookingChanges();
   }, [propertyID]);
   
   async function getUserProfile(id: string) {
@@ -66,6 +89,9 @@ export default function Dashboard() {
       if (data && data.length > 0) {
         setProperties(data);
         setPropertyID(data[0]?.property_id);
+        setLatitude(data[0]?.latitude);
+        setLongitude(data[0]?.longitude);
+        
       }
     } catch (error) {
       console.log("Error fetching properties: ", error.message)
@@ -95,7 +121,7 @@ export default function Dashboard() {
     }
 }
 
-async function subscribeToRealTimeChanges() {
+async function subscribeToPropertyChanges() {
   const channels = supabase
     .channel('property-creation')
     .on(
@@ -154,37 +180,72 @@ async function subscribeToRealTimeChanges() {
 
   return (
     <SafeAreaView className='flex-1 p-3'>
-      <View className='flex-row items-center justify-between'>
-        <Logo/>
-
-        <Pressable className='p-3 bg-yellow rounded-md'>
-          <Ionicons name='notifications' color={"#444"} size={20}/>
-        </Pressable>
-      </View>
-
       {loading ? (
-        <HomepageSkeleton/>
-      ) : (
-        <View className='p-5'>
-        <Text className='text-2xl'>Hello <Text className='font-semibold'>{userProfile?.first_name}</Text></Text>
+        <View></View>
+      ): (
+        <>
+          <View className='flex-row items-center justify-between'>
+            <Logo/>
+            <Pressable className='p-3 bg-yellow rounded-md'>
+              <Ionicons name='notifications' color={"#444"} size={20}/>
+            </Pressable>
+          </View>
 
-        <View className='mb-4'>
-          <Text className='text-xs'>This is what we have for you today.</Text>
-        </View>
+            <ScrollView className='p-5'>
+            <Text className='text-2xl'>Hello <Text className='font-semibold'>{userProfile?.first_name}</Text></Text>
 
-        <DashboardComponents id={user} properties={properties} tenants={tenants} bookings={bookings}/>
+            <View className='mb-4'>
+              <Text className='text-xs'>This is what we have for you today.</Text>
+            </View>
 
-        <View className='mt-8 border-2 border-gray-200'></View>
-        
-        <View className='mt-3'>
-          <Text className='font-semibold'>Property Reviews <Text>({propertyReviews ? propertyReviews.length : "0"})</Text></Text>
-        </View>
-        <PropertyReviews reviews={propertyReviews}/>
-      </View>
+            <DashboardComponents id={user} properties={properties} tenants={tenants} bookings={bookings}/>
+
+            <View className='mt-10 mb-2'>
+              <Text className='font-semibold'>{properties[0]?.name} is located here: </Text>
+            </View>
+          
+            <View className='rounded-md'>
+              <MapView 
+              scrollEnabled={false}
+              style={{borderRadius: 20}}
+              className='h-48 w-full rounded-md'
+              initialRegion={{
+                latitude: 10.7913309,
+                longitude: 122.0068165,
+                latitudeDelta: 0.001,
+                longitudeDelta: 0.001,
+              }}>
+                <MarkerAnimated
+                coordinate={markerPosition}>
+                  <View className='justify-center items-center'>
+                    <View 
+                    style={{backgroundColor: "#444"}}
+                    className='rounded-md p-2'>
+                      <Text className='text-center text-white text-xs'>{properties[0]?.name}</Text>
+                    </View>
+                   
+                    <View className='h-12 w-12'>
+                      <Image 
+                      style={{width: '100%', height: "100%"}}
+                      source={require("@/assets/custom-pin.png")}/>
+                    </View>
+                  </View>
+                  
+                 
+                  
+                  <Callout>
+                    <View className='w-32 rounded-md'>
+                      <Text className='text-center'>{properties[0]?.name}</Text>
+                    </View>
+                  </Callout>
+                </MarkerAnimated>
+              </MapView>   
+            </View>
+          
+        </ScrollView> 
+      </> 
       )}
-
-      
-
+       
     </SafeAreaView>
   )
 }
