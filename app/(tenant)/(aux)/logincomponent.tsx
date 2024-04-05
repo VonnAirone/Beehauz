@@ -1,6 +1,6 @@
 // TextInputField.js
 import React, { useState } from 'react';
-import { Text, TextInput, View, Pressable, Image, Linking, Platform, Alert } from 'react-native';
+import { Text, TextInput, View, Pressable, Image, Linking, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/utils/supabase';
 
@@ -113,8 +113,8 @@ export function CheckEmail({ email, actionType }) {
     <View>    
 
       <View className='absolute -top-24 items-center left-2 w-full z-10'>
-        {actionType == 'confirmation' ? (<Image source={require("@/assets/checkemailicon.png")} />) : (<Image source={require("@/assets/forgotpasswordicon.png")} />)}
-        
+        {/* {actionType == 'confirmation' ? (<Image source={require("@/assets/checkemailicon.png")} />) : (<Image source={require("@/assets/forgotpasswordicon.png")} />)}
+         */}
       </View>
 
       <View className='z-0 w-96 px-8 bg-white shadow-2xl border border-gray-200 justify-center rounded-md'>

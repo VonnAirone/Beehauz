@@ -1,21 +1,12 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import LottieView from 'lottie-react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 
 export default function PropertySuccess() {
   return (
     <SafeAreaView className='flex-1 justify-center items-center'>
-      <View className='w-40 h-40'>
-        <LottieView
-        autoPlay
-        loop
-        style={{width: "100%", height: "100%"}}
-        source={require("@/assets/success.json")}/>
-      </View>
-
       <View className='items-center gap-y-2 mt-5'>
         <Text className='text-xl'>Congratulations!</Text>
         <Text>You have successfully created your property!</Text>

@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import React, { memo, useEffect, useRef, useState } from "react";
 import { FlatList as RNFlatList, Pressable, View, Text, Image, FlatList, TouchableOpacity } from "react-native";
 import { PropertyData } from "@/api/Properties";
+import { useQuery } from "react-query";
 
 
  
@@ -91,8 +92,6 @@ import { PropertyData } from "@/api/Properties";
       
     }, [propertyID]);
 
-    
-  
     if (images.length > 0) {
       const firstImage = images[0];
       return (
@@ -353,27 +352,26 @@ import { PropertyData } from "@/api/Properties";
 
 
   export function Favorites({ data }: { data: PropertyData[]}) {
-
     const [imagesLoaded, setImagesLoaded] = useState(false);
-    const hasFetched = useRef(false);
+  
+    const { isLoading, error, refetch } = useQuery('favorites', async () => {
+      try {
+        await loadImages(data, setImagesLoaded);
+        return true; // Return a value to indicate successful fetching
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        throw new Error('Error fetching data');
+      }
+    });
   
     useEffect(() => {
-      if (!hasFetched.current) {
-        async function fetchData() {
-          try {
-            await loadImages(data, setImagesLoaded);
-          } catch (error) {
-            console.error('Error fetching data:', error);
-          }
-        }
-        fetchData();
-      }
-    }, [data]);
-
+      // You can perform any additional actions here after data is fetched, if needed
+    }, [isLoading]);
+  
     const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
       <Pressable
-      onPress={() => handleCardPress(item.property_id)} 
-      className='overflow-hidden'>
+        onPress={() => handleCardPress(item.property_id)} 
+        className='overflow-hidden'>
         <View>
           <View className='h-40 w-80'>
             <SingleImageDisplay propertyID={item.property_id}/>
@@ -389,7 +387,7 @@ import { PropertyData } from "@/api/Properties";
               <Ionicons name="location" color={'#444'}/>
               <Text>{item.address}</Text>
             </View>
-
+  
             <View className="flex-row items-center gap-x-1">
               <Ionicons name="bed-outline" size={15}/>
               <Text>{item.available_beds} Beds</Text>
@@ -399,12 +397,13 @@ import { PropertyData } from "@/api/Properties";
       </Pressable>
     );
   
-    return <RNFlatList 
-    contentContainerStyle={{alignItems: 'center'}}
-    data={data} 
-    renderItem={renderItem} 
-    showsHorizontalScrollIndicator={false} 
-    horizontal={false} />;
-  };
-
-  
+    return (
+      <FlatList 
+        contentContainerStyle={{alignItems: 'center'}}
+        data={data} 
+        renderItem={renderItem} 
+        showsHorizontalScrollIndicator={false} 
+        horizontal={false} 
+      />
+    );
+  }

@@ -1,41 +1,86 @@
-import { View, Text } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import BackButton from '@/components/back-button'
-import { supabase } from '@/utils/supabase'
-import { useAuth } from '@/utils/AuthProvider'
-import { fetchFavorites } from '@/api/DataFetching'
-import { Favorites } from '../(aux)/homecomponents'
+import React, { useState, useEffect } from 'react';
+import { View, Text, Pressable, FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import BackButton from '@/components/back-button';
+import { useAuth } from '@/utils/AuthProvider';
+import { useQuery } from 'react-query';
+import { fetchFavorites } from '@/api/DataFetching';
+import { supabase } from '@/utils/supabase';
+import { Ionicons } from '@expo/vector-icons'; // Assuming you have Ionicons imported
+import { SingleImageDisplay } from '../(aux)/homecomponents';
 
 export default function Bookmarked() {
   const user = useAuth();
-  const [properties, setProperties] = useState([])
 
-  async function fetchSavedProperties() {
-    try {
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  const { data: properties = [], isLoading, isError, refetch } = useQuery(
+    ['savedProperties', user],
+    async () => {
       const { data, error } = await supabase
         .from('favorites')
         .select("*")
         .eq('tenant_id', user?.session.user.id);
-  
+
+      if (error) {
+        throw new Error('Error fetching saved properties');
+      }
+
       if (data) {
         const propertyPromises = data.map(async (property) => {
           return await fetchFavorites(property.property_id);
         });
         const fetchedProperties = await Promise.all(propertyPromises);
-        setProperties(fetchedProperties.flat());
+        return fetchedProperties.flat();
       }
-    } catch (error) {
-      console.log("Error fetching saved properties: ", error.message);
+
+      return [];
     }
-  }
-  
-  
-  
+  );
 
   useEffect(() => {
-    fetchSavedProperties()
-  }, [user])
+    // You can perform any additional actions here after data is fetched, if needed
+  }, [isLoading]);
+
+  const handleCardPress = (propertyId) => {
+    // Define your handleCardPress function logic here
+  };
+
+  const renderItem = ({ item, index }) => (
+    <Pressable onPress={() => handleCardPress(item.property_id)} className='overflow-hidden'>
+      <View>
+        <View className='h-40 w-80'>
+          <SingleImageDisplay propertyID={item.property_id}/>
+        </View>
+
+        <View className="mt-2">
+          <View className="flex-row items-end justify-between">
+            <Text className='font-semibold text-xl'>{item.name}</Text>
+            <Text className="font-semibold">{item.price} / month</Text>
+          </View>
+
+          <View className="flex-row items-center">
+            <Ionicons name="location" color={'#444'}/>
+            <Text>{item.address}</Text>
+          </View>
+
+          <View className="flex-row items-center gap-x-1">
+            <Ionicons name="bed-outline" size={15}/>
+            <Text>{item.available_beds} Beds</Text>
+          </View>
+        </View>
+      </View>
+    </Pressable>
+  );
+
+  if (isLoading) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (isError) {
+    return <Text>Error fetching saved properties</Text>;
+  }
+
   return (
     <SafeAreaView className='flex-1'>
       <View className='p-5'>
@@ -44,10 +89,14 @@ export default function Bookmarked() {
           <Text className='font-semibold'>List of Saved Properties</Text>
         </View>
 
-        <View>
-          <Favorites data={properties}/>
-        </View>
+        <FlatList 
+          contentContainerStyle={{alignItems: 'center'}}
+          data={properties} 
+          renderItem={renderItem} 
+          showsHorizontalScrollIndicator={false} 
+          horizontal={false} 
+        />
       </View>
     </SafeAreaView>
-  )
+  );
 }

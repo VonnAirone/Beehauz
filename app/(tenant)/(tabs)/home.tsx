@@ -51,21 +51,24 @@ export default function HomePage() {
     <> 
       <View>
 
-          <View 
-          className='h-18 justify-center p-4 mb-5'>
+          
+
+        <View
+        style={{backgroundColor: "#444"}}
+        className='py-5'>
+          <View          
+          className='h-18 justify-center p-4'>
             <View className='flex-row items-center'>
               <Image className='w-10 h-10' source={require("@/assets/images/icon.png")}/>
-              <Text className='font-semibold text-2xl'>BEEHAUZ</Text>
+              <Text className='font-semibold text-2xl text-white'>BEEHAUZ</Text>
             </View>
           </View>
 
-        <View 
-        className='px-5'>
-          <View className='flex-row items-center'>
+          <View className='flex-row items-center px-5'>
             <Pressable 
             className='grow'
             onPress={() => router.push("/Searchpage")}>    
-              <View className='flex-row items-center bg-gray-200 rounded-md p-2'>
+              <View className='flex-row items-center bg-white rounded-md p-2'>
                 <View className='mx-2'>
                   <Ionicons 
                   color={"#444"}
@@ -79,7 +82,7 @@ export default function HomePage() {
             </Pressable>
             <View className='ml-3'>
               <TouchableOpacity onPress={() => router.push("/Bookmarked")}>
-                <Ionicons name='bookmark' size={36} color={"#444"}/>
+                <Ionicons name='bookmark' size={36} color={"white"}/>
               </TouchableOpacity>
             </View>
           </View>
@@ -96,12 +99,12 @@ export default function HomePage() {
           </View>
 
           <View className='my-5'>
-            <View className='rounded-md'>
+            <View>
               <Image
               className='h-48 w-full rounded-md'
               source={require("@/assets/images/Map Illustration.jpg")}/>
               <View className='absolute overflow-hidden rounded-md bottom-4 left-3'>
-                <Pressable className='bg-gray-200 rounded-md p-3 flex-row items-center gap-x-2'>
+                <Pressable className='bg-gray-200 rounded-md p-3 flex-row items-center'>
                   <Text>
                     Find through the map
                   </Text>

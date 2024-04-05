@@ -4,6 +4,9 @@ import { Stack } from 'expo-router';
 import { useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
+import { QueryClient, QueryClientProvider } from 'react-query'; // Import QueryClient and QueryClientProvider
+
+const queryClient = new QueryClient(); // Create a new QueryClient instance
 
 export const unstable_settings = {
   initialRouteName: '(tabs)',
@@ -20,13 +23,13 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthProvider>
-      <RootLayoutNav />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RootLayoutNav />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
-
-
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
@@ -42,4 +45,3 @@ function RootLayoutNav() {
     </ThemeProvider>
   );
 }
-

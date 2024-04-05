@@ -119,7 +119,7 @@ export default function Account() {
           </View>
 
           <View className='ml-4'>
-            <Text className='font-medium italic'>Owner</Text>
+            <Text className='font-medium italic'>Tenant</Text>
             <Text className='font-semibold text-xl'>{userProfile?.first_name} {userProfile?.last_name}</Text>
             <Text className='text-xs'>{userProfile?.gender}</Text>
             <Text className='text-xs'>{userProfile?.age}</Text>
@@ -134,7 +134,7 @@ export default function Account() {
         </View>
         
         <View className='gap-y-3 mt-3 mb-10'>
-          <View className='flex-row justify-between rounded-md bg-gray-50 p-3'>
+          <View className='flex-row justify-between rounded-md p-3'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='mail-outline' size={18}/>
               <Text className='font-semibold'>Email</Text>
@@ -148,7 +148,7 @@ export default function Account() {
             </View>
           </View>
 
-          <View className='flex-row justify-between rounded-md bg-gray-50 p-3'>
+          <View className='flex-row justify-between rounded-md p-3'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='phone-portrait-outline' size={18}/>
               <Text className='font-semibold'>Phone</Text>
@@ -162,7 +162,7 @@ export default function Account() {
             </View>
           </View>
 
-          <View className='flex-row justify-between rounded-md bg-gray-50 p-3'>
+          <View className='flex-row justify-between rounded-md p-3'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='location-outline' size={18}/>
               <Text className='font-semibold'>Location</Text>
@@ -217,7 +217,10 @@ export default function Account() {
           </View>
          
          <View className='rounded-md overflow-hidden'>
-          <Pressable android_ripple={{color: 'f1f1f1'}} className='rounded-md p-4'>
+          <Pressable 
+          onPress={() => router.push("/(owner)/(screens)/MapView")}
+          android_ripple={{color: 'f1f1f1'}} 
+          className='rounded-md p-4'>
               <View className='flex-row justify-between items-center'>
                 <View className='flex-row items-center gap-x-2'>
                   <Ionicons name='star-half-outline' size={18}/>

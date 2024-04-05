@@ -157,8 +157,11 @@ export default function OwnerProfile() {
         
         <BackButton/>
         <View>
-          <View className='items-center bg-yellow rounded-md mt-2 h-32 mb-6'>
-            <View className='absolute -bottom-10 rounded-full border-2 border-yellow bg-white h-28 w-28'>
+          <View 
+          style={{backgroundColor: "#444"}}
+          className='items-center rounded-md mt-2 h-32 mb-6'>
+            <View 
+            className='absolute -bottom-10 rounded-full border-2 border-gray-200 bg-white h-28 w-28'>
                 <AvatarImage userID={ownerData?.first_name}/>
             </View>
           </View>
@@ -286,8 +289,9 @@ export default function OwnerProfile() {
           <View className='rounded-full overflow-hidden '>
             <Pressable 
             onPress={() => ContactOwner()}
+            style={{backgroundColor: "#444"}}
             android_ripple={{color: "#fdfdd9"}}
-            className='p-5 bg-yellow rounded-full'>
+            className='p-5 rounded-full'>
               <Ionicons name='chatbubble' size={32} color={"white"}/>
             </Pressable>
           </View>

@@ -1,12 +1,10 @@
-import { StyleSheet, View, Text, Image } from 'react-native';
+import { View, Text } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from "expo-location";
-import MapView, { Callout, Marker, MarkerAnimated } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import { fetchPropertyListData } from '@/api/DataFetching';
-import { ZoomIn } from 'react-native-reanimated';
 import BackButton from '@/components/back-button';
-import { useLocalSearchParams } from 'expo-router';
 
 type LocationData = {
   latitude: number;
@@ -86,14 +84,13 @@ export default function PropertyLocationView() {
     <SafeAreaView className='flex-1'>
       {location ? (
         <View>
-          <View className='absolute z-10'>
+          <View className='absolute z-10 p-5'>
             <BackButton/>
           </View>
           
           <MapView
           showsMyLocationButton
           showsBuildings={false}
-          // showsUserLocation
             className='w-full h-full'
             initialRegion={{
               latitude: location.latitude,

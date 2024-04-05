@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, Image, TextInput } from 'react-native';
+import { StyleSheet, View, Text, Image, TextInput, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from "expo-location";
@@ -7,6 +7,7 @@ import { fetchPropertyListData } from '@/api/DataFetching';
 import { Images, SingleImageDisplay } from '../(aux)/homecomponents';
 import { ZoomIn } from 'react-native-reanimated';
 import BackButton from '@/components/back-button';
+import LoadingComponent from '@/components/LoadingComponent';
 
 type LocationData = {
   latitude: number;
@@ -45,6 +46,7 @@ export default function map() {
   const [location, setLocation] = useState<LocationData | null>(null);
   const [address, setAddress] = useState('');
   const [markerPosition, setMarkerPosition] = useState({ latitude: 10.7198499, longitude: 122.5616936 });
+  const [loading, setLoading] = useState(true)
 
   async function fetchProperties() {
     try {
@@ -58,9 +60,19 @@ export default function map() {
   }
 
   useEffect(() => {
-    
-    getPermissions();
-    fetchProperties();
+    async function fetchData() {
+      try {
+        setLoading(true)
+        getPermissions();
+        fetchProperties();
+
+      } catch (error) {
+        console.log("Error fetching location data: ", error.message)
+      }
+    }
+
+    fetchData()
+
   }, []);
 
   const getPermissions = async () => {
@@ -85,50 +97,49 @@ export default function map() {
 
   return (
     <SafeAreaView className='flex-1'>
-      {location ? (
+      {loading ? (
+         <LoadingComponent/>
+      ) : (
         <View>
           <View className='absolute z-10'>
             <BackButton/>
           </View>
-          
+        
           <MapView
           showsMyLocationButton
           showsBuildings={false}
           // showsUserLocation
             className='w-full h-full'
             initialRegion={{
-              latitude: location.latitude,
-              longitude: location.longitude,
+              latitude: 10.7198499,
+              longitude: 122.5616936,
               latitudeDelta: 0.005,
               longitudeDelta: 0.005,
             }}
           >
 
-            {properties.map(property => (
-              <MarkerAnimated 
-              onPress={() => ZoomIn}
-              key={property?.property_id} coordinate={{latitude: property?.latitude, longitude: property?.longitude}}>
-                <View className='h-20 w-20 p-2 bg-white rounded-md'>
-                  <SingleImageDisplay propertyID={property.property_id}/>
-                </View>
+          {/* {properties.map(property => (
+            <MarkerAnimated 
+            onPress={() => ZoomIn}
+            key={property?.property_id} coordinate={{latitude: property?.latitude, longitude: property?.longitude}}>
+              <View className='h-20 w-20 p-2 bg-white rounded-md'>
+                <SingleImageDisplay propertyID={property.property_id}/>
+              </View>
 
-                <PropertyCallout property={property} />
-              </MarkerAnimated>
-            ))}
-
-
-          </MapView>
-            <View className='absolute bottom-10 w-full items-center'>
-              <TextInput
-              className='shadow-md bg-yellow text-white p-3 w-80 rounded-md' 
-              placeholder='Enter a property' 
-              value={address}
-              onChangeText={handleAddressChange}/>
-            </View>
-
+              <PropertyCallout property={property} />
+            </MarkerAnimated>
+          ))} */}
+        </MapView>
+          
+          <View className='absolute bottom-10 w-full items-center'>
+            <TextInput
+            className='shadow-md bg-yellow text-white p-3 w-80 rounded-md' 
+            placeholder='Enter a property' 
+            value={address}
+            onChangeText={handleAddressChange}/>
           </View>
-      ) : (
-        <Text>Loading...</Text>
+
+        </View>
       )}
     </SafeAreaView>
   );
