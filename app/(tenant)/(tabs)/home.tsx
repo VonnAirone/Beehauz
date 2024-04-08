@@ -8,36 +8,60 @@ import { useEffect, useState } from 'react';
 import { View, Text, TextInput, ScrollView, Pressable, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchCheapProperties, fetchNearbyMe } from '../(aux)/Filters';
-import { getRouteInfoFromState } from 'expo-router/build/LocationProvider';
+import { usePushNotifications } from '@/api/usePushNotification';
+import { supabase } from '@/utils/supabase';
 
 export default function HomePage() {
+  const { expoPushToken } = usePushNotifications()
+
   const [PopularList, setPopularList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [location, setLocation] = useState<LocationData | null>(null);
   const [NearbyProperties, setNearbyProperties] = useState([])
   const [cheapProperties, setCheapProperties] = useState([])
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const PopularList = await fetchPopularNowList();
-        setPopularList(PopularList);
-        const data = await getPermissions();
-        if (data) {
-          await fetchCheapProperties(setCheapProperties)
-          setLocation(data)
+  async function subscribeToPropertyChanges() {
+    const channels = supabase
+      .channel('property-creation')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'property' },
+        (payload) => {
+          fetchData()
         }
+      )
+      .subscribe();
+  
+    return () => {
+      channels.unsubscribe();
+    };
+  }
 
-        if (location) {
-          await fetchNearbyMe(location?.latitude, location?.longitude, setNearbyProperties)
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
+  async function fetchData() {
+    try {
+      const PopularList = await fetchPopularNowList();
+      setPopularList(PopularList);
+      const data = await getPermissions();
+      if (data) {
+        await fetchCheapProperties(setCheapProperties)
+        setLocation(data)
       }
+
+      if (location) {
+        await fetchNearbyMe(location?.latitude, location?.longitude, setNearbyProperties)
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
     }
+  }
+
+  
+  useEffect(() => {
+    getPermissions()
     fetchData();
+    subscribeToPropertyChanges();
   }, []);
 
   return (
@@ -50,9 +74,6 @@ export default function HomePage() {
     ) : (  
     <> 
       <View>
-
-          
-
         <View
         style={{backgroundColor: "#444"}}
         className='py-5'>
@@ -99,16 +120,20 @@ export default function HomePage() {
           </View>
 
           <View className='my-5'>
-            <View>
+            <View className='border rounded-md'>
               <Image
-              className='h-48 w-full rounded-md'
+              className='h-48 w-80 rounded-md'
               source={require("@/assets/images/Map Illustration.jpg")}/>
               <View className='absolute overflow-hidden rounded-md bottom-4 left-3'>
-                <Pressable className='bg-gray-200 rounded-md p-3 flex-row items-center'>
-                  <Text>
+                <Pressable 
+                onPress={() => router.replace("/(tenant)/(tabs)/map")}
+                android_ripple={{color: "white"}}
+                style={{backgroundColor: "#444"}}
+                className='rounded-md p-3 flex-row items-center'>
+                  <Text className='text-white mr-2'>
                     Find through the map
                   </Text>
-                  <Ionicons name='arrow-forward-outline'/>
+                  <Ionicons name='arrow-forward-outline' color={'white'}/>
                 </Pressable>
               </View>
             </View>

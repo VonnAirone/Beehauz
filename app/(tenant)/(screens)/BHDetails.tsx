@@ -6,8 +6,8 @@ import { fetchPropertyDetailsData, fetchPropertyTerms, getOwnerData, getProperty
 import { loadImages } from '@/api/ImageFetching';
 import BackButton from '@/components/back-button';
 import { Ionicons } from '@expo/vector-icons';
-import { BottomBar, fetchAmenities } from '../(aux)/detailscomponent';
-import { Images } from '../(aux)/homecomponents';
+import { BottomBar } from '../(aux)/detailscomponent';
+import { Images, SingleImageDisplay } from '../(aux)/homecomponents';
 import { PropertyData, ReviewData, OwnerData, PropertyTerms } from '@/api/Properties';
 import { PropertyReviews } from '@/app/(owner)/(aux)/propertycomponents';
 import LoadingComponent from '@/components/LoadingComponent';
@@ -30,7 +30,7 @@ export default function BHDetails() {
   const hasFetched = useRef(false);
   const [ratings, setRatings] = useState(0)
   const [propertyReviews, setPropertyReviews] = useState<ReviewData[] | null>(null);
-  const [amenities, setAmenities] = useState([]);
+  const [amenities, setAmenities] = useState([])
   const [ownerData, setOwnerData] = useState<OwnerData | null>(null);
   const [terms, setTerms] = useState<PropertyTerms | null>(null)
 
@@ -50,11 +50,9 @@ export default function BHDetails() {
         try {
           const fetchedData = await fetchPropertyDetailsData(propertyID.toString());
           setData(fetchedData);
-
           await checkBookmarkStatus(propertyID, user?.id, setBookmarkStatus);
           await loadImages(propertyID, setImages);
           await fetchPropertyReviews();
-          await fetchAmenities(propertyID, setAmenities);
           await getOwnerData(fetchedData?.owner_id, setOwnerData);
           await fetchPropertyTerms(propertyID, setTerms);
 
@@ -173,7 +171,7 @@ export default function BHDetails() {
                 <View className='w-screen h-60'> 
                   <Pressable onPress={() => openImage(item)}>
                   <View>
-                    <Images item={{...item, propertyID}}/>
+                    <SingleImageDisplay propertyID={propertyID}/>
                   </View>
 
                   </Pressable>
@@ -266,11 +264,11 @@ export default function BHDetails() {
               </View>
 
               <FlatList 
-              data={amenities} 
+              data={data?.amenities} 
               renderItem={({item,index}) =>
-              <View className='mr-2'>
-              <View key={item.amenity_id} className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
-                  <Text className='text-center text-xs'>{item.amenity_name}</Text>
+              <View className='mr-2 mt-2'>
+              <View key={index} className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
+                  <Text className='text-center text-xs'>{item}</Text>
               </View>
               </View>} showsHorizontalScrollIndicator={false} horizontal={true} />
             </View>
@@ -292,11 +290,12 @@ export default function BHDetails() {
 
                   <View className='w-40 self-end mt-4 overflow-hidden rounded-md'>
                     <Pressable 
+                    style={{backgroundColor: "#444"}}
                     className='p-2 rounded-md flex-row items-center'
-                    android_ripple={{color: "#444"}}
+                    android_ripple={{color: "white"}}
                     onPress={() => router.push({pathname: "/(tenant)/(screens)/OwnerProfile", params: {owner_id : data?.owner_id}})}>
-                      <Text>View Owner details</Text>
-                      <Ionicons name='chevron-forward-outline' size={20} color={"#444"}/>
+                      <Text className='text-white'>View Owner details</Text>
+                      <Ionicons name='chevron-forward-outline' size={20} color={"white"}/>
                     </Pressable>
                   </View>
                 </View>

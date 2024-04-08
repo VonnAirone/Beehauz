@@ -1,9 +1,5 @@
-import BackButton from "@/components/back-button";
-import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { getUsername } from "./usercomponent";
-import Avatar from "@/app/(owner)/(screens)/accountcomponents";
+import React from "react";
+import { View, Text } from "react-native";
 import AvatarImage from "./avatar";
 
 export default function MessageComponent({ item, user }) {
@@ -18,7 +14,7 @@ export default function MessageComponent({ item, user }) {
     <View className={`${isSender ? 'items-end' : 'items-start'} py-2`}>
       {isSender ? (
         <View className="flex-row gap-x-2 items-center">
-          <View className="bg-yellow px-3 py-1 rounded-md">
+          <View className="px-3 py-1 rounded-md bg-gray-200">
             <Text className="min-w-max">{item.message_content}</Text>
           </View>
           <View className="h-10 w-10 rounded-full">

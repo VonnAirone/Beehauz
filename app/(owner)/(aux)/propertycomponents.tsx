@@ -90,7 +90,7 @@ export const DashboardComponents = ({id, properties, tenants, bookings}) => {
     </View>
 
     <View className='flex-row items-center justify-between mt-5'>
-      <View className='overflow-hidden rounded-md w-36'>
+      <View className='overflow-hidden rounded-md w-40'>
         <Pressable
         onPress={() => router.push({pathname: "/Appointments", params: {property_id: propertyID}})}
         android_ripple={{color: "#444"}}
@@ -106,7 +106,7 @@ export const DashboardComponents = ({id, properties, tenants, bookings}) => {
         </Pressable>
       </View>
       
-      <View className='overflow-hidden rounded-md w-36'>
+      <View className='overflow-hidden rounded-md w-40'>
         <Pressable
         onPress={() => router.push("/(owner)/(tabs)/Tenants")}
         android_ripple={{color: "#444"}}

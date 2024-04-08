@@ -8,7 +8,7 @@ import { useAuth } from '@/utils/AuthProvider';
 import BackButton from '@/components/back-button';
 import { Dropdown } from 'react-native-element-dropdown';
 
-export default function TenantRegistration({ email }) {
+export default function TenantRegistration() {
   const { usertype } = useLocalSearchParams();
   const user = useAuth().session?.user;
   const [firstName, setFirstName] = useState('');
@@ -18,6 +18,7 @@ export default function TenantRegistration({ email }) {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [gender, setGender] = useState('')
   const [isEmpty, setIsEmpty] = useState(false);
+  const currentDate = new Date().toISOString(); 
 
   const handleFirstNameChange = (text) => { setFirstName(text); setIsEmpty(false); };
   const handleLastNameChange = (text) => { setLastName(text); setIsEmpty(false); };
@@ -43,7 +44,7 @@ export default function TenantRegistration({ email }) {
       } else {
         if (usertype === "Tenant") {
           try {
-            const { data, error } = await supabase.from('tenants').insert({ 'tenant_id': user?.id, 'date_joined': Date.now() });
+            const { data, error } = await supabase.from('tenants').insert({ 'tenant_id': user?.id, 'date_joined': currentDate });
         
             if (error) {
               throw error;
@@ -139,7 +140,7 @@ export default function TenantRegistration({ email }) {
                       placeholder='Ex. Juan'
                       value={firstName}
                       onChangeText={handleFirstNameChange}
-                      className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+                      className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
                     />
                 </View>
                 <View className='w-40'>
@@ -149,7 +150,7 @@ export default function TenantRegistration({ email }) {
                       clearTextOnFocus
                       value={lastName}
                       onChangeText={handleLastNameChange}
-                      className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+                      className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
                     />
                 </View>
               </View>
@@ -160,7 +161,7 @@ export default function TenantRegistration({ email }) {
                     clearTextOnFocus
                     value={user?.email}
                     editable={false}
-                    className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+                    className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
                   />
               </View>
 
@@ -171,7 +172,7 @@ export default function TenantRegistration({ email }) {
                     value={address}
                     placeholder={'(ex. Barangay, Municipality, Province)'}
                     onChangeText={handleAddressChange}
-                    className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+                    className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
                   />
               </View>
 
@@ -183,13 +184,13 @@ export default function TenantRegistration({ email }) {
                     value={age}
                     placeholder={'Age'}
                     onChangeText={handleAgeChange}
-                    className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+                    className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
                   />
                 </View>
 
                 <View className='grow ml-5'>
                   <Text className="mb-1 font-semibold">Gender</Text>
-                  <View className='bg-gray-100 rounded-md'>
+                  <View className='bg-gray-200 rounded-md'>
                     <Dropdown 
                       style={{padding: 4}}
                       data={genderOptions} 
@@ -216,7 +217,7 @@ export default function TenantRegistration({ email }) {
                     placeholder='+63 -'
                     value={phoneNumber}
                     onChangeText={handlePhoneNumberChange}
-                    className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+                    className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
                   />
               </View>
               

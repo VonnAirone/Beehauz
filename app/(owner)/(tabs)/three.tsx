@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FlatList, Pressable, Text, TextInput, View, Image } from 'react-native';
+import { FlatList, Pressable, Text, TextInput, View, Image, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/utils/AuthProvider';
@@ -14,6 +14,7 @@ export default function Messages() {
   const [messages, setMessages] = useState<MessageInfoData[]>([]);
   const [senderData, setSenderData] = useState<Record<string, { name: string; propertyName: string; gender: string; }>>({});
   const [loading, setLoading] = useState(false)
+  const [showModal, setShowModal] = useState(false)
 
   const formatTime = (time: string) => {
     const [hours, minutes, seconds] = time.split(':').map(Number);
@@ -158,24 +159,31 @@ export default function Messages() {
     <SafeAreaView className='flex-1'>
       <View className='p-5'>
 
-        <View className='mb-4 flex-row items-center justify-between'>
-          <View>
+        <View className='mb-4 flex-row items-center'>
+          <View className='mr-1'>
             <Text className='text-xl font-semibold'>Messages</Text>
           </View>
 
-          <Pressable 
-          style={{backgroundColor: "#444"}}
-          onPress={() => {}}
-          android_ripple={{color: "white"}}
-          className='p-3 rounded-md'>
-            <Ionicons name='create' color={"white"} size={20}/>
+          <Pressable onPress={() => setShowModal(!showModal)}>
+            <Ionicons name='help-circle-outline' size={20}/>
           </Pressable>
+
+          {showModal && (
+            <View
+            className='p-3 rounded-md bg-white absolute top-8 w-full z-10 border border-gray-200 flex-row items-center justify-between'>
+              <Text className='text-xs'>Note: Only tenants are able to start conversations.</Text>
+              <Pressable onPress={() => setShowModal(!false)}>
+                <Ionicons name='close'/>
+              </Pressable>
+            </View>
+          )}
+       
         </View>
 
         <View>
           <View className='flex-row items-center bg-gray-50 rounded-md p-2 backdrop-blur-3xl'>
             <View className='mx-2'>
-              <Ionicons name='search' size={20} color={'#ffa233'}/>
+              <Ionicons name='search' size={20} color={'#444'}/>
             </View>
             <TextInput 
             editable={false} 

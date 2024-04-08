@@ -1,10 +1,10 @@
-import { View, Text, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BackButton from '@/components/back-button';
 import AvatarImage from '@/app/(tenant)/(aux)/avatar';
-import { fetchPropertyDetailsData, getProfile } from '@/api/DataFetching';
+import { getProfile } from '@/api/DataFetching';
 import { PropertyData, UserData } from '@/api/Properties';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/utils/supabase';
@@ -74,7 +74,7 @@ export default function TenantProfile() {
   const addTenantToProperty = async () => {
     const TenantData = {
       status: 'Boarding',
-      // property_id: propertyData?.property_id
+      property_id: propertyData?.property_id
     }
     try {
       const {data, error} = await supabase

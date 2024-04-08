@@ -1,26 +1,89 @@
-import React, { useState, useEffect } from "react";
-import { Text, FlatList, TextInput, View, Pressable} from "react-native";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { Text, FlatList, TextInput, View, Pressable } from "react-native";
 import { fetchUserMessages, subscribeToRealTimeMessages } from "../(aux)/messagecomponent";
 import { useAuth } from "@/utils/AuthProvider";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ChatComponent from "../(aux)/ChatComponent";
+import { router } from "expo-router";
+import { BottomSheetModal, BottomSheetModalProvider, BottomSheetView } from '@gorhom/bottom-sheet';
+import { OwnerData, PropertyData } from "@/api/Properties";
+import { supabase } from "@/utils/supabase";
+import { ContactOwner } from "@/api/ContactOwner";
 
 export default function Messages() {
   const session = useAuth();
   const userID = session?.session.user.id;
   const [userMessages, setUserMessages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const [owners, setOwners] = useState<OwnerData[] | null>(null);
+  const [ownerProperty, setOwnerProperty] = useState<PropertyData[] | null>(null)
 
+
+  const snapPoints = useMemo(() => ['25%', '50%'], []);
+
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetModalRef.current?.present();
+  }, []);
+
+
+  async function fetchOwners() {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select("*")
+        .eq("user_type", 'Owner');
+
+    
+      if (!error) {
+        setOwners(data);
+
+        const ownersWithProperties = await Promise.all(data.map(async (owner) => {
+          const properties = await fetchOwnerProperty(owner.id);
+          return { ...owner, properties };
+        }));
+        
+        const allProperties = ownersWithProperties.reduce((acc, owner) => {
+          return [...acc, ...owner.properties];
+        }, []);
+        
+        setOwnerProperty(allProperties); // Set all properties separately
+      }        
+    } catch (error) {
+      console.error("Error fetching owners:", error.message);
+      setOwners([]);
+    }
+  }
+  
+  async function fetchOwnerProperty(ownerId) {
+    try {
+      const { data, error } = await supabase
+        .from('property')
+        .select("*")
+        .eq("owner_id", ownerId);
+        
+      if (!error) {
+        return data;
+      }
+      
+      console.log(data)
+    } catch (error) {
+      console.error("Error fetching owner properties:", error.message);
+      return [];
+    }
+  }
+  
   useEffect(() => {
     async function fetchData() {
       const messages = await fetchUserMessages(userID);
       setUserMessages(messages);
+      fetchOwners()
       setLoading(false);
     }
 
-    fetchData();
 
+    fetchData();
     const unsubscribe = subscribeToRealTimeMessages(userID, (newMessage) => {
     setUserMessages((prevMessages) => {
       const isUniqueRoom = !prevMessages.some(
@@ -43,6 +106,7 @@ export default function Messages() {
   }, [userID]);
 
   return (
+    <BottomSheetModalProvider>
     <SafeAreaView className="flex-1">
       <View className="p-5">
         <View className='flex-row items-center justify-between mb-4'>
@@ -52,7 +116,7 @@ export default function Messages() {
 
           <Pressable 
           style={{backgroundColor: "#444"}}
-          onPress={() => {}}
+          onPress={handlePresentModalPress}
           android_ripple={{color: "white"}}
           className='p-3 rounded-md'>
             <Ionicons name='create' color={"white"} size={20}/>
@@ -72,10 +136,14 @@ export default function Messages() {
 
         <View className="mt-5">
           {loading ? (
-            <Text>Loading...</Text>
+            <View></View>
           ) : userMessages.length === 0 ? (
-            <Text>No messages</Text>
+            <View className="items-center justify-center">
+             <Text>No messages as of the moment</Text>
+            </View>
+           
           ) : (
+            <>
             <FlatList
               scrollEnabled
               data={userMessages}
@@ -84,10 +152,45 @@ export default function Messages() {
               )}
               keyExtractor={(item) => (item.message_id || item.id).toString()}
             />
+            </>
           )}
         </View>
 
       </View>
+
+      <BottomSheetModal
+          ref={bottomSheetModalRef}
+          index={1}
+          snapPoints={snapPoints}
+          enablePanDownToClose={true}
+        >
+          <BottomSheetView>
+            <View className="p-5">
+              <Text className="font-semibold">Chat Property Owners</Text>
+
+              <FlatList
+              data={owners}
+              renderItem={({item, index}) => (
+                <View className="rounded-md overflow-hidden mt-4">
+                  <Pressable
+                  onPress={() => ContactOwner(session?.session?.user.id, item.id)} 
+                  android_ripple={{color: "#444"}}
+                  className="p-3 bg-gray-100 flex-row items-center justify-between rounded-md">
+                    <View className="rounded-md">
+                      <Text className="font-semibold">{item.first_name} {item.last_name}</Text>
+                      <Text className="text-xs">Owner of {ownerProperty[index]?.name}</Text> 
+                    </View>
+
+                    <View>
+                      <Ionicons name="chevron-forward" size={20}/>
+                    </View>
+                  </Pressable> 
+                </View>
+              )}/>
+            </View>
+          </BottomSheetView>
+        </BottomSheetModal>
     </SafeAreaView>
+  </BottomSheetModalProvider>
   );
 }

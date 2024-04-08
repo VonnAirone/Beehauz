@@ -9,10 +9,10 @@
       "output": "static"
     },
     "plugins": [
-      ["expo-router", {
-        "asyncRoutes": "development"
-      }
-      ],
+      // ["expo-router", {
+      //   "asyncRoutes": "development"
+      // }
+      // ],
       [
         "expo-image-picker",
         {
@@ -56,7 +56,14 @@
       "permissions": [
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.aironevonn.beehauzapp"
+      "package": "com.aironevonn.beehauzapp",
+      "googleServicesFile": "./google-services.json",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyAXn-flhdb__4Fqa-4pbPJsXk9DzF2ScPo"
+        }
+      }
+     
     },
     "extra": {
       "router": {

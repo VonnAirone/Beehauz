@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "679041773416",
+    "project_id": "beehauz-app",
+    "storage_bucket": "beehauz-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:679041773416:android:a1bf570238c6918e1e30dd",
+        "android_client_info": {
+          "package_name": "com.aironevonn.beehauzapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCX31qCcBdKaquHMxKvq6Eo1mz2NAlIrMY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

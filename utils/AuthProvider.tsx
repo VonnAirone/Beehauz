@@ -40,7 +40,7 @@ export function AuthProvider({ children }: Props) {
         router.replace('/Usertype')
       } else {
         if (session?.user.user_metadata.usertype == "Tenant") {
-          router.replace("/(tenant)/(tabs)/home")
+          router.replace("/(tenant)/(screens)/TenantProperty")
         } else {
           router.replace("/(owner)/(tabs)/Dashboard")
         }

@@ -21,13 +21,16 @@ export async function fetchPropertyListData() {
 }
 
 export async function fetchPopularNowList() {
-  const query = supabase.from('property')
-  .select('*')
-  .order('view_count', {ascending: false})
-  .limit(5)
+  const query = supabase
+    .from('property')
+    .select('*')
+    .gte('view_count', 50)
+    .order('view_count', { ascending: true })
+    .limit(5);
 
   return fetchData(query);
 }
+
 
 export async function fetchPropertyDetailsData(propertyID: string) {
   const query = supabase

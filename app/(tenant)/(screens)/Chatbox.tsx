@@ -5,11 +5,12 @@ import React, { useState, useEffect } from "react";
 import { View, FlatList, TouchableOpacity, TextInput, ActivityIndicator, Text, Pressable } from "react-native";
 import { Icon } from "react-native-elements";
 import MessageComponent from "../(aux)/MessageChip";
-import BackButton from "@/components/back-button";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { fetchRoomID } from "../(aux)/messagecomponent";
 import { Ionicons } from "@expo/vector-icons";
 import { fetchPropertyData } from "@/api/DataFetching";
+import { getUsername } from "../(aux)/usercomponent";
+import LoadingComponent from "@/components/LoadingComponent";
 
 
 const Chatbox = () => {
@@ -20,6 +21,7 @@ const Chatbox = () => {
   const [loading, setLoading] = useState(true);
   const [chatMessages, setChatMessages] = useState([]);
   const [message, setMessage] = useState("");
+  const [username, setUsername] = useState("")
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [propertyName, setPropertyName] = useState("")
   const [isModalVisible, setModalVisible] = useState(false);
@@ -46,7 +48,6 @@ const Chatbox = () => {
     setModalVisible(true);
   };
 
-  const hideModal = () => setModalVisible(false);
 
   const deleteSelectedMessage = async () => {
     const { error } = await supabase.from('messages').delete().eq('message_id', selectedMessage.message_id);
@@ -98,16 +99,14 @@ const Chatbox = () => {
 
     useEffect(() => {
       async function fetchData() {
+        await getUsername(roomData?.receiver_id, setUsername)
         await fetchOwnerProperties()
         await fetchRoomID(userID, roomData?.receiver_id, setRoomID);
         if (roomID) {
           await fetchChatMessages();
         }
-
       }
-      
       fetchData();
-    
       return () => {
         messages.unsubscribe();
       };
@@ -118,15 +117,18 @@ const Chatbox = () => {
     <SafeAreaView className="flex-1">
       {loading ?
       (
-        <ActivityIndicator/>
+        <LoadingComponent/>
       ) : (
         <View className="flex-1 p-5">
         <View className="flex-row items-center">
           <Pressable onPress={() => router.back()}>
             <Ionicons name="chevron-back" size={20}/>
           </Pressable>
-          <Pressable onPress={() => router.push({pathname: "/OwnerProfile", params: {owner_id: roomData?.receiver_id}})}>
-            <Text className="ml-5 font-semibold">{roomData?.first_name}</Text>
+          <Pressable 
+          onPress={() => router.back()}
+          // onPress={() => router.push({pathname: "/OwnerProfile", params: {owner_id: roomData?.receiver_id}})}
+          >
+            <Text className="ml-5 font-semibold text-lg">{username}</Text>
             <Text className="ml-5 text-xs">Owner of {propertyName}</Text>
           </Pressable>
           
@@ -151,16 +153,23 @@ const Chatbox = () => {
         </View>
         
         
-        <View className="flex-row items-center absolute bottom-0 p-4 w-screen">
+        <View className="flex-row items-center justify-between absolute bottom-0 p-4 w-screen">
           <TextInput
-            className="grow bg-white p-2 rounded-md"
+            className="w-64 bg-white py-2 px-5 rounded-md border border-gray-200"
             placeholder="Enter your message"
             value={message}
             onChangeText={(value) => setMessage(value)}
           />
-          <TouchableOpacity onPress={sendMessage}>
-            <Icon name="send" size={32}/>
-          </TouchableOpacity>
+          <Pressable
+          android_ripple={{color: "white"}} 
+          onPress={sendMessage}
+          style={{backgroundColor: "#444"}}
+          className="flex-row items-center p-3 rounded-md">
+            <View className="mx-2">
+              <Text className="text-white">Send</Text>
+            </View>
+            <Ionicons name="send" size={15} color={"white"}/>
+          </Pressable>
         </View>
 
           {/* <Modal visible={isModalVisible} onDismiss={hideModal}>

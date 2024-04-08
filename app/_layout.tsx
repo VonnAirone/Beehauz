@@ -4,16 +4,16 @@ import { Stack } from 'expo-router';
 import { useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
-import { QueryClient, QueryClientProvider } from 'react-query'; // Import QueryClient and QueryClientProvider
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-const queryClient = new QueryClient(); // Create a new QueryClient instance
+const queryClient = new QueryClient();
 
 export const unstable_settings = {
   initialRouteName: '(tabs)',
 };
 
 export default function RootLayout() {
-
   const [fontsLoaded, fontError] = useFonts({
     'Rubik': require('@/assets/fonts/Rubik-Regular.ttf'),
   });
@@ -25,7 +25,9 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <RootLayoutNav />
+        <GestureHandlerRootView className='flex-1'>
+          <RootLayoutNav />
+        </GestureHandlerRootView>
       </AuthProvider>
     </QueryClientProvider>
   );

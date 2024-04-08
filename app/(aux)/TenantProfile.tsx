@@ -1,6 +1,6 @@
 import { View, Text, Pressable, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { useLocalSearchParams } from 'expo-router';
+import { useGlobalSearchParams, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import BackButton from '@/components/back-button';
 import AvatarImage from '@/app/(tenant)/(aux)/avatar';
@@ -15,6 +15,7 @@ export default function TenantProfile() {
   const [loading, setLoading] = useState(true)
   const [tenantStatus, setTenantStatus] = useState()
   const [propertyData, setPropertyData] = useState<PropertyData | null>(null) 
+  let { propertyID } = useGlobalSearchParams();
 
   async function getTenantStatus() {
     try {
@@ -89,29 +90,29 @@ export default function TenantProfile() {
   const formattedDate = `${month} ${year}`;
 
   const addTenantToProperty = async () => {
-    const TenantData = {
-      status: 'Boarding',
-      // property_id: propertyData?.property_id
-    }
-    try {
-      const {data, error} = await supabase
-      .from("tenants")
-      .update(TenantData)
-      .eq('tenant_id', tenant_id)
+    // const TenantData = {
+    //   status: 'Boarding',
+    //   property_id: propertyData?.property_id
+    // }
+    // try {
+    //   const {data, error} = await supabase
+    //   .from("tenants")
+    //   .update(TenantData)
+    //   .eq('tenant_id', tenant_id)
 
-      if (data) {
-        console.log("Successfully updated tenant status")
-      }
+    //   if (data) {
+    //     console.log("Successfully updated tenant status")
+    //   }
 
-      if (error) {
-        console.log("Error updating tenant status: ", error.message)
-      }
+    //   if (error) {
+    //     console.log("Error updating tenant status: ", error.message)
+    //   }
 
-    } catch (error) {
-      console.log("Error updating tenant information: ", error.message)
-    } finally {
-      console.log("Successfully updated tenant status!")
-    }
+    // } catch (error) {
+    //   console.log("Error updating tenant information: ", error.message)
+    // } finally {
+    //   console.log("Successfully updated tenant status!")
+    // }
   }
 
 
