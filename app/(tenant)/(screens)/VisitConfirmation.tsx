@@ -9,12 +9,6 @@ export default function VisitConfirmation() {
     <SafeAreaView className='flex-1 justify-center items-center'>
       <View className='p-5'>
 
-        <View className='mb-2'>
-          <LottieView
-          style={{width: 100, height: 100}}
-          source={require("@/assets/success.json")}/>
-        </View>
-
         <View className='mb-4'>
           <Text className='text-lg font-semibold text-center'>Thank you for your visit booking request.</Text>
           <Text className='text-center'>We have received your request to visit the property.</Text>

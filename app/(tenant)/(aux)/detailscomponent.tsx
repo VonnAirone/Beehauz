@@ -70,7 +70,7 @@ export function BottomBar ({price, propertyID, propertyName}) {
             <Pressable 
             android_ripple={{color: "#ffa233"}}
             className='bg-white p-3 rounded-md'>
-              <Text>Book Now</Text>
+              <Text>Reserve Now</Text>
             </Pressable>
           </View>
         </View>

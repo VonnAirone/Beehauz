@@ -13,16 +13,18 @@
     }
   },
   "scripts": {
-    "android": "expo start --android",
+    "android": "expo run:android",
     "format": "eslint \"**/*.{js,jsx,ts,tsx}\" --fix && prettier \"**/*.{js,jsx,ts,tsx,json}\" --write",
-    "ios": "expo start --ios",
+    "ios": "expo run:ios",
     "start": "expo start",
     "web": "expo start --web"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.0",
     "@flaticon/flaticon-uicons": "^3.1.0",
+    "@gorhom/bottom-sheet": "^4",
     "@react-native-async-storage/async-storage": "1.21.0",
+    "@react-native-community/datetimepicker": "^7.6.4",
     "@react-navigation/native": "^6.1.7",
     "@supabase/supabase-js": "^2.40.0",
     "axios": "^1.6.7",
@@ -60,7 +62,7 @@
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "~0.19.6",
     "react-query": "^3.39.3",
-    "resend": "^3.2.0",
+    "supabase": "^1.153.4",
     "uuidv4": "^6.2.13"
   },
   "devDependencies": {
@@ -83,5 +85,7 @@
   "overrides": {
     "expo-modules-core": "~1.11.0"
   },
-  "private": true
+  "private": true,
+  "name": "BeehauzApp",
+  "version": "1.0.0"
 }

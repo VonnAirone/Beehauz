@@ -39,8 +39,27 @@ export default function Bookmarked() {
   );
 
   useEffect(() => {
-    // You can perform any additional actions here after data is fetched, if needed
-  }, [isLoading]);
+    subscribeToChanges()
+    
+  }, []);
+
+  async function subscribeToChanges() {
+    const channels = supabase
+      .channel('favorites-update')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'favorites' },
+        (payload) => {
+          console.log('Change received!', payload);
+          refetch()
+        }
+      )
+      .subscribe();
+  
+    return () => {
+      channels.unsubscribe();
+    };
+  }
 
   const handleCardPress = (propertyId) => {
     // Define your handleCardPress function logic here
@@ -83,20 +102,26 @@ export default function Bookmarked() {
 
   return (
     <SafeAreaView className='flex-1'>
-      <View className='p-5'>
+       <View className='p-5'>
         <BackButton/>
-        <View className='p-3'>
-          <Text className='font-semibold'>List of Saved Properties</Text>
-        </View>
-
-        <FlatList 
-          contentContainerStyle={{alignItems: 'center'}}
-          data={properties} 
-          renderItem={renderItem} 
-          showsHorizontalScrollIndicator={false} 
-          horizontal={false} 
-        />
+          <View className='p-3'>
+            <Text className='font-semibold'>List of Saved Properties</Text>
+          </View>
+          {properties && properties?.length !== 0 ? (
+            <FlatList 
+              contentContainerStyle={{alignItems: 'center'}}
+              data={properties} 
+              renderItem={renderItem} 
+              showsHorizontalScrollIndicator={false} 
+              horizontal={false} 
+            />
+          ) : (
+            <View className='h-20 justify-center'>
+              <Text className='text-center'>No saved properties as of the moment</Text>
+            </View>
+          )}
       </View>
     </SafeAreaView>
   );
 }
+

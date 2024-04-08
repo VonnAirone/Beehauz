@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, Text, View, Image} from 'react-native'
+import { Pressable, ScrollView, Text, View, Image } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Logo from '@/components/logo'
@@ -6,11 +6,13 @@ import { useAuth } from '@/utils/AuthProvider'
 import { getProfile } from '@/api/DataFetching'
 import { PropertyData, ReviewData, TenantsData, UserData } from '@/api/Properties'
 import { supabase } from '@/utils/supabase'
-import { DashboardComponents, PropertyReviews } from '../(aux)/propertycomponents'
+import { DashboardComponents } from '../(aux)/propertycomponents'
 import { Ionicons } from '@expo/vector-icons'
-import MapView, { Callout, Marker, MarkerAnimated } from 'react-native-maps'
+import MapView, { Callout, MarkerAnimated } from 'react-native-maps'
+import { usePushNotifications } from '@/api/usePushNotification'
 
 export default function Dashboard() {
+  const { expoPushToken } = usePushNotifications()
   const session = useAuth()
   const user = session?.session?.user?.id;
   const [userProfile, setUserProfile] = useState<UserData | null>(null)
@@ -22,8 +24,6 @@ export default function Dashboard() {
   const [propertyReviews, setPropertyReviews] = useState<ReviewData[] | null>(null);
   const [latitude, setLatitude] = useState(() => undefined);
   const [longitude, setLongitude] = useState(() => undefined);
-  const [markerPosition, setMarkerPosition] = useState({ latitude: 10.7913309, longitude: 122.0068165 });
-  
 
   async function subscribeToBookingChanges() {
     const channels = supabase
@@ -46,17 +46,22 @@ export default function Dashboard() {
   
   useEffect(() => {
     async function fetchData() {
-      setLoading(true);
-      await getUserProfile(user);
-      await getProperties();
+      try {
+        setLoading(true);
+        await getUserProfile(user);
+        await getProperties();
 
-      if (propertyID !== null) {
-          await getPropertyReviews();
-          await getTenants();
-          await fetchBookings();
+        if (propertyID !== null) {
+            await getPropertyReviews();
+            await getTenants();
+            await fetchBookings();
+        } 
+      } catch (error) {
+        console.log("Error fetching data: ", error.message)
+      } finally {
+        setLoading(false)
       }
-      
-      setLoading(false)
+
     }
     
     fetchData();
@@ -89,8 +94,10 @@ export default function Dashboard() {
       if (data && data.length > 0) {
         setProperties(data);
         setPropertyID(data[0]?.property_id);
-        setLatitude(data[0]?.latitude);
-        setLongitude(data[0]?.longitude);
+        const latitudeFloat = parseFloat(data[0]?.latitude)
+        const longitudeFloat = parseFloat(data[0]?.longitude)
+        setLatitude(latitudeFloat)
+        setLongitude(longitudeFloat)
         
       }
     } catch (error) {
@@ -160,7 +167,6 @@ async function subscribeToPropertyChanges() {
 
   const fetchBookings = async () => {
     try {
-      setLoading(true);
       const { data, error } = await supabase
         .from('appointments')
         .select('*')
@@ -179,16 +185,20 @@ async function subscribeToPropertyChanges() {
 
 
   return (
-    <SafeAreaView className='flex-1 p-3'>
+    <SafeAreaView className='flex-1'>
       {loading ? (
         <View></View>
       ): (
         <>
-          <View className='flex-row items-center justify-between'>
-            <Logo/>
-            <Pressable className='p-3 bg-yellow rounded-md'>
-              <Ionicons name='notifications' color={"#444"} size={20}/>
-            </Pressable>
+          <View 
+          style={{backgroundColor: "#444"}}>
+            <View className='p-5 flex-row items-center justify-between'>
+              <Logo/>
+              <Pressable className='bg-yellow rounded-md'>
+                <Ionicons name='notifications' color={"white"} size={30}/>
+              </Pressable>
+            </View>
+
           </View>
 
             <ScrollView className='p-5'>
@@ -210,13 +220,13 @@ async function subscribeToPropertyChanges() {
               style={{borderRadius: 20}}
               className='h-48 w-full rounded-md'
               initialRegion={{
-                latitude: 10.7913309,
-                longitude: 122.0068165,
+                latitude: latitude,
+                longitude: longitude,
                 latitudeDelta: 0.001,
                 longitudeDelta: 0.001,
               }}>
                 <MarkerAnimated
-                coordinate={markerPosition}>
+                coordinate={{latitude: latitude, longitude: longitude}}>
                   <View className='justify-center items-center'>
                     <View 
                     style={{backgroundColor: "#444"}}

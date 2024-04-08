@@ -104,7 +104,7 @@ export default function Transactions() {
                 data={transactions}
                 renderItem={({ item, index }) => (
                   item.type === 'Visit' ? (
-                    <View className='bg-gray-200 p-4 rounded-md'>
+                    <View className='bg-gray-200 p-4 rounded-md mt-4'>
                       <Text className='mb-2'>Status: {item.status}</Text>
 
                       <Text className='mb-1'>You have requested a visit to {properties[index]?.name}</Text>

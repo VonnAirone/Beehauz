@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
-import { getProfile } from '@/api/DataFetching';
-import { UserData } from '@/api/Properties';
+import { fetchPropertyDetailsData, getProfile } from '@/api/DataFetching';
+import { PropertyData, UserData } from '@/api/Properties';
 import { Link, router } from 'expo-router';
 
 export default function Account() {
@@ -13,18 +13,44 @@ export default function Account() {
   const [modalVisible, setModalVisible] = useState(false);
   const [userProfile, setUserProfile] = useState<UserData | null>(null)
   const [avatar, setAvatar] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [property, setProperty] = useState<PropertyData | null>(null)
+  const [dateJoined, setDateJoined] = useState()
 
   useEffect(() => {
     fetchData();
     subscribeToChanges();
+    subscribeToTenantTableChanges();
   }, []); 
 
   async function fetchData() {
     await getUserProfile();
     await fetchAvatar();
+    await fetchProperty();
   }
 
+  async function fetchProperty() {
+    try {
+      const { data, error } = await supabase
+        .from("tenants")
+        .select('*')
+        .eq('tenant_id', user?.id);
+  
+      if (data && data.length > 0) {
+        const property = await fetchPropertyDetailsData(data[0]?.property_id)
+        setProperty(property)
+        setDateJoined(property[0]?.date_joined)
+      } else {
+        console.log("No property found for the user.");
+      }
+  
+      if (error) {
+        console.log("Error fetching property: ", error.message);
+      }
+    } catch (error) {
+      console.log("An error occurred while fetching property: ", error.message);
+    }
+  }
+  
 
   async function getUserProfile() {
     try {
@@ -54,9 +80,26 @@ export default function Account() {
     };
   }
 
+  async function subscribeToTenantTableChanges() {
+    const channels = supabase
+      .channel('profile-update')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tenants' },
+        (payload) => {
+          console.log('Change received!', payload);
+          fetchData()
+        }
+      )
+      .subscribe();
+  
+    return () => {
+      channels.unsubscribe();
+    };
+  }
+
   const fetchAvatar = async () => {
     try {
-      setLoading(true)
       const { data } = await supabase.storage.from('images').list(`avatars/${user?.id}`);
       if (data && data.length > 0) {
         const lastAvatar = data[data.length - 1];
@@ -67,8 +110,6 @@ export default function Account() {
       }
     } catch (error) {
       console.error('Error loading avatar:', error.message);
-    } finally {
-      setLoading(false)
     }
   };
 
@@ -108,7 +149,7 @@ export default function Account() {
       <SafeAreaView className='flex-1 p-5'>
 
         <View
-        className='mt-10 flex-row items-center'>
+        className='mt-5 flex-row items-center'>
           <View className='h-20 w-20 rounded-md'>
             {avatar && 
             <Image 
@@ -134,7 +175,7 @@ export default function Account() {
         </View>
         
         <View className='gap-y-3 mt-3 mb-10'>
-          <View className='flex-row justify-between rounded-md p-3'>
+          <View className='flex-row justify-between rounded-md p-2'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='mail-outline' size={18}/>
               <Text className='font-semibold'>Email</Text>
@@ -148,7 +189,7 @@ export default function Account() {
             </View>
           </View>
 
-          <View className='flex-row justify-between rounded-md p-3'>
+          <View className='flex-row justify-between rounded-md p-2'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='phone-portrait-outline' size={18}/>
               <Text className='font-semibold'>Phone</Text>
@@ -162,7 +203,7 @@ export default function Account() {
             </View>
           </View>
 
-          <View className='flex-row justify-between rounded-md p-3'>
+          <View className='flex-row justify-between rounded-md p-2'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='location-outline' size={18}/>
               <Text className='font-semibold'>Location</Text>
@@ -175,6 +216,27 @@ export default function Account() {
               className='text-right text-xs'/>
             </View>
           </View>
+
+          <View className='flex-row justify-between rounded-md p-2'>
+            <View className='flex-row items-center gap-x-2'>
+              <Ionicons name='home-outline' size={18}/>
+              <Text className='font-semibold'>Property</Text>
+            </View>
+
+            <View>
+            {property ? (
+              <Pressable 
+              onPress={() => router.push({pathname: "/(tenant)/(screens)/TenantProperty", params: {"propertyID": property?.property_id,
+              "date_joined": dateJoined}})}
+              className='flex-row items-center'>
+                <Text className='mr-1'>{property.name}</Text>
+                <Ionicons name='chevron-forward'/>
+              </Pressable>
+            ) : (
+              <Text>{property !== null ? "Loading..." : "Not boarding"}</Text>
+            )}
+            </View>
+          </View>
           
         </View>
 
@@ -182,7 +244,7 @@ export default function Account() {
           <Text className='font-semibold text-gray-700'>Utilities</Text>
         </View>
 
-        <View className='gap-y-3 mt-3 mb-10'>
+        <View className='gap-y-3 mt-1 mb-10'>
           <View className='rounded-md overflow-hidden'>
             <Pressable 
             onPress={() => router.push("/Transactions")}
@@ -217,20 +279,20 @@ export default function Account() {
           </View>
          
          <View className='rounded-md overflow-hidden'>
-          <Pressable 
-          onPress={() => router.push("/(owner)/(screens)/MapView")}
-          android_ripple={{color: 'f1f1f1'}} 
-          className='rounded-md p-4'>
-              <View className='flex-row justify-between items-center'>
-                <View className='flex-row items-center gap-x-2'>
-                  <Ionicons name='star-half-outline' size={18}/>
-                  <Text className='font-semibold'>Rate this app</Text>
-                </View>
+            <Pressable 
+            onPress={() => router.navigate("https://forms.gle/YM1LU7Q5cfvhJeeKA")}
+            android_ripple={{color: 'f1f1f1'}} 
+            className='rounded-md p-4'>
+                <View className='flex-row justify-between items-center'>
+                  <View className='flex-row items-center gap-x-2'>
+                    <Ionicons name='star-half-outline' size={18}/>
+                    <Text className='font-semibold'>Rate this app</Text>
+                  </View>
 
-                <View>
-                  <Ionicons name='chevron-forward-outline'/>
+                  <View>
+                    <Ionicons name='chevron-forward-outline'/>
+                  </View>
                 </View>
-              </View>
             </Pressable>
          </View>
 

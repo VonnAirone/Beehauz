@@ -134,7 +134,7 @@ export default function Account() {
         </View>
         
         <View className='gap-y-3 mt-3 mb-10'>
-          <View className='flex-row justify-between rounded-md bg-gray-50 p-3'>
+          <View className='flex-row justify-between rounded-md p-3'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='mail-outline' size={18}/>
               <Text className='font-semibold'>Email</Text>
@@ -148,7 +148,7 @@ export default function Account() {
             </View>
           </View>
 
-          <View className='flex-row justify-between rounded-md bg-gray-50 p-3'>
+          <View className='flex-row justify-between rounded-md p-3'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='phone-portrait-outline' size={18}/>
               <Text className='font-semibold'>Phone</Text>
@@ -162,7 +162,7 @@ export default function Account() {
             </View>
           </View>
 
-          <View className='flex-row justify-between rounded-md bg-gray-50 p-3'>
+          <View className='flex-row justify-between rounded-md p-3'>
             <View className='flex-row items-center gap-x-2'>
               <Ionicons name='location-outline' size={18}/>
               <Text className='font-semibold'>Location</Text>

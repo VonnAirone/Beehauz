@@ -10,25 +10,19 @@ import { loadImages } from '@/api/ImageFetching';
 import { fetchAmenities, fetchPropertyTerms, getPropertyReviews } from '@/api/DataFetching';
 import { PropertyReviews } from '../(aux)/propertycomponents';
 import { router } from 'expo-router';
+import LoadingComponent from '@/components/LoadingComponent';
 
 
 export default function BHDetails() {
   const user = useAuth()?.session.user;
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showImageModal, setShowImageModal] = useState(false)
-  const [selectedImage, setSelectedImage] = useState(null)
   const [properties, setProperties] = useState<PropertyData | null>(null);
   const [propertyID, setPropertyID] = useState(0)
   const [propertyReviews, setPropertyReviews] = useState<ReviewData[] | null>(null);
   const [ratings, setRatings] = useState(0)
   const [terms, setTerms] = useState<PropertyTerms | null>(null)
   const [amenities, setAmenities] = useState([])
-
-  const openImage = (image) => {
-    setSelectedImage(image);
-    setShowImageModal(true)
-  }
 
   useEffect(() => {
     
@@ -83,7 +77,6 @@ export default function BHDetails() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'property' },
         (payload) => {
-          console.log('Change received!', payload);
           fetchData()
         }
       )
@@ -127,14 +120,12 @@ export default function BHDetails() {
   return (
     <SafeAreaView className='flex-1 bg-white'>
       {loading ? (
-        <View className='flex-1 justify-center items-center'>
-          <Text>Loading...</Text>
-        </View>
+        <LoadingComponent/>
       ) : (
         <>
           {properties ? (
           <ScrollView showsVerticalScrollIndicator={false}> 
-            <View className='overflow-hidden rounded-full absolute z-10 right-5 top-5'>
+            <View className='overflow-hidden rounded-full absolute z-10 right-3 top-3'>
               <Pressable 
               onPress={() => router.push({pathname: "/ManageProperty", params: {propertyID}})}
               android_ripple={{color: '#444'}}
@@ -151,7 +142,7 @@ export default function BHDetails() {
                   keyExtractor={(item, index) => index.toString()}
                   renderItem={({ item }) => 
                   <View className='w-screen h-72'> 
-                    <Pressable onPress={() => openImage(item)}>
+                    <Pressable>
                       <Images item={{...item, propertyID}} />
                     </Pressable>
                   </View>}
@@ -164,15 +155,13 @@ export default function BHDetails() {
               )}
 
               <View className='p-5'>
-
-                <View>
+                <View className='flex-row items-center justify-between'>
                   <Text className='font-semibold text-lg'>{properties?.name}</Text>
+                  <Text className='font-medium'>{properties?.price ? properties?.price : 'N/A'} / month</Text>
                 </View>
 
                 <View>
                   <TouchableOpacity 
-                  // onPress={() => router.push({pathname: "/MapView", params: {latitude: properties?.latitude, longitude: properties?.longitude}})}
-
                   className='flex-row items-center gap-x-1'>
                     <Ionicons name='location' size={15} color={'#FF8B00'}/>
                     <Text>{properties?.address}</Text>
@@ -229,15 +218,20 @@ export default function BHDetails() {
                   <View className='flex-row items-center'>
                     <Text className='font-semibold mr-1'>Amenities</Text>  
                   </View>
-
-                  <FlatList 
-                  data={amenities} 
-                  renderItem={({item,index}) =>
-                  <View className='mr-2'>
-                  <View key={item.amenity_id} className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
-                      <Text className='text-center text-xs'>{item.amenity_name}</Text>
+                  
+                  <View className='mt-2'>
+                    <FlatList 
+                    data={properties?.amenities} 
+                    showsHorizontalScrollIndicator={false} horizontal={true} 
+                    renderItem={({item,index}) =>
+                      <View className='mr-2'>
+                        <View key={item} className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
+                            <Text className='text-center text-xs'>{item}</Text>
+                        </View>
+                      </View>
+                    }/>
                   </View>
-                  </View>} showsHorizontalScrollIndicator={false} horizontal={true} />
+                 
                 </View>
                 
                 <View className='mt-5'>

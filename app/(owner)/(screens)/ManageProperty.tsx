@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Images } from '@/app/(tenant)/(aux)/homecomponents';
 import BackButton from '@/components/back-button';
 import { useLocalSearchParams } from 'expo-router';
+import LoadingComponent from '@/components/LoadingComponent';
 
 
 export default function BHDetails() {
@@ -24,7 +25,24 @@ export default function BHDetails() {
   const [amenities, setAmenities] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [allowEdit, setAllowEdit] = useState(false);
-  const [uploading, setUploading] = useState(false)
+  const [uploading, setUploading] = useState(false);
+  const [typedAmenity, setTypedAmenity] = useState('')
+
+  const handleAddAmenity = () => {
+    if (typedAmenity) {
+      setAmenities(prevAmenities => [...prevAmenities, typedAmenity]);
+      setTypedAmenity('')
+    } else {
+      Alert.alert("Please type in the amenity you want to add.")
+    }
+   
+  };
+
+  const handleRemoveAmenity = (index) => {
+    const newAmenities = [...amenities];
+    newAmenities.splice(index, 1);
+    setAmenities(newAmenities);
+  };
   
   const handleChangeText = (key, value) => {
     setData(prevData => ({
@@ -42,18 +60,21 @@ export default function BHDetails() {
 
   async function fetchData() {
     try {
+      setLoading(true)
       const fetchedData = await fetchPropertyDetailsData(propertyID)
       setData(fetchedData)
+      setAmenities(data?.amenities)
       await loadImages(propertyID, setImages)
-      await fetchAmenities(propertyID, setAmenities)
       await fetchPropertyTerms(propertyID, setPropertyTerms)
-      setLoading(false)
     } catch (error) {
       console.log("Error fetching data: ", error.message)
+    } finally {
+      setLoading(false)
     }
   }
 
-  useEffect(() => {  
+  useEffect(() => { 
+    console.log(typedAmenity)
     fetchData()
   }, [user?.id, propertyID]);
 
@@ -61,7 +82,9 @@ export default function BHDetails() {
     const propertyData = {
       name: data.name,
       description: data?.description,
-      address: data?.address
+      address: data?.address,
+      price: data?.price,
+      amenities: amenities
     };
 
     const terms = {
@@ -117,7 +140,10 @@ export default function BHDetails() {
 
   return (
       <SafeAreaView className='flex-1'>
-        <ScrollView 
+        {loading ? (
+          <LoadingComponent/>
+        ) : (
+      <ScrollView 
         showsVerticalScrollIndicator={false}
         className='p-5'>
           <BackButton/>
@@ -212,6 +238,17 @@ export default function BHDetails() {
           <View className='gap-y-2 mt-2'>
             <Text className='font-semibold'>Payment Terms</Text>
 
+            <View className='gap-y-2'>
+              <View className='my-1 grow'>
+                <Text className='text-xs'>Renting Fee: </Text>
+                <TextInput
+                onChangeText={(text) => handleChangeText('price', text)}
+                editable={allowEdit}
+                value={String(data?.price)}
+                className='border border-gray-200 rounded-md py-2 px-5 mt-1'/>
+              </View>
+            </View>
+
             <View className='flex-row gap-x-4'>
               <View className='my-1 grow'>
                 <Text className='text-xs'>Advance Payment: </Text>
@@ -291,23 +328,40 @@ export default function BHDetails() {
 
             <FlatList 
               horizontal
-              data={amenities}
+              data={data?.amenities}
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item, index }) => (
-                <View key={index} className='mb-1 mr-2'>
-                  <View className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
-                    <Text>{item.amenity_name}</Text>
+                <View className='mr-2'>
+                  <View key={item} className='flex-row items-center rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
+                    <Text className='text-center text-xs mr-2'>{item}</Text>
+                    {allowEdit && 
+                    <Pressable onPress={() => handleRemoveAmenity(index)}>
+                      <Ionicons name='close-outline'  color={'#444'} size={15}/>
+                    </Pressable>
+                    
+                    }
                   </View>
                 </View>
               )}
-              />
+            />
 
-            {allowEdit && (
-              <View className='bg-gray-50 rounded-md flex-row items-center p-3 gap-x-2 justify-center'>
-                <Ionicons name='add-outline'/>
-                <Text>Add Amenities</Text>
-              </View>
-            )}
+            <View className='flex-row items-center py-2 px-5 justify-between border border-gray-200 rounded-md'>
+              <TextInput 
+              value={typedAmenity}
+              placeholder='Add an amenity'
+              onChangeText={(text) => setTypedAmenity(text)}/>
+              
+              <Pressable 
+              android_ripple={{color: "white"}}
+              style={{backgroundColor: "#444"}}
+              onPress={handleAddAmenity}
+              className='p-1 rounded-sm'>
+                <Ionicons 
+                name='add' 
+                size={20}
+                color={'white'}/>
+              </Pressable>
+            </View>
 
             <View className='pt-10'>
               <Pressable 
@@ -322,6 +376,7 @@ export default function BHDetails() {
             <View className='h-10'></View>
           </View>
         </ScrollView>
+        )}
       </SafeAreaView>
   );
 }

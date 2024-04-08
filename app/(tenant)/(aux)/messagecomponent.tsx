@@ -1,6 +1,4 @@
-import BackButton from "@/components/back-button";
 import { supabase } from "@/utils/supabase";
-import { Ionicons } from "@expo/vector-icons";
 
 // export async function fetchUserMessages(userID, existingMessages = []) {
 //   try {

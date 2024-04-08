@@ -162,7 +162,7 @@ export default function OwnerProfile() {
           className='items-center rounded-md mt-2 h-32 mb-6'>
             <View 
             className='absolute -bottom-10 rounded-full border-2 border-gray-200 bg-white h-28 w-28'>
-                <AvatarImage userID={ownerData?.first_name}/>
+                <AvatarImage userID={ownerData?.id}/>
             </View>
           </View>
 

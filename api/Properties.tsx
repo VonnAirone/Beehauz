@@ -20,6 +20,7 @@ export interface UserData {
 // }
 
 export interface OwnerData {
+  id: string;
   first_name: string;
   last_name: string;
   address: string;
@@ -28,6 +29,10 @@ export interface OwnerData {
   phone_number: string;
   age: string;
   created_at: string;
+  properties: [
+    id: string,
+    property_name: string
+  ]
 }
 
 
@@ -65,6 +70,7 @@ export type PropertyData = {
   longitude: number,
   address: string,
   available_beds: number,
+  amenities: []
 }
 
 export type PropertyTerms = {

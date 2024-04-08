@@ -93,7 +93,7 @@ export default function PayAVisit() {
             <View className='flex-row gap-x-2'>
               <View className='border border-gray-300 bg-white py-2 rounded-md px-3 mt-3 grow'>
                 <View className='flex-row items-center'>
-                    <Ionicons name='calendar' size={15} color={"#ffa233"}/>
+                    <Ionicons name='calendar' size={15} color={"#444"}/>
                     <Text className='ml-1'>Date of Visit</Text>
                 </View>
                 <View className='mt-2'>
@@ -103,7 +103,7 @@ export default function PayAVisit() {
 
               <View className='border border-gray-300 bg-white py-2 rounded-md px-5 mt-3 justify-center'>
                 <View className='flex-row items-center'>
-                    <Ionicons name='time' size={15} color={"#ffa233"}/>
+                    <Ionicons name='time' size={15} color={"#444"}/>
                     <Text className='ml-1'>Time of Visit</Text>
                 </View>
                 <View>
@@ -151,38 +151,54 @@ export default function PayAVisit() {
             <Text className='font-semibold'>Contact Details</Text>
 
             <View className='gap-y-3 mt-1 mb-10'>
+              {!user ? (
+                <>
+                <View className='h-3 w-32 bg-gray-200 rounded-sm'/>
+                <View className='h-3 w-32 bg-gray-200 rounded-sm'/>
+                <View className='h-3 w-32 bg-gray-200 rounded-sm'/>
+                </>
+              ) : (
+                <>
                 <View className='flex-row items-center gap-x-2'>
-                    <Ionicons name='person' size={18} color={"#ffa233"}/>
-                    <Text>{user?.first_name} {user?.last_name}</Text>
+                  <Ionicons name='person' size={18} color={"#444"}/>
+                  <Text>{user?.first_name} {user?.last_name}</Text>
                 </View>
+
                 <View className='flex-row items-center gap-x-2'>
-                    <Ionicons name='call' size={18} color={"#ffa233"}/>
+                    <Ionicons name='call' size={18} color={"#444"}/>
                     <Text>{user?.phone_number}</Text>
                 </View>
+
                 <View className='flex-row items-center gap-x-2'>
-                    <Ionicons name='location' size={18} color={"#ffa233"}/>
-                    <Text>Location</Text>
+                    <Ionicons name='location' size={18} color={"#444"}/>
+                    <Text>{user?.address}</Text>
                 </View>
+              </>
+              )}
+
+               
             </View>      
           </View>
         </View>
-        
-        <View className='items-center'>
-          <View className=' rounded-md overflow-hidden'>
-          <Pressable 
-            className='bg-yellow p-3 rounded-md w-80'
-            android_ripple={{color: "#fdfdd9"}}
-            onPress={() => {
-              if (!date || !time) {
-                Alert.alert("Missing information", "Please select both time and date of your visit.");
-              } else {
-                setModalVisible(true);
-              }}}>
-              <Text className='text-white text-center text-base font-semibold'>Confirm your visit</Text>
-              </Pressable>
-          </View>
-        </View>
     </View>
+
+      <View className='items-center absolute bottom-2 self-center'>
+        <View className=' rounded-md overflow-hidden'>
+        <Pressable 
+          style={{backgroundColor: "#444"}}
+          className='bg-yellow p-3 rounded-md w-80'
+          android_ripple={{color: "white"}}
+          onPress={() => {
+            if (!date || !time) {
+              Alert.alert("Missing information", "Please select both time and date of your visit.");
+            } else {
+              setModalVisible(true);
+            }}}>
+            <Text className='text-white text-center text-base font-semibold'>Confirm your visit</Text>
+            </Pressable>
+        </View>
+      </View>
+
         <Modal
           animationType="none"
           transparent={true}
@@ -216,7 +232,7 @@ export default function PayAVisit() {
                 <View className='overflow-hidden rounded-md w-32'>
                   <Pressable 
                   onPress={() => setModalVisible(false)}
-                  android_ripple={{color: '#ffa233'}}
+                  android_ripple={{color: '#444'}}
                   className='p-2 border border-gray-200 rounded-md'>
                     <Text className='text-center'>Cancel</Text>
                   </Pressable>
@@ -224,9 +240,10 @@ export default function PayAVisit() {
 
                 <View className='overflow-hidden rounded-md w-32'>
                   <Pressable 
+                  style={{backgroundColor: "#444"}}
                   onPress={handleSubmission}
-                  android_ripple={{color: '#fdfdd9'}}
-                  className='p-2 bg-yellow rounded-md'>
+                  android_ripple={{color: 'white'}}
+                  className='p-2 rounded-md'>
                     <Text className='text-center text-white'>Send Request</Text>
                   </Pressable>
                 </View>
