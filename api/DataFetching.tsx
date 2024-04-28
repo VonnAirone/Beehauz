@@ -25,8 +25,6 @@ export async function fetchPopularNowList() {
     .from('property')
     .select('*')
     .gte('view_count', 50)
-    .order('view_count', { ascending: true })
-    .limit(5);
 
   return fetchData(query);
 }
@@ -177,5 +175,18 @@ export async function getOwnerData(ownerID, setOwnerData) {
     }
   } catch (error) {
     console.log("Error fetching owner data", error.message)
+  }
+}
+
+export  async function fetchTenantStatus (userID) {
+  try {
+    const { data } = await supabase
+    .from('tenants')
+    .select('*')
+    .eq('tenant_id', userID)
+
+    return data;
+  } catch (error) {
+    console.log("Error fetching tenant status: ", error.message)
   }
 }

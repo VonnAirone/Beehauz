@@ -1,13 +1,10 @@
-import { ActivityIndicator, Alert, Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { Alert, Pressable, Text, View } from 'react-native'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import Logo from '@/components/logo'
 import { router } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
 import { useAuth } from '@/utils/AuthProvider'
 import { supabase } from '@/utils/supabase'
 import BackButton from '@/components/back-button'
-import { makeRedirectUri } from 'expo-auth-session'
 
 export default function Usertype() {
     const user = useAuth().session?.user

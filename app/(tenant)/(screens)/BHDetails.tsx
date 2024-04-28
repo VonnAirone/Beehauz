@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Text, View, Image, FlatList, Dimensions, ScrollView, Pressable, Modal, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { fetchPropertyDetailsData, fetchPropertyTerms, getOwnerData, getPropertyReviews } from '@/api/DataFetching';
+import { fetchPropertyDetailsData, fetchPropertyTerms, fetchTenantStatus, getOwnerData, getPropertyReviews } from '@/api/DataFetching';
 import { loadImages } from '@/api/ImageFetching';
 import BackButton from '@/components/back-button';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,7 +18,7 @@ import moment from 'moment';
 const screenWidth = Dimensions.get('window').width;
 
 export default function BHDetails() {
-  const user = useAuth()?.session.user;
+  const user = useAuth()?.session?.user;
   const [bookmarkStatus, setBookmarkStatus] = useState()
   let { propertyID } = useLocalSearchParams();
   const [data, setData] = useState<PropertyData | null>(null);
@@ -30,9 +30,9 @@ export default function BHDetails() {
   const hasFetched = useRef(false);
   const [ratings, setRatings] = useState(0)
   const [propertyReviews, setPropertyReviews] = useState<ReviewData[] | null>(null);
-  const [amenities, setAmenities] = useState([])
   const [ownerData, setOwnerData] = useState<OwnerData | null>(null);
   const [terms, setTerms] = useState<PropertyTerms | null>(null)
+  const [tenantStatus, setTenantStatus] = useState([])
 
   const formatDate = (date) => {
     return moment(date).format('MMMM YYYY');
@@ -44,29 +44,27 @@ export default function BHDetails() {
   }
 
   useEffect(() => {
-    if (!hasFetched.current && propertyID) {
-      async function fetchData() {
-        setLoading(true);
-        try {
-          const fetchedData = await fetchPropertyDetailsData(propertyID.toString());
-          setData(fetchedData);
-          await checkBookmarkStatus(propertyID, user?.id, setBookmarkStatus);
-          await loadImages(propertyID, setImages);
-          await fetchPropertyReviews();
-          await getOwnerData(fetchedData?.owner_id, setOwnerData);
-          await fetchPropertyTerms(propertyID, setTerms);
+    fetchData();
+  }, []); 
 
-          hasFetched.current = true;
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        } finally {
-          setLoading(false)
-        }
-      }
-
-      fetchData();
+  async function fetchData() {
+    setLoading(true);
+    try {
+      const tenantStatus = await fetchTenantStatus(user?.id)
+      setTenantStatus(tenantStatus[0])
+      const fetchedData = await fetchPropertyDetailsData(propertyID.toString());
+      setData(fetchedData);
+      await checkBookmarkStatus(propertyID, user?.id, setBookmarkStatus);
+      await loadImages(propertyID, setImages);
+      await fetchPropertyReviews();
+      await getOwnerData(fetchedData?.owner_id, setOwnerData);
+      await fetchPropertyTerms(propertyID, setTerms);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false)
     }
-  }, [propertyID, user?.id]); 
+  }
   
 
   const fetchPropertyReviews = async () => {
@@ -75,7 +73,8 @@ export default function BHDetails() {
       setPropertyReviews(reviews);
       const allRatings = reviews.map((review) => review.rating);
       const totalRating = allRatings.reduce((acc, rating) => acc + rating, 0);
-      setRatings(totalRating);
+      const averageRating = totalRating / allRatings.length;
+      setRatings(averageRating);
     } catch (error) {
       console.error('Error fetching property reviews:', error);
       setPropertyReviews(null);
@@ -209,7 +208,17 @@ export default function BHDetails() {
 
             <View className='flex-row items-center gap-x-1'>
               <Ionicons name='star' size={15} color={"#444"}/>
-              <Text> <Text className='font-semibold'>{ratings}</Text> stars / <Text className='font-semibold'>{propertyReviews?.length}</Text> {propertyReviews?.length > 0 ? 'review' : 'reviews'}</Text>
+              <Text> <Text className='font-semibold'>{ratings ? ratings : '0'}</Text> stars / <Text className='font-semibold'>{propertyReviews?.length}</Text> {propertyReviews?.length > 0 ? 'review' : 'reviews'}</Text>
+            </View>
+
+            <View className='flex-row items-center gap-x-1'>
+              <Ionicons name='bed' color={"#444"} size={15}/>
+              <Text><Text className='font-medium'>{data?.available_beds} </Text>beds available</Text>
+            </View>
+
+            <View className='mt-5 flex-row items-center'>
+              <Text className='font-medium'>Reservation Fee:</Text>
+              <Text> {data?.reservation_fee}</Text>
             </View>
  
             <View className='mt-5'>
@@ -306,7 +315,10 @@ export default function BHDetails() {
               <Text className='font-semibold'>Reviews ({propertyReviews?.length})</Text>
               <Text className='italic text-xs mt-1'>Note: Only previous tenants and currently boarding are allowed to leave reviews for the property.</Text>
 
-              <PropertyReviews reviews={propertyReviews}/>
+              <View className='mt-2'>
+                <PropertyReviews reviews={propertyReviews}/>
+              </View>
+              
             </View>
 
             <View className='h-16'/>
@@ -340,7 +352,13 @@ export default function BHDetails() {
         </View>
         
       </ScrollView>
-      <BottomBar price={data?.price} propertyID={propertyID} propertyName={data?.name}/>
+      <BottomBar 
+      userID={user?.id}
+      ownerID={ownerData?.id}
+      tenantStatus={tenantStatus}
+      price={data?.price} 
+      propertyID={propertyID} 
+      propertyName={data?.name}/>
       </View>
       )}
 

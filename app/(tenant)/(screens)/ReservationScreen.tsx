@@ -9,74 +9,84 @@ import { supabase } from '@/utils/supabase'
 import { router, useLocalSearchParams } from 'expo-router'
 import { UserData } from '@/api/Properties'
 import { Calendar } from 'react-native-calendars'
+import { getProfile } from '@/api/DataFetching'
+import { sendPushNotification } from '@/api/usePushNotification'
 
 export default function PayAVisit() {
     const session = useAuth()?.session;
     const params = useLocalSearchParams()
     const [user, setUser] = useState<UserData | null>(null);
     const [date, setDate] = useState('');
-    const [time, setTime] = useState('')
     const [selectedDateInWords, setSelectedDateInWords] = useState('');
     const currentDate = format(new Date(), 'yyyy-MM-dd');
     const [modalVisible, setModalVisible] = useState(false);
+    const [ownerPushToken, setOwnerPushToken] = useState('')
     
-    const handleOnTimeChange = (text) => {
-        setTime(text);
-    }
-
     const getUser = async () => {
-        const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session?.user.id);
-    
-        if (error) {
-            console.error('Error fetching user data:', error);
-            return;
-        }
-    
-        if (data && data.length > 0) {
-            setUser(data[0]);
-        } else {
-            console.log('User not found.');
-        }
+      const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session?.user.id);
+  
+      if (error) {
+          console.error('Error fetching user data:', error);
+          return;
+      }
+  
+      if (data && data.length > 0) {
+          setUser(data[0]);
+      } else {
+          console.log('User not found.');
+      }
     }
 
     
     const clearSelection = () => {
-        setDate('');
-        setSelectedDateInWords('');
+      setDate('');
+      setSelectedDateInWords('');
     }
 
     const handleSubmission = async () => {
+      if (!date) {
+          Alert.alert("Missing information", "Please select date of check in.")
+      } else {
+        const { data, error } = await supabase
+        .from('rentals')
+        .insert({
+            tenant_id: session?.user.id,
+            property_id: params.propertyID,
+            check_in_date: date,
+            status: 'Pending',
+          })
+        .select() 
 
-        if (!date || !time) {
-            Alert.alert("Missing information", "Please select both time and date of your visit.")
+        if (error) {
+            console.error('Error submitting reservation request:', error);
         } else {
-          const { data, error } = await supabase
-          .from('appointments')
-          .insert({
-              tenant_id: session?.user.id,
-              property_id: params.propertyID,
-              appointment_date: date,
-              appointment_time: time,
-              status: 'Pending',
-              type: 'Visit'
-            })
-          .select() 
-
-          if (error) {
-              console.error('Error submitting visit request:', error);
-          } else {
-            setModalVisible(false)
-            console.log("Successfully booked a visit.")
-          }
-        }  
+          setModalVisible(false)
+          Alert.alert("Successfully requested a reservation.")
+          sendPushNotification(ownerPushToken, `${user.first_name} requested for a reservation. See more details.`)
+          router.push('/(tenant)/(screens)/ReservationConfirmation')
+        }
+      }  
     }
 
 
+    async function getOwnerPushToken() {
+      try {
+        const data = await getProfile('d213563c-c28d-4de8-bf24-73b3a15a611e');
+
+        if (data) {
+          setOwnerPushToken(data?.expo_push_token)
+        }
+      } catch (error) {
+        console.log("Error fetching push token: ", error.message)
+      }
+    }
+
     useEffect(() => {
-        getUser()
+      getUser()
+      getOwnerPushToken()
     }, [])
 
   return (
@@ -86,57 +96,44 @@ export default function PayAVisit() {
         <BackButton/>
           <View>
             <View className='mt-3'>
-              <Text className='font-semibold text-lg'>Schedule your visit</Text>
+              <Text className='font-semibold text-lg'>Request a Reservation</Text>
+              <Text className='text-xs mt-1'>Choose your date and let us handle the rest.</Text>
             </View>
 
           <View>
-            <View className='flex-row gap-x-2'>
-              <View className='border border-gray-300 bg-white py-2 rounded-md px-3 mt-3 grow'>
-                <View className='flex-row items-center'>
-                    <Ionicons name='calendar' size={15} color={"#444"}/>
-                    <Text className='ml-1'>Date of Visit</Text>
+            <View className='border border-gray-300 p-2 rounded-md bg-white overflow-hidden grow mt-2'>
+                <View className='flex-row items-center gap-x-2'>
+                  <Ionicons name='calendar'/>
+                  <Text>Check In Date: </Text>
                 </View>
-                <View className='mt-2'>
-                    <Text className='text-xs'>{selectedDateInWords}</Text>
-                </View>
-              </View>
-
-              <View className='border border-gray-300 bg-white py-2 rounded-md px-5 mt-3 justify-center'>
-                <View className='flex-row items-center'>
-                    <Ionicons name='time' size={15} color={"#444"}/>
-                    <Text className='ml-1'>Time of Visit</Text>
-                </View>
-                <View>
-                    <TextInput 
-                    onChangeText={handleOnTimeChange}
-                    className='text-xs' 
-                    placeholder='Enter your preferred time'/>
-                </View>
-              </View>
+                
+                <Text className='mt-1 font-medium'>{selectedDateInWords}</Text>
+            </View>
+            <View className='mt-2'>
+              <Calendar
+                theme={{
+                  backgroundColor: '#ffffff',
+                  calendarBackground: '#ffffff',
+                  textSectionTitleColor: '#b6c1cd',
+                  selectedDayBackgroundColor: '#00adf5',
+                  selectedDayTextColor: '#ffffff',
+                  todayTextColor: '#ffa233',
+                  dayTextColor: '#2d4150',}}
+                  onDayPress={day => {
+                    setDate(day.dateString);
+                    const formattedDate = format(new Date(day.dateString), 'MMMM d, yyyy');
+                    setSelectedDateInWords(formattedDate);
+                }}
+                markedDates={{
+                    [date]: {selected: true, disableTouchEvent: false}
+                }}
+                className='border border-gray-300 rounded-md'
+                current={currentDate}/>
             </View>
 
-              <View className='mt-2'>
-                <Calendar
-                  theme={{
-                    backgroundColor: '#ffffff',
-                    calendarBackground: '#ffffff',
-                    textSectionTitleColor: '#b6c1cd',
-                    selectedDayBackgroundColor: '#00adf5',
-                    selectedDayTextColor: '#ffffff',
-                    todayTextColor: '#ffa233',
-                    dayTextColor: '#2d4150',}}
-                    onDayPress={day => {
-                      setDate(day.dateString);
-                      const formattedDate = format(new Date(day.dateString), 'MMMM d, yyyy');
-                      setSelectedDateInWords(formattedDate);
-                  }}
-                  markedDates={{
-                      [date]: {selected: true, disableTouchEvent: false}
-                  }}
-                  className='border border-gray-300 rounded-md'
-                  current={currentDate}/>
-              </View>
-              <View className='absolute -bottom-12 z-10 right-0 rounded-md overflow-hidden'>
+            <View className='flex-row mt-2 justify-between'>
+              
+              <View className='rounded-md overflow-hidden '>
                   <Pressable
                   android_ripple={{color: '#ffa233'}} 
                   onPress={() => clearSelection()} 
@@ -144,8 +141,8 @@ export default function PayAVisit() {
                       <Text>Clear Selection</Text>
                   </Pressable>
               </View>
-
             </View>
+          </View>
 
           <View className='mt-5'>
             <Text className='font-semibold'>Contact Details</Text>
@@ -189,12 +186,12 @@ export default function PayAVisit() {
           className='bg-yellow p-3 rounded-md w-80'
           android_ripple={{color: "white"}}
           onPress={() => {
-            if (!date || !time) {
+            if (!date) {
               Alert.alert("Missing information", "Please select both time and date of your visit.");
             } else {
               setModalVisible(true);
             }}}>
-            <Text className='text-white text-center text-base font-semibold'>Confirm your visit</Text>
+            <Text className='text-white text-center text-base font-semibold'>Request a Reservation</Text>
             </Pressable>
         </View>
       </View>
@@ -217,15 +214,13 @@ export default function PayAVisit() {
                 <Ionicons name='close-outline' size={20}/>
               </Pressable>
 
-              <Text className='text-lg font-semibold'>Send Visit Request?</Text>
+              <Text className='text-lg font-semibold'>Send Reservation Request?</Text>
 
-              <Text className='mt-3'>Appointment Details:</Text>
+              <Text className='mt-3'>Reservation Details:</Text>
               <View className='gap-y-1 mt-2'>
                 <Text className='opacity-60'>Property: <Text className='font-medium'>{params?.propertyName}</Text></Text>
 
-                <Text className='opacity-60'>Date of Visit: <Text className='font-medium'>{selectedDateInWords}</Text></Text>
-
-                <Text className='opacity-60'>Time of Visit: <Text className='font-medium'>{time}</Text></Text>
+                <Text className='opacity-60'>Check In Date: <Text className='font-medium'>{selectedDateInWords}</Text></Text>
               </View>
 
               <View className='flex-row items-center gap-x-3 justify-evenly mt-5'>

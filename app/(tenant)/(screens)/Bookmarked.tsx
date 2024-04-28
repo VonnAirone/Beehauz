@@ -8,6 +8,7 @@ import { fetchFavorites } from '@/api/DataFetching';
 import { supabase } from '@/utils/supabase';
 import { Ionicons } from '@expo/vector-icons'; // Assuming you have Ionicons imported
 import { SingleImageDisplay } from '../(aux)/homecomponents';
+import LoadingComponent from '@/components/LoadingComponent';
 
 export default function Bookmarked() {
   const user = useAuth();
@@ -66,7 +67,7 @@ export default function Bookmarked() {
   };
 
   const renderItem = ({ item, index }) => (
-    <Pressable onPress={() => handleCardPress(item.property_id)} className='overflow-hidden'>
+    <Pressable onPress={() => handleCardPress(item.property_id)} className='overflow-hidden mt-4'>
       <View>
         <View className='h-40 w-80'>
           <SingleImageDisplay propertyID={item.property_id}/>
@@ -93,7 +94,7 @@ export default function Bookmarked() {
   );
 
   if (isLoading) {
-    return <Text>Loading...</Text>;
+    return <LoadingComponent/>;
   }
 
   if (isError) {

@@ -4,10 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 
-export default function VisitConfirmation() {
+export default function ReservationConfirmation() {
   return (
     <SafeAreaView className='flex-1 items-center justify-center'>
-      <Text className='font-medium text-lg'>Your request for a visit has been made.</Text>
+      <Text className='font-medium text-lg'>Your reservation request has been made.</Text>
       <Text>Please wait for the owner to confirm your request.</Text>
 
       <Pressable 

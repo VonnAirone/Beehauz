@@ -57,6 +57,8 @@ export default function ManageProfile() {
       description: userData?.description,
       phone_number: userData?.phone_number,
       address: userData?.address,
+      gender: userData?.gender,
+      age: userData?.age,
       updated_at: new Date(Date.now()).toUTCString()
     }
 
@@ -134,6 +136,14 @@ export default function ManageProfile() {
   return (
     <SafeAreaView className='flex-1'>
       <ScrollView className='p-5' showsVerticalScrollIndicator={false}>
+
+        {allowEdit && (
+          <View 
+          className='bg-white z-10 border border-gray-200 self-center p-2 rounded-md absolute'>
+            <Text className=''>On Edit Mode</Text>
+          </View>
+        )}
+
           <View>
             <Pressable onPress={() => router.back()}>
               <View className='flex-row items-center '>
@@ -147,22 +157,30 @@ export default function ManageProfile() {
         className='items-center rounded-md mt-2 h-32 mb-6'>
             <View className='absolute -bottom-10 rounded-full border-2 border-gray-200 bg-white overflow-hidden'>
               <Pressable 
-              onPress={changeProfile}
+              onPress={allowEdit ? changeProfile : () => {}}
               android_ripple={{color: "#444"}}>
                 {loading ? (
-                  <View className='h-28 w-28 justify-center items-center'>
+                  <View className={`h-28 w-28 justify-center items-center ${allowEdit ? 'opacity-60' : ''}`}>
                     {/* <ActivityIndicator size={'large'}/> */}
                   </View>
                   
                 ) : (
-                  <View className='h-28 w-28'> 
-                    {avatar && 
+                  <View className={`h-28 w-28 ${allowEdit && 'opacity-20'}`}> 
+                    {avatar ?
+                    (
                     <Image source={{ uri: avatar }} style={{ width: "100%", height: "100%" }} 
-                    />} 
+                    />
+                    ) :(
+                    <Image source={require("@/assets/icon.png")} style={{ width: "100%", height: "100%" }} 
+                    />
+                    )} 
                   </View>
                )}
                   <View className='absolute self-center top-10'>
-                    <Ionicons name='camera' color={'#444'} size={32}/>
+                    {allowEdit && (
+                      <Ionicons name='camera' color={'#444'} size={32}/>
+                    )}
+                   
                   </View>
               </Pressable>
             </View>
@@ -170,8 +188,12 @@ export default function ManageProfile() {
 
         <View className='flex-row items-center justify-between mt-4'>
           <Text className='font-semibold text-xl'>Manage Profile</Text>
-          <Pressable onPress={() => setAllowEdit(!allowEdit)}>
-            <Ionicons name='create-outline' size={20}/>
+          <Pressable 
+          className='flex-row items-center gap-x-1'
+          onPress={() => setAllowEdit(!allowEdit)}>
+            <Text>Edit</Text>
+            <Ionicons name='pencil' size={15}/>
+            
           </Pressable>
         </View>
 
@@ -210,7 +232,7 @@ export default function ManageProfile() {
           <Text className='font-semibold'>Email</Text>
           <TextInput className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
           editable={false}
-          value={userData?.email}/>
+          value={user?.email}/>
         </View>
 
         <View className="mt-4 flex-row">
@@ -219,7 +241,8 @@ export default function ManageProfile() {
             <TextInput
               editable={allowEdit}
               clearTextOnFocus
-              value={userData?.age.toString()}
+              value={userData?.age?.toString()}
+              onChangeText={(text) => handleChangeText('age', text)}
               className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
             />
           </View>
@@ -230,6 +253,7 @@ export default function ManageProfile() {
               editable={allowEdit}
               clearTextOnFocus
               value={userData?.gender}
+              onChangeText={(text) => handleChangeText('gender', text)}
               className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
             />
   
@@ -241,29 +265,21 @@ export default function ManageProfile() {
           <TextInput className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
           onChangeText={(text) => handleChangeText('phone_number', text)} 
           editable={allowEdit}
-          value={userData?.phone_number.toString()}/>
+          value={userData?.phone_number?.toString()}/>
         </View>
 
         <View className='gap-y-2 mt-2'>
           <Text className='font-semibold'>Address</Text>
-
-          <View className='flex-row items-center gap-x-2'>
-            <View 
-            style={{backgroundColor: "#444"}}
-            className='p-3 rounded-md'>
-              <Ionicons name='location' color={"white"} size={20}/>
-            </View>
             
-            <TextInput 
-            editable={allowEdit}
-            className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs grow'
-            onChangeText={(text) => handleChangeText('address', text)} 
-            value={userData?.address}/>
-          </View>
+          <TextInput 
+          editable={allowEdit}
+          className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs grow'
+          onChangeText={(text) => handleChangeText('address', text)} 
+          value={userData?.address}/>
         </View>
 
 
-        <View className='pt-10'>
+        {/* <View className='pt-10'>
           <Pressable 
           android_ripple={{color: "white"}}
           style={{backgroundColor: "#444"}}
@@ -271,19 +287,22 @@ export default function ManageProfile() {
           className='rounded-md p-3'>
             <Text className='text-center text-white'>{loading ? 'Loading' : 'Save Changes'}</Text>
           </Pressable>
-        </View>
+        </View> */}
 
-        <View className='h-10'></View>
+        
 
           {allowEdit && (
             <View className='pt-8'>
               <Pressable 
+              style={{backgroundColor: "#444"}}
               onPress={updateProfile}
-              className='bg-yellow rounded-md p-3'>
-                <Text className='text-center text-white'>{loading ? 'Loading' : 'Save Changes'}</Text>
+              className='rounded-md p-3'>
+                <Text className='text-center font-medium text-white'>{loading ? 'Loading' : 'SAVE CHANGES'}</Text>
               </Pressable>
             </View>
           )}
+
+          <View className='h-10'></View>
       </ScrollView>
     </SafeAreaView>
   )

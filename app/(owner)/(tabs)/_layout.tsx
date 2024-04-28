@@ -61,7 +61,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="five"
+        name="Account"
         options={{
           title: 'Notifications',
           tabBarIcon: ({ color }) => <TabBarIcon name="person-circle-outline" color={color} />,

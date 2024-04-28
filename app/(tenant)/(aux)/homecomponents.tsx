@@ -103,30 +103,25 @@ import { useQuery } from "react-query";
 
   export function PopularNow({ data }: { data: PropertyData[]}) {
     const [imagesLoaded, setImagesLoaded] = useState(false);
-    const hasFetched = useRef(false);
-  
+    
     useEffect(() => {
-      setImagesLoaded(true)
-      if (!hasFetched.current) {
-        async function fetchData() {
-          try {
-            await loadImages(data, setImagesLoaded);
-          } catch (error) {
-            console.error('Error fetching data:', error);
-          }
+      async function fetchData() {
+        try {
+          await loadImages(data, () => setImagesLoaded(true));
+        } catch (error) {
+          console.error('Error fetching data:', error);
         }
-        fetchData();
       }
+      fetchData();
     }, [data]);
 
-  
     const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
-      <View className='overflow-hidden rounded-md mr-4'>
-        <Pressable
+        <TouchableOpacity
+        className="mr-4"
         onPress={() => handleCardPress(item.property_id)}>
           <View>
             <View className="h-40 w-40">
-              <SingleImageDisplay propertyID={item.property_id}/>
+              <SingleImageDisplay propertyID={item?.property_id}/>
             </View>
   
             <View className='mt-2'>
@@ -138,8 +133,7 @@ import { useQuery } from "react-query";
               <Text className="font-semibold">{item.price} / month</Text>
             </View>
           </View>
-        </Pressable>
-      </View>
+        </TouchableOpacity>
     );
 
     const skeleton = () => (
@@ -152,12 +146,12 @@ import { useQuery } from "react-query";
   
     return (
       <>
-          <RNFlatList
-            data={data}
-            renderItem={imagesLoaded ? renderItem : skeleton}
-            showsHorizontalScrollIndicator={false}
-            horizontal={true}
-            
+        <RNFlatList
+          data={data}
+          renderItem={imagesLoaded ? renderItem : skeleton}
+          showsHorizontalScrollIndicator={false}
+          horizontal={true}
+          
           />
       </>
     );
@@ -169,22 +163,19 @@ import { useQuery } from "react-query";
     const hasFetched = useRef(false);
   
     useEffect(() => {
-      if (!hasFetched.current) {
-        async function fetchData() {
-          try {
-            await loadImages(data, setImagesLoaded);
-          } catch (error) {
-            console.error('Error fetching data:', error);
-          }
+      async function fetchData() {
+        try {
+          await loadImages(data, setImagesLoaded);
+        } catch (error) {
+          console.error('Error fetching data:', error);
         }
-        fetchData();
       }
+      fetchData();
     }, [data]);
 
     const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
-      <View className='overflow-hidden rounded-md mr-4'>
-        <View>
-          <Pressable 
+        <View key={index} className="mr-4">
+          <TouchableOpacity 
           onPress={() => handleCardPress(item.property_id)}>
             <View className='h-40 w-72'>
               <SingleImageDisplay propertyID={item.property_id}/>
@@ -209,9 +200,8 @@ import { useQuery } from "react-query";
                 <Text className="text-xs">{item.address}</Text>
               </View>
             </View>
-          </Pressable>
+          </TouchableOpacity>
         </View>
-      </View>
     );
 
     const skeleton = () => (
@@ -236,20 +226,18 @@ import { useQuery } from "react-query";
     const hasFetched = useRef(false);
   
     useEffect(() => {
-      if (!hasFetched.current) {
-        async function fetchData() {
-          try {
-            await loadImages(data, setImagesLoaded);
-          } catch (error) {
-            console.error('Error fetching data:', error);
-          }
+      async function fetchData() {
+        try {
+          await loadImages(data, setImagesLoaded);
+        } catch (error) {
+          console.error('Error fetching data:', error);
         }
-        fetchData();
       }
+      fetchData();
     }, [data]);
 
     const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
-      <View className='overflow-hidden mr-4'>
+      <View key={index} className='overflow-hidden mr-4'>
         <View>
           <Pressable 
           onPress={() => handleCardPress(item.property_id)}>
@@ -370,6 +358,7 @@ import { useQuery } from "react-query";
   
     const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
       <Pressable
+        key={index}
         onPress={() => handleCardPress(item.property_id)} 
         className='overflow-hidden'>
         <View>

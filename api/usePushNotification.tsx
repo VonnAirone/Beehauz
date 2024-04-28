@@ -3,6 +3,7 @@ import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
+import { supabase } from "@/utils/supabase";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -12,12 +13,12 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export async function sendPushNotification(expoPushToken: string) {
+export async function sendPushNotification(expoPushToken: string, content) {
   const message = {
     to: expoPushToken,
     sound: "default",
-    title: "Ok!",
-    body: "And here is the body!",
+    title: "Beehauz",
+    body: `${content}`,
     data: { someData: "goes here" },
   };
 
@@ -37,7 +38,7 @@ export interface PushNotificationState {
   notification?: Notifications.Notification;
 }
 
-export const usePushNotifications = (): PushNotificationState => {
+export const usePushNotifications = (userID): PushNotificationState => {
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldPlaySound: false,
@@ -69,7 +70,7 @@ export const usePushNotifications = (): PushNotificationState => {
         finalStatus = status;
       }
       if (finalStatus !== "granted") {
-        alert("Failed to get push token for push notification");
+        console.log("Failed to get push token for push notification");
         return;
       }
 
@@ -93,8 +94,13 @@ export const usePushNotifications = (): PushNotificationState => {
   }
 
   useEffect(() => {
-    registerForPushNotificationsAsync().then((token) => {
+    registerForPushNotificationsAsync().then(async (token) => {
       setExpoPushToken(token);
+
+      const { error } = await supabase
+        .from("profiles")
+        .upsert({ id: userID, expo_push_token: token.data });
+        console.log(error);
     });
 
     notificationListener.current =

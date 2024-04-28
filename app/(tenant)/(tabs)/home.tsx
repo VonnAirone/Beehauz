@@ -1,55 +1,88 @@
 import { fetchPopularNowList } from '@/api/DataFetching';
-import { getPermissions } from '@/api/Location';
-import { LocationData } from '@/api/Properties';
 import { PopularNow, PropertyList } from '@/app/(tenant)/(aux)/homecomponents';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { View, Text, TextInput, ScrollView, Pressable, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TextInput, ScrollView, Pressable, TouchableOpacity, Image, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchCheapProperties, fetchNearbyMe } from '../(aux)/Filters';
+import * as Location from 'expo-location';
 import { usePushNotifications } from '@/api/usePushNotification';
-import { supabase } from '@/utils/supabase';
+import { useAuth } from '@/utils/AuthProvider';
 
 export default function HomePage() {
-  const { expoPushToken } = usePushNotifications()
-
+  const userID = useAuth()?.session?.user?.id;
+  let expoPushToken = usePushNotifications(userID);
   const [PopularList, setPopularList] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [location, setLocation] = useState<LocationData | null>(null);
   const [NearbyProperties, setNearbyProperties] = useState([])
   const [cheapProperties, setCheapProperties] = useState([])
+  const [currentAddress, setCurrentAddress] = useState('')
+  const [refreshing, setRefreshing] = useState(false);
 
-  async function subscribeToPropertyChanges() {
-    const channels = supabase
-      .channel('property-creation')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'property' },
-        (payload) => {
-          fetchData()
-        }
-      )
-      .subscribe();
+  // async function subscribeToPropertyChanges() {
+  //   const channels = supabase
+  //     .channel('property-creation')
+  //     .on(
+  //       'postgres_changes',
+  //       { event: '*', schema: 'public', table: 'property' },
+  //       (payload) => {
+  //         fetchData()
+  //       }
+  //     )
+  //     .subscribe();
   
-    return () => {
-      channels.unsubscribe();
-    };
+  //   return () => {
+  //     channels.unsubscribe();
+  //   };
+  // }
+
+  const reverseGeocode = async (latitude, longitude) => {
+    const reverseGeocodeAddress = await Location.reverseGeocodeAsync(
+      {
+        latitude: latitude,
+        longitude: longitude
+      }
+    )
+   
+    if (reverseGeocodeAddress) {
+      setCurrentAddress(`${reverseGeocodeAddress[0].city}, ${reverseGeocodeAddress[0].subregion}`)
+    }
+    
   }
+
+  // async function sendNotif() {
+  //   console.log(expoPushToken.data)
+  //   if (expoPushToken) {
+  //     await sendPushNotification(expoPushToken.data, "Welcome to Beehauz")
+  //   } else {
+  //     const token = await Notifications.getExpoPushTokenAsync({
+  //       projectId: Constants.expoConfig?.extra?.eas.projectId,
+  //     });
+
+  //     await sendPushNotification(token.data, "Welcome to Beehauz")
+  //   }
+    
+  // }
 
   async function fetchData() {
     try {
       const PopularList = await fetchPopularNowList();
       setPopularList(PopularList);
-      const data = await getPermissions();
-      if (data) {
-        await fetchCheapProperties(setCheapProperties)
-        setLocation(data)
-      }
+      await fetchCheapProperties(setCheapProperties)
 
-      if (location) {
-        await fetchNearbyMe(location?.latitude, location?.longitude, setNearbyProperties)
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log("Please grant location permissions");
+        return;
+      } else {
+        let currentLocation = await (await Location.getCurrentPositionAsync()).coords;
+        await reverseGeocode(currentLocation.latitude, currentLocation?.longitude)
+        await fetchNearbyMe(currentLocation.latitude, currentLocation?.longitude, setNearbyProperties)
       }
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+     
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -57,16 +90,25 @@ export default function HomePage() {
     }
   }
 
-  
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchData().then(() => setRefreshing(false));
+};
+
   useEffect(() => {
-    getPermissions()
     fetchData();
-    subscribeToPropertyChanges();
   }, []);
 
   return (
     <SafeAreaView className='flex-1'>
       <ScrollView 
+      refreshControl={
+        <RefreshControl
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        colors={['#444']}
+        />
+      }
       showsVerticalScrollIndicator={false}
       className='flex-1'>
     { loading ? (
@@ -88,7 +130,7 @@ export default function HomePage() {
           <View className='flex-row items-center px-5'>
             <Pressable 
             className='grow'
-            onPress={() => router.push("/Searchpage")}>    
+            onPress={() => router.push("/(tenant)/(screens)/Searchpage")}>    
               <View className='flex-row items-center bg-white rounded-md p-2'>
                 <View className='mx-2'>
                   <Ionicons 
@@ -145,7 +187,7 @@ export default function HomePage() {
           <View className='mt-5'>
             <View>
               <Text className='font-semibold text-lg'>NEARBY ME</Text>
-              <Text className='text-xs'>Current Location: ({location?.latitude}, {location?.longitude})</Text>
+              <Text className='text-xs'>Current Location: {currentAddress}</Text>
             </View>
 
             <View className='mt-4'>

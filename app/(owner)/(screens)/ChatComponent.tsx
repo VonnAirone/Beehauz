@@ -1,11 +1,11 @@
   import React, { useEffect, useState } from "react";
   import { View, TouchableOpacity, StyleSheet, Pressable, Text } from "react-native";
-  import { fetchLastMessage, subscribeToRealTimeMessages } from "./messagecomponent";
   import { supabase } from "@/utils/supabase";
   import { useAuth } from "@/utils/AuthProvider";
-  import { getUsername } from "./usercomponent";
-  import AvatarImage from "./avatar";
   import { router } from "expo-router";
+import { fetchLastMessage, subscribeToRealTimeMessages } from "@/app/(tenant)/(aux)/messagecomponent";
+import { getUsername } from "@/app/(tenant)/(aux)/usercomponent";
+import AvatarImage from "@/app/(tenant)/(aux)/avatar";
 
   const ChatComponent = ({ item }) => {
     const user = useAuth()?.session.user;
@@ -47,8 +47,8 @@
       try {
         const { data, error} = await supabase.from('chat_rooms').select("*").eq('room_id', item?.room_id)
     
-        setReceiverID(data[0]?.users[1])
-        await getUsername(data[0]?.users[1], setUsername) 
+        setReceiverID(data[0]?.users[0])
+        await getUsername(data[0]?.users[0], setUsername) 
         
 
       } catch (error) {
@@ -74,8 +74,8 @@
         </View>
       ) : (
         <Pressable onPress={() => router.push({
-          pathname: "/(tenant)/(screens)/Chatbox", 
-          params: { sender_id: user?.id, receiver_id: receiverID, username }
+          pathname: "/(owner)/(screens)/Chatbox", 
+          params: { sender_id: user?.id, receiver_id: receiverID, username: username }
         })}>
           <View className="p-2 rounded-md flex-row items-center gap-x-2">
             <View className="h-14 w-14 bg-white overflow-hidden rounded-full">
@@ -85,8 +85,8 @@
             <View>
               <Text className="font-semibold">{username}</Text>
               <View className="flex-row items-center gap-x-2">
-                <Text>{lastMessage ? `${lastMessage?.sender_id === user?.id ? "You: " : ""}${lastMessage.message_content}` : ''}</Text>
-                <Text>{lastMessage ? displayTime(lastMessage.created_at) : "now"}</Text>
+                <Text>{lastMessage ? `${lastMessage?.sender_id === user?.id ? "You: " : ""}${lastMessage?.message_content}` : ''}</Text>
+                <Text>{lastMessage ? displayTime(lastMessage?.created_at) : "now"}</Text>
               </View>
             
             </View>

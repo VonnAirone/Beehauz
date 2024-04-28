@@ -9,10 +9,11 @@ import { Ionicons } from '@expo/vector-icons';
 import debounce from 'lodash/debounce';
 import AvatarImage from '@/app/(tenant)/(aux)/avatar';
 import { router } from 'expo-router';
+import moment from 'moment';
 
 export default function Tenants() {
   const user = useAuth();
-  const [tenants, setTenants] = useState<TenantsData[] | null>(null);
+  const [tenants, setTenants] = useState([]);
   const [tenantsProfiles, setTenantsProfiles] = useState<UserData[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [propertyID, setPropertyID] = useState(0);
@@ -20,23 +21,32 @@ export default function Tenants() {
   const [searchResults, setSearchResults] = useState<UserData[]>([]);
   const [showModal, setShowModal] = useState(false)
 
+  const formatDate = (date) => {
+    return moment(date).format('MMMM YYYY');
+  };
+
   async function getTenants() {
     try {
-      const { data, error } = await supabase
-        .from("tenants")
-        .select("*")
-        .eq("property_id", propertyID);
+        const { data, error } = await supabase
+          .from("tenants")
+          .select("*")
+          .eq("property_id", propertyID);
 
-      if (error) {
-        console.log("Error fetching tenants: ", error.message);
-      } else {
-        setTenants(data);
-        fetchTenantsProfiles(data);
-      }
+        if (error) {
+            console.log("Error fetching tenants: ", error.message);
+            return null;
+        } else if (data.length === 0) {
+            return null;
+        } else {
+            setTenants(data);
+            fetchTenantsProfiles(data);
+        }
     } catch (error) {
-      console.log("Error fetching tenants: ", error.message);
+        console.log("Error fetching tenants: ", error.message);
+        return null;
     }
-  }
+}
+
 
   async function getProperties() {
     try {
@@ -65,24 +75,44 @@ export default function Tenants() {
       });
       const profilesData = await Promise.all(profilesPromises);
       setTenantsProfiles(profilesData);
+    } else {
+      return null;
     }
   }
 
   useEffect(() => {
     async function fetchData() {
       try {
+        setLoading(true)
         await getProperties();
-        if (propertyID) {
-          await getTenants();
-        }
+        await getTenants();
       } catch (error) {
         console.log("Error fetching data: ", error.message);
       } finally {
         setLoading(false)
       }
     }
+
+    async function subscribeToChanges() {
+      const channels = supabase
+        .channel('tenants-update')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'tenants' },
+          (payload) => {
+            console.log('Change received!', payload);
+            fetchData()
+          }
+        )
+        .subscribe();
+    
+      return () => {
+        channels.unsubscribe();
+      };
+    }
   
     fetchData();
+    subscribeToChanges();
   }, [propertyID]);
   
 
@@ -94,7 +124,6 @@ export default function Tenants() {
         const filtered = tenantsProfiles?.filter((item) =>
           item.first_name.toLowerCase().includes(query.toLowerCase())
         );
-        console.log(filtered)
         setSearchResults(filtered || []);
       }
     } catch (error) {
@@ -107,40 +136,19 @@ export default function Tenants() {
     debouncedSearch(text);
   };
 
-  const SkeletonComponent = () => {
-    return (
-      <View className='bg-gray-200 mt-2 rounded-md p-5 shadow-2xl'>
-        <View className='flex-row items-center justify-between'>
-          <View className='flex-row items-center gap-x-2'>
-            <View className=' bg-gray-300 h-12 w-12 rounded-full'/>
-            <View className='h-4 rounded-md bg-gray-300 w-20'/>
-          </View>
-          
-          <View className='h-2 rounded-sm bg-gray-300 w-14'/>
-        </View>
-
-        <View className='p-3 gap-y-2'>
-          <View className='h-3 rounded-sm bg-gray-300 w-60'/>
-          <View className='h-3 rounded-sm bg-gray-300 w-60'/>
-          <View className='h-3 rounded-sm bg-gray-300 w-60'/>
-        </View>
-      </View>
-    )
-  }
-
   const navigateToTenantsList = () => {
     setShowModal(false)
-    router.push({pathname: "/TenantsList", params: {propertyID}})
+    router.push({pathname: "/(owner)/(screens)/TenantsList", params: {propertyID}})
   }
 
   return (
     <TouchableWithoutFeedback 
     onPress={() => Keyboard.dismiss()}
-    className='bg-gray-500 flex-1'>
+    className='flex-1'>
     <SafeAreaView className='flex-1'>
 
       {showModal && (
-        <View className='bg-gray-50 border border-gray-200 h-60 w-80 items-center justify-center rounded-md absolute self-center top-64 z-10'>
+        <View className='bg-white border border-gray-200 h-60 w-80 items-center justify-center rounded-md absolute self-center top-64 z-10'>
         <Pressable 
         onPress={() => setShowModal(false)}
         className='absolute top-3 right-3'>
@@ -153,15 +161,16 @@ export default function Tenants() {
           android_ripple={{color: 'white'}}
           style={{backgroundColor: "#444"}} 
           className='p-3 rounded-md'>
-            <Text className='text-white text-center'>Select from Existing Tenants</Text>
+            <Text className='text-white text-center'>Select from Approved Tenants</Text>
           </Pressable>
         </View>
 
         <View className='overflow-hidden rounded-md w-60'>
           <Pressable
+          onPress={() => {setShowModal(false), router.push({pathname: '/(owner)/(screens)/Reservations', params: {propertyID}})}}
           android_ripple={{color: '#444'}}
           className='p-3 rounded-md border border-gray-700'>
-            <Text className='text-center'>Add New Tenant</Text>
+            <Text className='text-center'>View Reservations</Text>
           </Pressable>
         </View>
         </View>
@@ -169,99 +178,94 @@ export default function Tenants() {
      
       
       <View className={`${showModal ? ('opacity-20') : ('')} p-5`}>
-        <View className='mb-4 flex-row items-center justify-between'>
+        <View className='mb-4'>
           <Text className='font-semibold text-xl'>Manage your Tenants</Text>
-          <Pressable 
-          style={{backgroundColor: "#444"}}
-          onPress={() => setShowModal(!showModal)}
-          android_ripple={{color: "white"}}
-          className='p-3 rounded-md'>
-            <Ionicons name='person-add' color={"white"} size={20}/>
-          </Pressable>
         </View>
 
-        <View className='flex-row items-center bg-gray-50  rounded-md p-2 backdrop-blur-3xl'>
-          <View className='mx-2'>
-            <Ionicons name='search' size={20} color={'#444'}/>
+        <View className='flex-row items-center gap-x-2'>
+          <View className='flex-row grow items-center bg-white rounded-md p-2 backdrop-blur-3xl'>
+            <View className='mx-2'>
+              <Ionicons name='search' size={20} color={'#444'}/>
+            </View>
+            <TextInput
+              placeholder='Search for a user'
+              value={searchQuery}
+              onChangeText={handleOnChangeText}
+            />
           </View>
-          <TextInput
-            placeholder='Search for a user'
-            value={searchQuery}
-            onChangeText={handleOnChangeText}
-          />
+          <View className='rounded-md overflow-hidden'>
+            <Pressable 
+              onPress={() => setShowModal(!showModal)}
+              style={{backgroundColor: "#444"}}
+              android_ripple={{color: "white"}}
+              className='p-3 rounded-md '>
+              <Ionicons name='person-add' color={"white"} size={20}/>
+            </Pressable>
+          </View>
+          
         </View>
-
         {loading ? (
-          <View className='gap-y-2 mt-2'>
-            {[...Array(1)].map((_, index) => (
-             <SkeletonComponent key={index}/>
-            ))}
+          <View>
           </View>
         ) : (
           <View className='gap-y-2 mt-2'>
-            {tenants && tenants.length !== 0 ? (
-              <FlatList
-              data={tenantsProfiles}
+            <FlatList
+              data={searchQuery ? searchResults : tenantsProfiles}
               keyExtractor={(item, index) => index.toString()}
               renderItem={({ item, index }) => (
-                <View key={index} className="overflow-hidden rounded-md">
+                <View key={index} className="overflow-hidden rounded-md mb-4">
                   <Pressable
-                    android_ripple={{ color: "#ffa233" }}
-                    className="p-5 bg-gray-200 shadow-lg rounded-md"
+                    onPress={() => router.push({pathname: "/(owner)/(screens)/TenantProfile", params: {tenant_id: tenantsProfiles[index].id, status: tenants[index].status}})}
+                    android_ripple={{ color: "#444" }}
+                    className="p-4 bg-white rounded-md"
                   >
-                  <View className='flex-row justify-between items-center'>
-                    <View className='flex-row items-center gap-x-2'>
-                      <View className='h-12 w-12'>
-                        <AvatarImage userID={tenants[index].tenant_id}/>
+                    <View className='flex-row justify-between items-center'>
+                      <View className='flex-row items-center gap-x-2'>
+                        <View className='h-12 w-12'>
+                          <AvatarImage userID={tenants[index].tenant_id} />
+                        </View>
+                        <View>
+                          <Text>{item.first_name}</Text>
+                          <Text className='text-xs'>Joined last
+                            <Text className='font-medium'> {formatDate(item?.date_joined)}</Text>
+                          </Text>
+                        </View>
                       </View>
-                      <Text>{item.first_name}</Text>
-                    </View>
-                    <View className="flex-row items-center gap-x-1">
-                      <Ionicons
-                        name='ellipse'
-                        color={tenants && tenants[index].status === "Active" ? "green" : "gray"}
-                      />
-                      <Text className='text-xs'>{tenants && tenants[index].status}</Text>
-                    </View>
-                  </View>
 
-                  <View className='p-3'>
-                    <View className='flex-row items-center gap-x-2'>
-                      <Ionicons name='call'  color={"#ffa233"}/>
-                      <Text>{item.phone_number}</Text>
+                      <View className="flex-row items-center gap-x-1">
+                        <Ionicons
+                          name='ellipse'
+                          color={
+                            tenants &&
+                            tenants[index].status === "Boarding"
+                              ? "green"
+                              : tenants[index].status === "Request To Leave"
+                              ? "red"
+                              : ""
+                          }/>
+                        <Text className='text-xs w-20 text-start'>{tenants && tenants[index].status}</Text>
+                      </View>
                     </View>
-
-                    <View className='flex-row items-center gap-x-2'>
-                      <Ionicons name='mail'  color={"#ffa233"}/>
-                      <Text>{item.email}</Text>
-                    </View>
-
-                    <View className='flex-row items-center gap-x-2'>
-                      <Ionicons name='location' color={"#ffa233"}/>
-                      <Text>{item.address}</Text>
-                    </View>
-                  </View>
                   </Pressable>
                 </View>
               )}
             />
-            ) : (
-              <View className='text-xs'>
-                <Text>No tenants have been added to the property.</Text>
-                <View className='mt-4'>
-                  <Text>To add new tenants, follow the steps provided:</Text>
-                  <Text className='mt-2'>1. Select the Add Tenant Icon above</Text>
-                  <Text className='mt-2'>2. Select between <Text className='font-medium uppercase'>Select from existing tenants</Text> or <Text className='font-medium uppercase'>Add new tenants</Text>.</Text>
-
-                  <Text className='mt-4 italic'><Text className='font-medium uppercase bg-gray-800 text-white'>Select from existing tenants</Text> shows a list of registered tenants in the app.</Text>
-                  
-                  <Text className='mt-4 italic'><Text className='font-medium uppercase bg-gray-800 text-white'>Add new tenants</Text> allows you to add individuals who are currently boarding in your property but are not yet registered in the app.</Text>
-                </View>
-              </View>
-            )}
-            
           </View>
         )}
+      
+          
+        
+          {tenants?.length === 0 && (
+            <View className='text-xs mt-2'>
+              <Text className='text-center'>No tenants have been added to the property.</Text>
+            </View>
+          )}
+            
+        
+      
+       
+
+
 
           
       </View>

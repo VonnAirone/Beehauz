@@ -80,11 +80,13 @@ export default function BHDetails() {
 
   const handleUpdateProperty = async () => {
     const propertyData = {
-      name: data.name,
+      name: data?.name,
       description: data?.description,
       address: data?.address,
       price: data?.price,
-      amenities: amenities
+      amenities: amenities,
+      available_beds: data?.available_beds,
+      reservation_fee: data?.reservation_fee
     };
 
     const terms = {
@@ -149,12 +151,34 @@ export default function BHDetails() {
           <BackButton/>
           <View className='flex-row items-center justify-between mt-4'>
             <Text className='font-semibold text-xl'>Manage Property</Text>
-            <Pressable onPress={() => setAllowEdit(!allowEdit)}>
-              <Ionicons name='create-outline' size={20}/>
+            <Pressable 
+            className='flex-row items-center gap-x-1'
+            onPress={() => setAllowEdit(!allowEdit)}>
+              <Ionicons name='pencil' size={15}/>
+              <Text>Edit</Text>
             </Pressable>
             
           </View>
+
           <View className='gap-y-2 mt-5'>
+            <Text className='font-semibold'>Number of Beds Available</Text>
+            <TextInput 
+            onChangeText={(text) => handleChangeText('available_beds', text)}
+            className='w-full border border-gray-200 rounded-md py-2 px-5' 
+            value={data?.available_beds?.toString()}
+            editable={allowEdit}/>
+          </View>
+
+          <View className='gap-y-2 mt-5'>
+            <Text className='font-semibold'>Reservation Fee</Text>
+            <TextInput 
+            onChangeText={(text) => handleChangeText('reservation_fee', text)}
+            className='w-full border border-gray-200 rounded-md py-2 px-5' 
+            value={data?.reservation_fee?.toString()}
+            editable={allowEdit}/>
+          </View>
+
+          <View className='gap-y-2 mt-2'>
             <Text className='font-semibold'>Property Name </Text>
             <TextInput 
             onChangeText={(text) => handleChangeText('name', text)}
