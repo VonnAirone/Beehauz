@@ -1,9 +1,7 @@
-import { Pressable, FlatList as RNFlatList, Text, View, Image, Modal } from 'react-native'
-import React, { useEffect, useRef, useState } from 'react'
-import { Ionicons } from '@expo/vector-icons'
+import { Pressable, Text, View, Modal } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { supabase } from '@/utils/supabase'
 import { router } from 'expo-router'
-import { getProfile } from '@/api/DataFetching'
 
 
 //   async function insertAmenity() {
@@ -42,39 +40,101 @@ export async function fetchAmenities(propertyID, setAmenities) {
   }
 }
 
+export async function hasExistingCommitment(userId) {
+  const { data: appointments, error: appointmentError } = await supabase
+    .from('appointments')
+    .select('*')
+    .eq('tenant_id', userId)
+    .eq('status', 'Pending');
+  const { data: rentals, error: rentalError } = await supabase
+    .from('rentals')
+    .select('*')
+    .eq('tenant_id', userId)
+    .eq('status', 'Pending');
+
+  if (appointmentError || rentalError) {
+    console.error('Error checking existing commitments:', appointmentError || rentalError);
+    return true;
+  }
+  return appointments.length > 0 || rentals.length > 0;
+}
 
 
-export function BottomBar ({price, propertyID, propertyName}) {
-  const [isBooking, setIsBooking] = useState(false)
-    return (
-        <View
-        style={{backgroundColor: "#444"}} 
-        className='absolute bottom-0 left-0 z-50 w-full h-16 py-2 px-6 flex-row items-center justify-between'>
+export function BottomBar({ userID, price, propertyID, propertyName, tenantStatus, ownerID }) {
+  const [showModal, setShowModal] = useState(false);
 
-        <View>
-          <Text className='text-white'>Rental Price</Text>
-          <Text className='text-base font-semibold text-white'>{price} / month</Text>
-        </View>
+  
+  async function handleVisit() {
+    if (tenantStatus?.property_id) {
+      setShowModal(true);
+    } else {
+      const hasCommitment = await hasExistingCommitment(userID);
+      if (hasCommitment) {
+        setShowModal(true);
+      } else {
+        router.push({ pathname: "/VisitScreen", params: { propertyID, propertyName, ownerID } });
+      }
+    }
+  }
 
-        <View className='flex-row items-center gap-x-2'>
-          <View className='overflow-hidden rounded-md'>
-            <Pressable 
-            onPress={() => router.push({pathname: "/VisitScreen", params: {propertyID, propertyName}})}
-            android_ripple={{color: "#FDFDD9"}}
-            className='border border-white p-3 rounded-md'>
-              <Text className='text-white'>Pay a Visit</Text>
-            </Pressable>
-          </View>
+  async function handleReserve() {
+    if (tenantStatus?.property_id) {
+      setShowModal(true);
+    } else {
+      const hasCommitment = await hasExistingCommitment(userID);
+      if (hasCommitment) {
+        setShowModal(true);
+      } else {
+        router.push({ pathname: "/(tenant)/(screens)/ReservationScreen", params: { propertyID, propertyName, ownerID } });
+      }
+    }
+  }
 
-          <View className='overflow-hidden rounded-md'>
-            <Pressable 
-            android_ripple={{color: "#ffa233"}}
-            className='bg-white p-3 rounded-md'>
-              <Text>Reserve Now</Text>
-            </Pressable>
-          </View>
-        </View>
-        
+  return (
+    <View style={{ backgroundColor: "#444" }} className="absolute bottom-0 left-0 z-50 w-full h-16 py-2 px-6 flex-row items-center justify-between">
+      <Modal
+      className="flex-1 items-center justify-center"
+      transparent={true}
+      visible={showModal}
+      onRequestClose={() => setShowModal(false)}>
+        <Pressable
+            onPress={() => setShowModal(false)}
+            className="bg-white border border-red-500 w-80 self-center rounded-md p-5">
+          <Text className="text-center">
+              {tenantStatus?.property_id
+                  ? 'You are currently boarding. Only non-boarders can request a visit appointment or create a reservation.'
+                  : 'You have ongoing appointments. Please complete them before making a new one.'}
+          </Text>
+        </Pressable>
+      </Modal>
+
+
+      <View>
+        <Text className="text-white">Rental Price</Text>
+        <Text className="text-base font-semibold text-white">{price} / month</Text>
       </View>
-    )
+
+      <View className="flex-row items-center gap-x-2">
+        <View className="overflow-hidden rounded-md">
+          <Pressable
+            onPress={handleVisit}
+            android_ripple={{ color: "#FDFDD9" }}
+            className="border border-white p-3 rounded-md"
+          >
+            <Text className="text-white">Pay a Visit</Text>
+          </Pressable>
+        </View>
+
+        <View className="overflow-hidden rounded-md">
+          <Pressable
+            onPress={handleReserve}
+            android_ripple={{ color: "#444" }}
+            className="bg-white p-3 rounded-md"
+          >
+            <Text>Reserve Now</Text>
+          </Pressable>
+        </View>
+      </View>
+    </View>
+  );
 }

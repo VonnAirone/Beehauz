@@ -1,4 +1,4 @@
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import BackButton from '@/components/back-button'
@@ -8,11 +8,34 @@ import { getProfile } from '@/api/DataFetching'
 import { Ionicons } from '@expo/vector-icons'
 import AvatarImage from '@/app/(tenant)/(aux)/avatar'
 import { router, useLocalSearchParams } from 'expo-router'
+import debounce from 'debounce'
 
 export default function TenantsList() {
-  const propertyID = useLocalSearchParams()
+  const params = useLocalSearchParams();
   const [tenants, setTenants] = useState([])
   const [tenantsProfiles, setTenantsProfiles] = useState<UserData[] | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<UserData[]>([]);
+
+  const debouncedSearch = debounce(async (query: string) => {
+    try {
+      if (query.trim() === '') {
+        setSearchResults([]);
+      } else {
+        const filtered = tenantsProfiles?.filter((item) =>
+          item.first_name.toLowerCase().includes(query.toLowerCase())
+        );
+        setSearchResults(filtered || []);
+      }
+    } catch (error) {
+      console.error('Error searching:', error);
+    }
+  }, 300);
+
+  const handleOnChangeText = (text: string) => {
+    setSearchQuery(text);
+    debouncedSearch(text);
+  };
   
   async function fetchTenantsProfiles(tenantsData: TenantsData[] | null) {
     if (tenants) {
@@ -27,19 +50,41 @@ export default function TenantsList() {
   
   async function fetchTenants() {
     try {
-      const {data, error} = await supabase
-      .from("tenants")
-      .select("*")
-      .is('property_id', null)
+        // Fetch tenants from the rentals table based on property ID and payment status
+        const { data: rentalsData, error: rentalsError } = await supabase
+            .from('rentals')
+            .select('tenant_id')
+            .eq('property_id', params.propertyID)
+            .eq('status', 'Payment Successful');
+        
+        if (rentalsError) {
+            console.error('Error fetching rentals:', rentalsError);
+            return;
+        }
 
-      if (data) {
-        setTenants(data)
-        fetchTenantsProfiles(data)
-      }
+
+        if (rentalsData && rentalsData.length > 0) {
+            const tenantIds = rentalsData.map((rental) => rental.tenant_id);
+            const { data: tenantsData, error: tenantsError } = await supabase
+                .from('tenants')
+                .select('*')
+                .in('tenant_id', tenantIds)
+                .eq('status', 'Available');
+
+            if (tenantsError) {
+                console.error('Error fetching tenants:', tenantsError);
+                return;
+            }
+
+            if (tenantsData && tenantsData.length > 0) {
+                setTenants(tenantsData);
+                fetchTenantsProfiles(tenantsData);
+            }
+        }
     } catch (error) {
-      
+        console.error('Error fetching tenants:', error);
     }
-  }
+}
 
   async function subscribeToChanges() {
     const channels = supabase
@@ -59,33 +104,63 @@ export default function TenantsList() {
     };
   }
 
+  async function subscribeToRentalChanges() {
+    const channels = supabase
+      .channel('status-update')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'rentals' },
+        (payload) => {
+          console.log('Change received!', payload);
+          fetchTenants()
+        }
+      )
+      .subscribe();
+  
+    return () => {
+      channels.unsubscribe();
+    };
+  }
+
   useEffect(() => {
     fetchTenants()
     subscribeToChanges()
-    
+    subscribeToRentalChanges()    
   }, [])
   return (
     <SafeAreaView className='flex-1'>
       <View className='p-5'>
         <BackButton/>
 
-        <View className='mt-4'>
-          <Text className='text-lg font-semibold'>List of Available Tenants</Text>
+        <View className='mt-4 mb-4'>
+          <Text className='text-lg font-semibold'>List of Approved Tenants</Text>
+        </View>
+
+        <View className='flex-row items-center bg-gray-50  rounded-md p-2 backdrop-blur-3xl'>
+          <View className='mx-2'>
+            <Ionicons name='search' size={20} color={'#444'}/>
+          </View>
+          <TextInput
+            placeholder='Search for a user'
+            value={searchQuery}
+            onChangeText={handleOnChangeText}
+          />
         </View>
 
         <View className='mt-4'>
           <FlatList
-          data={tenantsProfiles}
+          showsVerticalScrollIndicator={false}
+          data={searchQuery ? searchResults : tenantsProfiles}
           renderItem={({item, index}) => (
-            <View key={index} className="overflow-hidden rounded-md">
+            <View key={index} className="overflow-hidden rounded-md mb-4">
               <Pressable
                 onPress={() => 
                   router.push({
-                    pathname: "/TenantProfile", 
-                    params: {tenant_id: tenants[index]?.tenant_id, status: tenants[index]?.status
+                    pathname: "/(owner)/(screens)/TenantProfile", 
+                    params: {tenant_id: tenants[index]?.tenant_id, status: tenants[index]?.status, propertyID: params?.propertyID
                   }})
                 }
-                android_ripple={{ color: "#ffa233" }}
+                android_ripple={{ color: "#444" }}
                 className="p-5 bg-gray-50 shadow-lg rounded-md"
               >
               <View className='flex-row justify-between items-center'>
@@ -95,15 +170,8 @@ export default function TenantsList() {
                   </View>
 
                   <View>
-                    <Text>{item.first_name}</Text>
+                    <Text>{item.first_name} {item.last_name}</Text>
                   </View>
-                </View>
-                <View className={`flex-row items-center gap-x-1 p-2 rounded-md ${tenants && tenants[index]?.status === "Available" ? "bg-green-200" : "bg-gray-200"}`}>
-                  <Ionicons
-                    name='ellipse'
-                    color={tenants && tenants[index]?.status === "Available" ? "green" : "gray"}
-                  />
-                  <Text className='text-xs'>{tenants && tenants[index]?.status}</Text>
                 </View>
               </View>
 
@@ -128,6 +196,7 @@ export default function TenantsList() {
           )}
           />
         </View>
+        
       </View>
     </SafeAreaView>
   )

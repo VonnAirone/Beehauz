@@ -68,7 +68,7 @@ export const DashboardComponents = ({id, properties, tenants, bookings}) => {
       <Pressable 
         onPress={() => router.push({pathname: "/two", params: {property: properties}})} 
       android_ripple={{color: "#444"}}
-      className='p-4 h-32 bg-gray-50 rounded-md'>
+      className='p-4 h-32 bg-gray-50 rounded-md border border-gray-700'>
         <View className='flex-row items-center gap-x-2'>
           <Ionicons name='storefront' size={18} color={"#444"}/>
           <Text className='font-semibold text-xs'>Property</Text>
@@ -79,7 +79,7 @@ export const DashboardComponents = ({id, properties, tenants, bookings}) => {
             <Text>{properties[0].name}</Text>   
           ) : (
             <TouchableOpacity 
-            onPress={() => router.push("/PropertyCreation")}
+            onPress={() => router.push("/(owner)/(screens)/PropertyCreation")}
             className='items-center flex-1 '>
               <Ionicons name='add-circle-outline' size={32}/>
               <Text className='mt-3'>Add a Property</Text>
@@ -89,8 +89,8 @@ export const DashboardComponents = ({id, properties, tenants, bookings}) => {
       </Pressable>
     </View>
 
-    <View className='flex-row items-center justify-between mt-5'>
-      <View className='overflow-hidden rounded-md w-40'>
+    <View className='flex-row items-center justify-between mt-5 '>
+      <View className='overflow-hidden rounded-md w-40 border border-gray-700'>
         <Pressable
         onPress={() => router.push({pathname: "/Appointments", params: {property_id: propertyID}})}
         android_ripple={{color: "#444"}}
@@ -101,12 +101,12 @@ export const DashboardComponents = ({id, properties, tenants, bookings}) => {
           </View>
           
           <View className='items-center flex-1 justify-center mt-4'>
-            <Text className='text-5xl text-yellow'>{bookings ? bookings.length : 0}</Text>
+            <Text className='text-5xl text-yellow'>{bookings ? bookings?.length : 0}</Text>
           </View>
         </Pressable>
       </View>
       
-      <View className='overflow-hidden rounded-md w-40'>
+      <View className='overflow-hidden rounded-md w-40 border border-gray-700'>
         <Pressable
         onPress={() => router.push("/(owner)/(tabs)/Tenants")}
         android_ripple={{color: "#444"}}
@@ -116,7 +116,7 @@ export const DashboardComponents = ({id, properties, tenants, bookings}) => {
             <Text className='font-semibold text-xs'>Tenants</Text>
           </View>
           <View className='items-center justify-center flex-1 mt-4'>
-            <Text className='text-5xl text-yellow'>{tenants ? tenants.length : 0}</Text>
+            <Text className='text-5xl text-yellow'>{tenants ? tenants?.length : 0}</Text>
           </View>
         </Pressable>
       </View>
@@ -151,17 +151,17 @@ export const PropertyReviews = ({ reviews }) => {
   return (
     <View>
       <FlatList
-      horizontal
+      scrollEnabled={false}
       data={reviews}
       renderItem={({ item, index }) => (
-      <View key={index} className='mt-3 bg-gray-50 rounded-md shadow-lg p-5 w-80'>
+      <View key={index} className='mt-3 bg-gray-50 rounded-md shadow-lg p-5 w-full'>
         <View className='flex-row items-center'>
           <View>
             <View>
               <Text className='font-semibold'>{tenantNames[item.tenant_id]}</Text>
             </View>
             <View>
-              <StarRatingComponent rating={1} />
+              <StarRatingComponent rating={item.rating} />
             </View>
           </View>
         </View>
@@ -175,6 +175,55 @@ export const PropertyReviews = ({ reviews }) => {
     </View>
   );
 };
+
+export const TenantReviews = ({ reviews }) => {
+  const [ownerNames, setOwnerNames] = useState({});
+
+  useEffect(() => {
+    async function fetchTenantNames() {
+      const OwnerIds = reviews.map(review => review.owner_id);
+      const names = {};
+      for (const id of OwnerIds) {
+        const userProfile = await getProfile(id);
+        names[id] = `${userProfile?.first_name} ${userProfile?.last_name || 'Unknown'}`;
+      }
+      setOwnerNames(names);
+    }
+
+    if (reviews && reviews.length > 0) {
+      fetchTenantNames();
+    }
+  }, [reviews]);
+  
+  if (!reviews || reviews.length === 0) {
+    return <Text>No reviews found</Text>;
+  }
+
+  return (
+    <View>
+      <FlatList
+      scrollEnabled={false}
+      data={reviews}
+      renderItem={({ item, index }) => (
+      <View key={index} className='mt-3 bg-gray-50 rounded-md shadow-lg p-5 w-full'>
+        <View className='flex-row items-center'>
+          <View>
+            <View>
+              <Text className='font-semibold'>{ownerNames[item.owner_id]}</Text>
+            </View>
+          </View>
+        </View>
+
+        <View className='mt-1'>
+          <Text>{item?.review_content}</Text>
+        </View>
+      </View>
+      )}
+      />
+    </View>
+  );
+};
+
 
 
 

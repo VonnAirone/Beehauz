@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Pressable, Image } from 'react-native';
+import { View, Text, TextInput, Pressable, Image, TouchableOpacity } from 'react-native';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from "expo-location";
@@ -83,8 +83,8 @@ export default function map() {
     async function fetchData() {
       try {
         setLoading(true)
-        fetchUserLocation();
-        fetchProperties();
+        await fetchUserLocation();
+        await fetchProperties();
       } catch (error) {
         console.log("Error fetching location data: ", error.message)
       } finally {
@@ -129,8 +129,8 @@ export default function map() {
             showsUserLocation
               className='w-full h-full'
               initialRegion={{
-                latitude: 10.790317,
-                longitude: 122.007448,
+                latitude: location?.latitude,
+                longitude: location?.longitude,
                 latitudeDelta: 0.001,
                 longitudeDelta: 0.001,
               }}
@@ -161,15 +161,16 @@ export default function map() {
 
           <BottomSheet
           ref={bottomSheetRef}
-          backgroundStyle={{backgroundColor:"#444"}}
+          backgroundStyle={{backgroundColor:"white"}}
           index={0}
           snapPoints={snapPoints}
           onChange={handleSheetChanges}
+          // enablePanDownToClose={true}
           >
             <BottomSheetView>
               <View className='p-5'>
                 <View>
-                  <Text className='font-medium text-white'>List of Properties</Text>
+                  <Text className='font-medium'>List of Properties</Text>
                 </View>
 
                 <View className='mt-4'>
@@ -178,7 +179,7 @@ export default function map() {
                   horizontal
                   data={properties}
                   renderItem={({item, index}) => (
-                    <Pressable 
+                    <TouchableOpacity 
                     onPress={() => goToProperty(item)}
                     className='mr-4'>
                       <View className='h-32 w-32'>
@@ -186,11 +187,11 @@ export default function map() {
                       </View>
 
                       <View className='mt-2'>
-                        <Text className='font-semibold text-white'>{item.name}</Text>
-                        <Text className='text-xs text-white'>Available Beds: {item.available_beds}</Text>
-                        <Text className='mt-1 font-medium text-white'>{item.price} per month</Text>
+                        <Text className='font-semibold'>{item.name}</Text>
+                        <Text className='text-xs'>Available Beds: {item.available_beds}</Text>
+                        <Text className='mt-1 font-medium'>{item.price} per month</Text>
                       </View>
-                    </Pressable>
+                    </TouchableOpacity>
                   )}/>
                 </View>
                 

@@ -48,7 +48,7 @@ const AvatarDisplay = ({ userID }) => {
     return (
       <View className='border border-gray-200 w-full h-full rounded-full'>
         <Image
-        className='h-full w-full' 
+        className='h-full w-full bg-white rounded-full' 
         source={require("@/assets/icon.png")}/>
       </View>
     )
@@ -65,7 +65,7 @@ const AvatarDisplay = ({ userID }) => {
     );
   }}
 
-const AvatarImage = ({ userID }) => {
+const  AvatarImage = ({ userID }) => {
   return (
     <View className='flex-1 items-center justify-center'>
       <AvatarDisplay userID={userID}/>

@@ -10,7 +10,7 @@
     },
     "plugins": [
       // ["expo-router", {
-      //   "asyncRoutes": "development"
+      //   "asyncRoutes": "p"
       // }
       // ],
       [

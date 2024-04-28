@@ -5,7 +5,7 @@ import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
 import { getProfile } from '@/api/DataFetching';
 import { UserData } from '@/api/Properties';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 
 export default function Account() {
   const auth = useAuth();
@@ -13,6 +13,7 @@ export default function Account() {
   const [modalVisible, setModalVisible] = useState(false);
   const [userProfile, setUserProfile] = useState<UserData | null>(null)
   const [avatar, setAvatar] = useState(null);
+  const [property, setProperty] = useState('')
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,9 +24,27 @@ export default function Account() {
   async function fetchData() {
     await getUserProfile();
     await fetchAvatar();
+    await getProperty()
   }
 
 
+  async function getProperty() {
+    try {
+      const { data, error } = await supabase
+        .from("property")
+        .select()
+        .eq("owner_id", user?.id)
+        .single()
+      
+      if (data) {
+        setProperty(data?.property_id)
+      }
+    } catch (error) {
+      console.log("Error fetching property: ", error.message)
+    }
+    
+    
+  }
   async function getUserProfile() {
     try {
         const data = await getProfile(user?.id);
@@ -110,12 +129,19 @@ export default function Account() {
         <View
         className='mt-10 flex-row items-center'>
           <View className='h-20 w-20 rounded-md'>
-            {avatar && 
-            <Image 
+            {avatar ?
+            (<Image 
             className='rounded-md'
             source={{ uri: avatar }} 
             style={{ width: '100%', height: "100%" }} 
-            resizeMode='cover'/>}
+            resizeMode='cover'/>) : 
+            (
+            <Image 
+            className='rounded-md bg-white'
+            source={require("@/assets/icon.png")} 
+            style={{ width: '100%', height: "100%" }} 
+            resizeMode='cover'/>
+            )}
           </View>
 
           <View className='ml-4'>
@@ -128,9 +154,12 @@ export default function Account() {
 
         <View className='flex-row justify-between mt-10'>
           <Text className='font-semibold text-gray-700'>Personal Information</Text>
-            <Link href={"/ManageProfile"}>
+            <Pressable 
+            onPress={() => router.push("/(aux)/ManageProfile")}
+            className='flex-row items-center gap-x-1'> 
+              <Text>Edit</Text>
               <Ionicons name='chevron-forward-outline'/>
-            </Link>
+            </Pressable>
         </View>
         
         <View className='gap-y-3 mt-3 mb-10'>
@@ -144,7 +173,7 @@ export default function Account() {
               <TextInput 
                 editable={false}
                 className='text-xs text-right'
-                placeholder={userProfile?.email}/>
+                placeholder={user?.email}/>
             </View>
           </View>
 
@@ -157,7 +186,7 @@ export default function Account() {
             <View className='relative w-40'>
               <TextInput 
               editable={false} 
-              value={userProfile?.phone_number.toString()}
+              value={userProfile?.phone_number?.toString()}
               className='text-right text-xs'/>
             </View>
           </View>
@@ -185,7 +214,7 @@ export default function Account() {
         <View className='gap-y-3 mt-3 mb-10'>
           <View className='rounded-md overflow-hidden'>
             <Pressable 
-            onPress={() => router.push("/Transactions")}
+            onPress={() => router.push({pathname: "/(owner)/(screens)/Transactions", params: {property}})}
             android_ripple={{color: 'f1f1f1'}} 
             className='rounded-md p-4'>
               <View className='flex-row justify-between items-center'>
@@ -218,7 +247,6 @@ export default function Account() {
          
          <View className='rounded-md overflow-hidden'>
           <Pressable 
-          onPress={() => router.push("/(owner)/(screens)/MapView")}
           android_ripple={{color: 'f1f1f1'}} 
           className='rounded-md p-4'>
               <View className='flex-row justify-between items-center'>

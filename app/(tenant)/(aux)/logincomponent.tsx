@@ -46,7 +46,7 @@ export function TextInputField({ label, value, placeholder, isPassword, isReveal
       
         <View>
         {feedbackText ? (
-          <Text className='ml-5 text-red-500 text-xs'>{feedbackText}</Text>
+          <Text className='ml-3 text-red-500 text-xs'>{feedbackText}</Text>
         ): (
         <Text className='ml-5 text-xs text-gray-500'>
           {defaultFeedback}

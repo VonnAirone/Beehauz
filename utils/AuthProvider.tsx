@@ -3,6 +3,7 @@ import { useContext, useEffect, useState, createContext } from 'react';
 import { AuthSession } from '@supabase/supabase-js';
 import { useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import { supabase } from './supabase';
+import { AppState } from 'react-native';
 
 interface Props {
   children?: React.ReactNode;
@@ -28,56 +29,73 @@ export function AuthProvider({ children }: Props) {
 
   useEffect(() => {
     if (!navigationState?.key || !authInitialized) return;
+  
     const inAuthGroup = segments[0] === '(auth)';
-
-    if (
-      !session?.user &&
-      !inAuthGroup
-    ) {
+    const isUserSignedIn = session?.user;
+    
+    if (!session) {
       router.replace('/(auth)/');
-    } else if (session?.user && inAuthGroup) {
-      if (session?.user.user_metadata.profileCompleted == false) {
-        router.replace('/Usertype')
+    }
+
+    if (!isUserSignedIn && !inAuthGroup) {
+      router.replace('/(auth)/');
+    } else if (isUserSignedIn && inAuthGroup) {
+      if (session?.user.user_metadata.profileCompleted === false) {
+        router.replace('/Usertype');
       } else {
-        if (session?.user.user_metadata.usertype == "Tenant") {
-          router.replace("/(tenant)/(screens)/TenantProperty")
+        const userType = session?.user.user_metadata?.usertype || '';
+  
+        if (userType === 'Tenant') {
+          router.replace('/(tenant)/(tabs)/home');
         } else {
-          router.replace("/(owner)/(tabs)/Dashboard")
+          router.replace('/(owner)/(tabs)/Dashboard');
         }
       }
     }
   }, [session, segments, authInitialized, navigationState?.key]);
-
+  
   useEffect(() => {
     async function initializeSession() {
       try {
-      const { data: authData, error: authError } = await supabase.auth.getSession();
-      
-      if (authData?.session) {
-        setSession(authData.session);
-        setAuthInitialized(true);
-      } else {
-        setAuthInitialized(true);
-      }
-
-      const { data: authListenerData } = supabase.auth.onAuthStateChange(
-        async (_event, session) => {
-          setSession(session);
+        const { data: authData, error: authError } = await supabase.auth.getSession();
+        
+        if (authData?.session) {
+          setSession(authData.session);
           setAuthInitialized(true);
-
-          if (_event == 'TOKEN_REFRESHED') {
-            // Handle accordingly
-          }
+        } else {
+          setAuthInitialized(true);
         }
-      );
-      return () => {
-        authListenerData.subscription?.unsubscribe();
-      };
-    } catch (error) {
-      console.log('Error initializing session: ', error)
+  
+        const { data: authListenerData } = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            if (event === 'TOKEN_REFRESHED') {
+              supabase.auth.startAutoRefresh()
+              setSession(session);
+            } else {
+              supabase.auth.startAutoRefresh()
+              setSession(session);
+              setAuthInitialized(true);
+            }
+          }
+        );
+  
+        // Add AppState change listener for auto-refresh
+        AppState.addEventListener('change', (state) => {
+          if (state === 'active') {
+            supabase.auth.startAutoRefresh();
+          } else {
+            supabase.auth.stopAutoRefresh();
+          }
+        });
+  
+        return () => {
+          authListenerData.subscription?.unsubscribe();
+        };
+      } catch (error) {
+        console.log('Error initializing session: ', error);
+      }
     }
-  }
-
+  
     initializeSession().then(() => {
       // Check if the session is initialized and the user is authenticated.
       if (session?.user) {
@@ -88,6 +106,7 @@ export function AuthProvider({ children }: Props) {
       }
     });
   }, []);
+  
 
   return (
     <AuthContext.Provider value={{ session, authInitialized }}>

@@ -135,7 +135,7 @@ export async function fetchCheapProperties(setCheapProperties) {
 
     const { data, error } = await supabase
       .from('property')
-      .select()
+      .select('*')
       .gte('price', minPrice)
       .lte('price', maxPrice);
 

@@ -1,5 +1,5 @@
 import { Pressable, ScrollView, Text, View, Image } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Logo from '@/components/logo'
 import { useAuth } from '@/utils/AuthProvider'
@@ -10,21 +10,23 @@ import { DashboardComponents } from '../(aux)/propertycomponents'
 import { Ionicons } from '@expo/vector-icons'
 import MapView, { Callout, MarkerAnimated } from 'react-native-maps'
 import { usePushNotifications } from '@/api/usePushNotification'
+import { router } from 'expo-router'
 
 export default function Dashboard() {
-  const { expoPushToken } = usePushNotifications()
   const session = useAuth()
   const user = session?.session?.user?.id;
+  const { expoPushToken } = usePushNotifications(user)
   const [userProfile, setUserProfile] = useState<UserData | null>(null)
   const [properties, setProperties] = useState<PropertyData[] | null>(null);
   const [tenants, setTenants] = useState<TenantsData[] | null>(null);
   const [bookings, setBookings] = useState(null)
   const [propertyID, setPropertyID] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [propertyReviews, setPropertyReviews] = useState<ReviewData[] | null>(null);
   const [latitude, setLatitude] = useState(() => undefined);
   const [longitude, setLongitude] = useState(() => undefined);
+  const [notificationsViewed, setNotificationsViewed] = useState(false);
 
+ 
   async function subscribeToBookingChanges() {
     const channels = supabase
       .channel('realtime-booking-channel')
@@ -32,7 +34,6 @@ export default function Dashboard() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'appointments' },
         (payload) => {
-          console.log('Change received!', payload);
           fetchBookings();
         }
       )
@@ -42,33 +43,34 @@ export default function Dashboard() {
       channels.unsubscribe();
     };
   }
-
   
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true);
-        await getUserProfile(user);
-        await getProperties();
+  const memoizedProperties = useMemo(() => properties, [properties]);
 
-        if (propertyID !== null) {
-            await getPropertyReviews();
-            await getTenants();
-            await fetchBookings();
-        } 
-      } catch (error) {
-        console.log("Error fetching data: ", error.message)
-      } finally {
-        setLoading(false)
+  useEffect(() => {
+    console.log(latitude)
+      async function fetchData() {
+          try {
+              usePushNotifications(user)
+              setLoading(true);
+              await getUserProfile(user);
+              await getProperties();
+
+              if (propertyID !== null) {
+                  await getTenants();
+                  await fetchBookings();
+              }
+          } catch (error) {
+              console.log("Error fetching data: ", error.message);
+          } finally {
+              setLoading(false);
+          }
       }
 
-    }
-    
-    fetchData();
-    subscribeToPropertyChanges();
-    subscribeToBookingChanges();
+      fetchData();
+      subscribeToPropertyChanges();
+      subscribeToBookingChanges();
   }, [propertyID]);
-  
+
   async function getUserProfile(id: string) {
     try {
         const data = await getProfile(user);
@@ -82,7 +84,7 @@ export default function Dashboard() {
   async function getProperties() {
     try {
       const { data, error } = await supabase.from("property")
-      .select()
+      .select('*')
       .eq("owner_id", user)
       
       
@@ -104,29 +106,6 @@ export default function Dashboard() {
       console.log("Error fetching properties: ", error.message)
     }
   }
-  
-  async function getPropertyReviews() {
-    try {
-        const { data, error } = await supabase
-            .from("property_reviews")
-            .select("*")
-            .eq('property_id', propertyID);
-
-        if (error) {
-            console.log("Error fetching property reviews: ", error.message);
-            return null;
-        }
-
-        if (data) {
-            setPropertyReviews(data);
-        } else {
-            console.log("No property reviews found.");
-        }
-    } catch (error) {
-        console.log("Error fetching property reviews: ", error.message);
-        return null;
-    }
-}
 
 async function subscribeToPropertyChanges() {
   const channels = supabase
@@ -135,7 +114,6 @@ async function subscribeToPropertyChanges() {
       'postgres_changes',
       { event: '*', schema: 'public', table: 'property' },
       (payload) => {
-        console.log('Change received!', payload);
         getProperties()
       }
     )
@@ -171,6 +149,7 @@ async function subscribeToPropertyChanges() {
         .from('appointments')
         .select('*')
         .eq("property_id", propertyID)
+        .eq("status", "Pending")
 
       if (error) {
         console.error('Error fetching bookings:', error.message);
@@ -193,10 +172,21 @@ async function subscribeToPropertyChanges() {
           <View 
           style={{backgroundColor: "#444"}}>
             <View className='p-5 flex-row items-center justify-between'>
-              <Logo/>
-              <Pressable className='bg-yellow rounded-md'>
-                <Ionicons name='notifications' color={"white"} size={30}/>
-              </Pressable>
+              <View className='flex-row items-center justify-center' >
+                <Image className='w-10 h-10' source={require("@/assets/images/icon.png")}/>
+                <Text className='text-xl text-white font-semibold pr-2'>BEEHAUZ for Owners</Text>
+              </View>
+              {/* <Pressable
+                onPress={() => {
+                    router.push({ pathname: "/(owner)/(screens)/Notifications", params: { propertyID } });
+                    setNotificationsViewed(true);}}
+                className='bg-yellow rounded-md'>
+                <Ionicons name='notifications' color={"white"} size={30} />
+                {!notificationsViewed && bookings && bookings.length > 0 && (
+                    <View className="absolute inline-flex items-center justify-center w-3 h-3 font-bold text-white bg-red-500 rounded-full right-0"></View>
+                )}
+              </Pressable> */}
+
             </View>
 
           </View>
@@ -210,47 +200,74 @@ async function subscribeToPropertyChanges() {
 
             <DashboardComponents id={user} properties={properties} tenants={tenants} bookings={bookings}/>
 
-            <View className='mt-10 mb-2'>
-              <Text className='font-semibold'>{properties[0]?.name} is located here: </Text>
-            </View>
+            {/* <View className='mt-10 mb-2'>
+              <Text className='font-semibold'>{properties ? properties[0]?.name : 'No property created'}</Text>
+            </View> */}
           
-            <View className='rounded-md'>
+            {properties && properties?.length !== 0 ? (
+              <>
+              <View className='mt-10 mb-2'>
+                <Text className='font-semibold'>
+                  {properties ? `${properties[0]?.name} is located here` : 'No property created'}
+                  </Text>
+              </View>
+          
+              <View className='rounded-md'>
+                <MapView 
+                scrollEnabled={false}
+                className='h-48 w-full'
+                initialRegion={{
+                  latitude: latitude,
+                  longitude: longitude,
+                  latitudeDelta: 0.005,
+                  longitudeDelta: 0.005,
+                }}>
+                  <MarkerAnimated
+                  coordinate={{latitude: latitude, longitude: longitude}}>
+                    <View className='justify-center items-center'>
+                      <View 
+                      style={{backgroundColor: "#444"}}
+                      className='rounded-md p-2'>
+                        <Text className='text-center text-white text-xs'>{properties[0]?.name}</Text>
+                      </View>
+                    
+                      <View className='h-12 w-12'>
+                        <Image 
+                        style={{width: '100%', height: "100%"}}
+                        source={require("@/assets/custom-pin.png")}/>
+                      </View>
+                    </View>
+                    
+                  
+                    
+                    <Callout>
+                      <View className='w-32 rounded-md'>
+                        <Text className='text-center'>{properties[0]?.name}</Text>
+                      </View>
+                    </Callout>
+                  </MarkerAnimated>
+                </MapView>   
+              </View>
+              </>
+            ) : (
+              <>
+              <View className='mt-10 mb-2'>
+                <Text className='font-semibold'>{properties ? properties[0]?.name : 'No property created'}</Text>
+              </View>
               <MapView 
-              scrollEnabled={false}
-              style={{borderRadius: 20}}
-              className='h-48 w-full rounded-md'
-              initialRegion={{
-                latitude: latitude,
-                longitude: longitude,
-                latitudeDelta: 0.001,
-                longitudeDelta: 0.001,
-              }}>
-                <MarkerAnimated
-                coordinate={{latitude: latitude, longitude: longitude}}>
-                  <View className='justify-center items-center'>
-                    <View 
-                    style={{backgroundColor: "#444"}}
-                    className='rounded-md p-2'>
-                      <Text className='text-center text-white text-xs'>{properties[0]?.name}</Text>
-                    </View>
-                   
-                    <View className='h-12 w-12'>
-                      <Image 
-                      style={{width: '100%', height: "100%"}}
-                      source={require("@/assets/custom-pin.png")}/>
-                    </View>
-                  </View>
-                  
-                 
-                  
-                  <Callout>
-                    <View className='w-32 rounded-md'>
-                      <Text className='text-center'>{properties[0]?.name}</Text>
-                    </View>
-                  </Callout>
-                </MarkerAnimated>
-              </MapView>   
-            </View>
+                scrollEnabled={false}
+                style={{borderRadius: 20}}
+                className='h-48 w-full rounded-md'
+                initialRegion={{
+                  latitude: 10.790666,
+                  longitude: 122.0052101,
+                  latitudeDelta: 0.001,
+                  longitudeDelta: 0.001,
+                }}>
+              </MapView>
+              </>
+            )}
+            
           
         </ScrollView> 
       </> 

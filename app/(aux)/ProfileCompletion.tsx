@@ -12,106 +12,75 @@ export default function TenantRegistration() {
   const { usertype } = useLocalSearchParams();
   const user = useAuth().session?.user;
   const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('')
+  const [lastName, setLastName] = useState('');
   const [address, setAddress] = useState('');
   const [age, setAge] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [gender, setGender] = useState('')
-  const [isEmpty, setIsEmpty] = useState(false);
-  const currentDate = new Date().toISOString(); 
+  const [gender, setGender] = useState(null);
+  const currentDate = new Date().toISOString();
 
-  const handleFirstNameChange = (text) => { setFirstName(text); setIsEmpty(false); };
-  const handleLastNameChange = (text) => { setLastName(text); setIsEmpty(false); };
+  const handleFirstNameChange = (text) => { setFirstName(text); };
+  const handleLastNameChange = (text) => { setLastName(text); };
   const handleAddressChange = (text) => setAddress(text);
   const handleAgeChange = (num) => setAge(num);
   const handlePhoneNumberChange = (num) => setPhoneNumber(num);
 
   const updateUserInformation = async () => {
-     let {data, error} = await supabase.from('profiles')
-     .update({
-      first_name: firstName,
-      last_name: lastName, 
-      email: user?.email,
-      age: age,
-      address: address,
-      phone_number: phoneNumber,
-      gender: gender
-    })
-    .eq("id", user?.id)
+    try {
+      await supabase.from('profiles')
+        .update({
+          first_name: firstName,
+          last_name: lastName,
+          email: user?.email,
+          age: age,
+          address: address,
+          phone_number: phoneNumber,
+          gender: gender,
+          date_joined: new Date(),
+        })
+        .eq("id", user?.id);
 
-      if (error) {
-        Alert.alert("Error updating user information:", error.message)
+      if (usertype === "Tenant") {
+        await supabase.from('tenants').insert({ 'tenant_id': user?.id, 'date_joined': currentDate, 'status': 'Available'});
+        router.push("/(tenant)/(tabs)/home");
       } else {
-        if (usertype === "Tenant") {
-          try {
-            const { data, error } = await supabase.from('tenants').insert({ 'tenant_id': user?.id, 'date_joined': currentDate });
-        
-            if (error) {
-              throw error;
-            }
-        
-            if (data) {
-              router.push("/(tenant)/(tabs)/home");
-            }
-          } catch (error) {
-            console.log("Error inserting tenant: ", error.message);
-
-          }
-        } else {
-          try {
-            const { data, error } = await supabase.from('owners').insert({ 'owner_id': user?.id });
-        
-            if (error) {
-              throw error;
-            }
-        
-            if (data) {
-              router.push("/(owner)/(tabs)/Dashboard");
-            }
-          } catch (error) {
-            console.log("Error inserting owner: ", error.message);
-          }
-        }        
+        await supabase.from('owners').insert({ 'owner_id': user?.id });
+        router.push("/(owner)/(tabs)/Dashboard");
       }
+    } catch (error) {
+      Alert.alert("Error updating user information:", error.message);
+    }
   }
-  
+
   const handleSubmission = async () => {
     const fields = [firstName, lastName, address, age, phoneNumber];
-    let isEmpty = false;
-
-    for (const field of fields) {
-      if (field.trim() === '') {
-        isEmpty = true;
-        setIsEmpty(true);
-        Alert.alert('Please complete all fields');
-        break;
-      }
-    }
+    const isEmpty = fields.some(field => field.trim() === '');
 
     if (isEmpty) {
+      Alert.alert('Please complete all fields');
       return;
-    } else {
-      const { data, error } = await supabase.auth.updateUser({
-        data: { 
-          ...user.user_metadata, 
-          profileCompleted: 'true',
-          usertype: usertype }
-      })
+    }
 
-      if (error) {
-        Alert.alert("Error updating metadata:", error.message)
-      } else {
-        Alert.alert("Successfully completed personal information.")
-        updateUserInformation()
-      }
+    try {
+      await supabase.auth.updateUser({
+        data: {
+          ...user.user_metadata,
+          profileCompleted: 'true',
+          usertype: usertype
+        }
+      });
+      updateUserInformation();
+      Alert.alert("Successfully completed personal information.");
+    } catch (error) {
+      Alert.alert("Error updating metadata:", error.message);
     }
   }
 
   const genderOptions = [
-    {label: 'Male', value: 'Male'},
-    {label: 'Female', value: 'Female'},
-    {label: 'Do not specify', value: 'Not specified'}
-  ]
+    { label: 'Male', value: 'Male' },
+    { label: 'Female', value: 'Female' },
+    { label: 'Do not specify', value: 'Not specified' }
+  ];
 
   const handleGenderPress = (selectedGender) => {
     setGender(prevGender => prevGender === selectedGender ? null : selectedGender);
@@ -123,7 +92,9 @@ export default function TenantRegistration() {
     <SafeAreaView className="flex-1">
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <>
-        <ScrollView className="flex-1 p-5">
+        <ScrollView 
+        showsVerticalScrollIndicator={false}
+        className="flex-1 p-5">
           <BackButton/>
           <View className="mt-10">
             <View className="mb-5">

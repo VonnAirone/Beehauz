@@ -5,7 +5,8 @@ import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
 import { fetchPropertyDetailsData, getProfile } from '@/api/DataFetching';
 import { PropertyData, UserData } from '@/api/Properties';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 export default function Account() {
   const auth = useAuth();
@@ -14,7 +15,7 @@ export default function Account() {
   const [userProfile, setUserProfile] = useState<UserData | null>(null)
   const [avatar, setAvatar] = useState(null);
   const [property, setProperty] = useState<PropertyData | null>(null)
-  const [dateJoined, setDateJoined] = useState()
+  const [dateJoined, setDateJoined] = useState('')
 
   useEffect(() => {
     fetchData();
@@ -23,22 +24,35 @@ export default function Account() {
   }, []); 
 
   async function fetchData() {
-    await getUserProfile();
-    await fetchAvatar();
-    await fetchProperty();
+    try {
+      await getUserProfile();
+      await fetchAvatar();
+      await fetchProperty();
+    } catch (error) {
+      console.log("Error fetching data: ", error.message)
+    }
+    
   }
+
+  async function signOUt() {
+    const { error } = await supabase.auth.signOut()
+
+    if (error) {
+      console.log('Error message', error.message)
+    }
+  } 
 
   async function fetchProperty() {
     try {
       const { data, error } = await supabase
         .from("tenants")
         .select('*')
-        .eq('tenant_id', user?.id);
-  
-      if (data && data.length > 0) {
+        .eq('tenant_id', user?.id.toString());
+
+      if (data[0]?.property_id) {
         const property = await fetchPropertyDetailsData(data[0]?.property_id)
         setProperty(property)
-        setDateJoined(property[0]?.date_joined)
+        setDateJoined(data[0].date_joined)
       } else {
         console.log("No property found for the user.");
       }
@@ -135,15 +149,6 @@ export default function Account() {
     }
   };
 
-
-  async function signOUt() {
-    const { error } = await supabase.auth.signOut()
-
-    if (error) {
-      console.log('Error message', error.message)
-    }
-  } 
-
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <SafeAreaView className='flex-1 p-5'>
@@ -151,27 +156,36 @@ export default function Account() {
         <View
         className='mt-5 flex-row items-center'>
           <View className='h-20 w-20 rounded-md'>
-            {avatar && 
-            <Image 
+            {avatar ?
+            (<Image 
             className='rounded-md'
             source={{ uri: avatar }} 
             style={{ width: '100%', height: "100%" }} 
-            resizeMode='cover'/>}
+            resizeMode='cover'/>) : 
+            (
+            <Image 
+            className='rounded-md bg-white'
+            source={require("@/assets/icon.png")} 
+            style={{ width: '100%', height: "100%" }} 
+            resizeMode='cover'/>
+            )}
           </View>
 
           <View className='ml-4'>
             <Text className='font-medium italic'>Tenant</Text>
             <Text className='font-semibold text-xl'>{userProfile?.first_name} {userProfile?.last_name}</Text>
-            <Text className='text-xs'>{userProfile?.gender}</Text>
             <Text className='text-xs'>{userProfile?.age}</Text>
           </View>
         </View>
 
         <View className='flex-row justify-between mt-10'>
           <Text className='font-semibold text-gray-700'>Personal Information</Text>
-            <Link href={"/ManageProfile"}>
+            <Pressable 
+            onPress={() => router.push("/(aux)/ManageProfile")}
+            className='flex-row items-center gap-x-1'> 
+              <Text>Edit</Text>
               <Ionicons name='chevron-forward-outline'/>
-            </Link>
+            </Pressable>
         </View>
         
         <View className='gap-y-3 mt-3 mb-10'>
@@ -225,15 +239,15 @@ export default function Account() {
 
             <View>
             {property ? (
-              <Pressable 
-              onPress={() => router.push({pathname: "/(tenant)/(screens)/TenantProperty", params: {"propertyID": property?.property_id,
-              "date_joined": dateJoined}})}
+              <TouchableOpacity 
+              onPress={() => router.push({pathname: "/(tenant)/(screens)/TenantProperty", params: {propertyID: property?.property_id,
+              date_joined: dateJoined}})}
               className='flex-row items-center'>
                 <Text className='mr-1'>{property.name}</Text>
                 <Ionicons name='chevron-forward'/>
-              </Pressable>
+              </TouchableOpacity>
             ) : (
-              <Text>{property !== null ? "Loading..." : "Not boarding"}</Text>
+              <Text>{property === null ? "Not boarding" : ""}</Text>
             )}
             </View>
           </View>
@@ -247,7 +261,7 @@ export default function Account() {
         <View className='gap-y-3 mt-1 mb-10'>
           <View className='rounded-md overflow-hidden'>
             <Pressable 
-            onPress={() => router.push("/Transactions")}
+            onPress={() => router.push("/(tenant)/(screens)/Transactions")}
             android_ripple={{color: 'f1f1f1'}} 
             className='rounded-md p-4'>
               <View className='flex-row justify-between items-center'>

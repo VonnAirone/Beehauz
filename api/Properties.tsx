@@ -9,6 +9,7 @@ export interface UserData {
     age: string;
     description: string;
     date_joined: string;
+    expo_push_token: string;
 }
 
 // export type PropertyData = {
@@ -29,6 +30,7 @@ export interface OwnerData {
   phone_number: string;
   age: string;
   created_at: string;
+  expo_push_token: string;
   properties: [
     id: string,
     property_name: string
@@ -56,7 +58,7 @@ export type ReviewData = {
 export type TenantsData = {
   property_id: string;
   tenant_id: string;
-  status: "Active" | "Left"
+  status: "Boarding" | "Request To Leave" | "Left"
 }
 
 export type PropertyData = {
@@ -70,6 +72,7 @@ export type PropertyData = {
   longitude: number,
   address: string,
   available_beds: number,
+  reservation_fee: number,
   amenities: []
 }
 

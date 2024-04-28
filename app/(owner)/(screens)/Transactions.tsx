@@ -4,33 +4,25 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import BackButton from '@/components/back-button';
 import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
-import { AppointmentData, PropertyData } from '@/api/Properties';
-import { fetchPropertyDetailsData } from '@/api/DataFetching';
-import { router } from 'expo-router';
+import { AppointmentData, PropertyData, UserData } from '@/api/Properties';
+import { fetchPropertyDetailsData, getProfile } from '@/api/DataFetching';
+import { router, useLocalSearchParams } from 'expo-router';
 import LoadingComponent from '@/components/LoadingComponent';
 
 export default function Transactions() {
   const user = useAuth()?.session.user;
+  const params = useLocalSearchParams()
   const [transactions, setTransactions] = useState([]);
   const [properties, setProperties] = useState<PropertyData[] | null>(null);
   const [loading, setLoading] = useState(true)
+  const [profiles, setProfiles] = useState<UserData[] | null>(null)
 
   useEffect(() => {
-    fetchData()
+    fetchTransactions()
+    // fetchProfiles(transactions)
     subscribeToVisitChanges()
     subscribeToRentalChanges()
   }, []);
-
-  async function fetchData() {
-    try {
-      setLoading(true)
-      await fetchTransactions()
-    } catch (error) {
-      console.log("Error fetching transactions: ", error.message)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   
   async function fetchTransactions() {
@@ -39,12 +31,12 @@ export default function Transactions() {
       const { data: transactionsData, error: transactionsError } = await supabase
         .from('appointments')
         .select('*')
-        .eq('tenant_id', user.id.toString());
+        .eq('property_id', params.property);
 
       const { data: rentalsData, error: rentalsError } = await supabase
         .from('rentals')
         .select('*')
-        .eq('tenant_id', user.id.toString());
+        .eq('property_id', params.property);
     
       if (transactionsError) {
         console.log("Error fetching transactions: ", transactionsError.message);
@@ -65,8 +57,17 @@ export default function Transactions() {
           
           return dateB.getTime() - dateA.getTime();  
       });
-      fetchPropertyData(combinedData)
       setTransactions(combinedData);
+
+      const tenantData = combinedData.map(async (transaction) => {
+        
+        const profile = await getProfile(transaction.tenant_id.toString());
+        return profile;
+      });
+
+      const resolvedProfiles = await Promise.all(tenantData);
+      setProfiles(resolvedProfiles);
+
     }
     } catch (error) {
       console.log("Error fetching data: ", error.message);
@@ -76,19 +77,19 @@ export default function Transactions() {
   }
   
 
-  async function fetchPropertyData(transactions: AppointmentData[]) {
-    if (transactions) {
-      const propertyData = transactions.map(async (transaction) => {
+  // async function fetchProfiles(transactions: AppointmentData[]) {
+  //   if (transactions) {
+  //     console.log(transactions)
+  //     const tenantData = transactions.map(async (transaction) => {
         
-        const property = await fetchPropertyDetailsData(transaction.property_id.toString());
-        return property;
-      });
+  //       const profile = await getProfile(transaction.tenant_id.toString());
+  //       return profile;
+  //     });
 
-      const resolvedProperties = await Promise.all(propertyData);
-      console.log(resolvedProperties)
-      setProperties(resolvedProperties);
-    }
-  }
+  //     const resolvedProfiles = await Promise.all(tenantData);
+  //     setProfiles(resolvedProfiles);
+  //   }
+  // }
 
   function formatDate(dateString) {
     const date = new Date(dateString);
@@ -131,7 +132,6 @@ export default function Transactions() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'rentals' },
         (payload) => {
-          // console.log('Change received!', payload);
           fetchTransactions()
         }
       )
@@ -168,10 +168,9 @@ export default function Transactions() {
                 data={transactions}
                 keyExtractor={item => item.appointment_id || item.rental_id}
                 renderItem={({ item, index }) => {
-                  const propertyName = properties && properties[index] ? properties[index].name : 'Unknown Property';
+                  const tenantName = profiles && profiles[index] ? profiles[index].first_name : 'Unknown User';
                 
                   if (item.type === 'Visit') {
-                    // Handling 'Visit' appointments
                     if (item.status === 'Approved') {
                       return (
                         <View className='bg-gray-200 p-4 rounded-md mt-4'>
@@ -179,7 +178,7 @@ export default function Transactions() {
                           <Text className='font-semibold text-green-700'>Status: {item.status}</Text>
                           <Text className='text-xs mb-4'>Requested last {formatDate(item.created_at)}</Text>
                           
-                          <Text className='mb-1'>You have an approved visit to {propertyName}</Text>
+                          <Text className='mb-1'>You have approved {tenantName}'s request to visit your property on {formatDate(item.appointment_date)} at {formatTime(item.appointment_time)}.</Text>
                           <View className='flex-row items-center gap-x-4'>
                             <Text className='text-xs'>
                               Date of Visit: <Text className='font-semibold'>{formatDate(item.appointment_date)}</Text>
@@ -189,7 +188,7 @@ export default function Transactions() {
                             </Text>
                           </View>
                           <Text className='mt-2 text-xs'>
-                            Your visit has been approved! Please be punctual and follow all property rules during your visit.
+                            Please review and respond to the request.
                           </Text>
                         </View>
                       );
@@ -199,7 +198,7 @@ export default function Transactions() {
                           <Text className='font-semibold text-red-700'>Status: {item.status}</Text>
                           <Text className='text-xs mb-4'>Requested last {formatDate(item.created_at)}</Text>
   
-                          <Text className='mb-1'>Your request to visit {propertyName} was denied.</Text>
+                          <Text className='mb-1'>You have rejected {tenantName}'s request to visit your property.</Text>
                           <View className='flex-row items-center gap-x-4'>
                             <Text className='text-xs'>
                               Date of Visit: <Text className='font-semibold'>{formatDate(item.appointment_date)}</Text>
@@ -209,7 +208,27 @@ export default function Transactions() {
                             </Text>
                           </View>
                           <Text className='mt-2 text-xs'>
-                            Please consider requesting another visit at a different time or reach out to the property owner for more information.
+                            Consider informing the tenant about the reasons for the rejection to maintain clear communication.
+                          </Text>
+                        </View>
+                      );
+                    } else if (item.status === 'Finished') {
+                      return (
+                        <View className='bg-gray-200 p-4 rounded-md mt-4'>
+                          <Text className='font-semibold text-green-700'>Status: {item.status}</Text>
+                          <Text className='text-xs mb-4'>Requested last {formatDate(item.created_at)}</Text>
+  
+                          <Text className='mb-1'>{tenantName}'s visit to your property was finished.</Text>
+                          <View className='flex-row items-center gap-x-4'>
+                            <Text className='text-xs'>
+                              Date of Visit: <Text className='font-semibold'>{formatDate(item.appointment_date)}</Text>
+                            </Text>
+                            <Text className='text-xs'>
+                              Time of Visit: <Text className='font-semibold'>{formatTime(item.appointment_time)}</Text>
+                            </Text>
+                          </View>
+                          <Text className='mt-2 text-xs'>
+                            Please follow up if necessary and update the appointment status accordingly.
                           </Text>
                         </View>
                       );
@@ -219,7 +238,7 @@ export default function Transactions() {
                           <Text className='font-semibold'>Status: {item.status}</Text>
                           <Text className='text-xs mb-4'>Requested last {formatDate(item.created_at)}</Text>
   
-                          <Text className='mb-1'>You have requested a visit to {propertyName}</Text>
+                          <Text className='mb-1'>{tenantName} has requested a visit to your property.</Text>
                           <View className='flex-row items-center gap-x-4'>
                             <Text className='text-xs'>
                               Date of Visit: <Text className='font-semibold'>{formatDate(item.appointment_date)}</Text>
@@ -229,7 +248,7 @@ export default function Transactions() {
                             </Text>
                           </View>
                           <Text className='mt-2 text-xs'>
-                            Please wait for the owner to confirm your visit.
+                            Please review and respond to the request.
                           </Text>
                         </View>
                       );
@@ -241,66 +260,29 @@ export default function Transactions() {
                           <Text className='font-semibold text-red-700'>Status: {item.status}</Text>
                           <Text className='text-xs mb-4'>Requested last {formatDate(item.created_at)}</Text>
   
-                          <Text className='mb-1'>Your rental request at {propertyName} was denied.</Text>
+                          <Text className='mb-1'>A reservation request from {tenantName} for your property is pending approval.</Text>
                           <Text className='mt-2 text-xs'>
                             Please consider making a different request or contacting the property owner for more information.
                           </Text>
                         </View>
                       );
-                    } else if (item.status === 'Approved') {
-                      return (
-                        <Pressable className='bg-gray-200 p-4 rounded-md mt-4'>
-                          <Text className='mb-2 font-semibold text-green-700'>Status: {item.status}</Text>
-                          <Text className='mb-1'>Your rental request at {propertyName} has been approved!</Text>
-                          <Text className='mt-2 text-xs'>
-                            Please follow the agreed-upon terms and enjoy your stay.
-                          </Text>
-                        </Pressable>
-                      );
                     } else if (item.status === 'Pending Payment') {
-                      if (item.payment_method === 'Cash on Hand') {
-                        return (
-                          <View className='bg-gray-200 p-4 rounded-md mt-4'>
-                            <Text className='mb-2 font-semibold text-green-700'>Status: {item.status}</Text>
-                            <Text className='mb-1'>Your rental request at {propertyName} has been approved!</Text>
-                            <Text className='mt-2 text-xs'>
-                              You've chosen <Text className='font-medium'>Cash on Hand</Text> as your payment method. The owner will update the payment status once they have received the payment.
-                            </Text>
-  
-  
-                          </View>
-                        )
-                      } else {
                       return (
                         <View className='bg-gray-200 p-4 rounded-md mt-4'>
                           <Text className='mb-2 font-semibold text-green-700'>Status: {item.status}</Text>
-                          <Text className='mb-1'>Your rental request at {propertyName} has been approved!</Text>
+                          <Text className='mb-1'>You have approved the reservation request of {tenantName}.</Text>
                           <Text className='mt-2 text-xs'>
-                            Proceed to payment to complete your booking.
+                            Awaiting payment completion before the deadline.
                           </Text>
-  
-                          <View className='rounded-md overflow-hidden'>
-                            <Pressable 
-                            onPress={() =>
-                              router.push({pathname: "/(tenant)/(payment)/paymentIntent", params: {rentalID: item.rental_id, propertyID: item.property_id}})
-                            }
-                            android_ripple={{color: "white"}}
-                            style={{backgroundColor: "#444"}}
-                            className='p-2 self-start rounded-md my-2'>
-                              <Text className='text-white'>Proceed to Payment</Text>
-                            </Pressable>
-                          </View>
-                          
                         </View>
                       );
-                    }
                     } else if (item.status === 'Payment Successful') {
                       return (
                         <Pressable className='bg-gray-200 p-4 rounded-md mt-4'>
                           <Text className='mb-2 font-semibold text-green-700'>Status: {item.status}</Text>
-                          <Text className='mb-1'>Congratulations! You have paid your reservation in {propertyName}</Text>
+                          <Text className='mb-1'>{tenantName} has completed the payment for their reservation on your property.</Text>
                           <Text className='mt-2 text-xs'>
-                            The owner will add you to the property in a while. Please follow the agreed-upon terms and enjoy your stay.
+                            You can now prepare the room for their stay.
                           </Text>
                         </Pressable>
                       );
@@ -308,15 +290,14 @@ export default function Transactions() {
                       return (
                         <View className='bg-gray-200 p-4 rounded-md mt-4'>
                           <Text className='mb-2 font-semibold'>Status: {item.status}</Text>
-                          <Text className='mb-1'>Your rental request at {propertyName} is being processed.</Text>
+                          <Text className='mb-1'>A reservation request from {tenantName} for your property. The check in date is on {item?.check_in_date}</Text>
                           <Text className='mt-2 text-xs'>
-                            Please wait for further updates from the property owner.
+                            Please review the details and confirm or decline the reservation.
                           </Text>
                         </View>
                       );
                     }
                   } else {
-                    // Fallback rendering if data type is not recognized
                     return (
                       <View className='bg-gray-200 p-4 rounded-md mt-4'>
                         <Text>Status not recognized</Text>
