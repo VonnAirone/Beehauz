@@ -127,3 +127,22 @@ export const usePushNotifications = (userID): PushNotificationState => {
     notification,
   };
 };
+
+export  async function addToNotif(userID, content) {
+  const data = {
+    user_id: userID,
+    body: content
+  }
+
+  try {
+    const {data: notifData, error: notifError} = await supabase
+    .from('notifications')
+    .insert(data)
+
+    if (notifError) {
+      console.log("Error inserting notification :", notifError.message)
+    }
+  } catch (error) {
+    console.log("Error fetching notification :", error.message)
+  }
+}

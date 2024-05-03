@@ -31,6 +31,7 @@ export interface OwnerData {
   age: string;
   created_at: string;
   expo_push_token: string;
+  status: string;
   properties: [
     id: string,
     property_name: string

@@ -13,7 +13,7 @@ import { getProfile } from "@/api/DataFetching";
 
 export default function Messages() {
   const session = useAuth();
-  const userID = session?.session.user.id;
+  const userID = session?.session?.user?.id;
   const [userMessages, setUserMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);

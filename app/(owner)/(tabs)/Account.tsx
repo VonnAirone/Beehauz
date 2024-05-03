@@ -1,10 +1,10 @@
-import { Pressable, SafeAreaView, Text, View, Modal, Alert, TextInput, TouchableWithoutFeedback, Keyboard, Image } from 'react-native';
+import { Pressable, SafeAreaView, Text, View, Modal, Alert, TextInput, TouchableWithoutFeedback, Keyboard, Image, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
 import { getProfile } from '@/api/DataFetching';
-import { UserData } from '@/api/Properties';
+import { OwnerData, UserData } from '@/api/Properties';
 import { router } from 'expo-router';
 
 export default function Account() {
@@ -13,20 +13,49 @@ export default function Account() {
   const [modalVisible, setModalVisible] = useState(false);
   const [userProfile, setUserProfile] = useState<UserData | null>(null)
   const [avatar, setAvatar] = useState(null);
+  const [owner, setOwner] = useState<OwnerData | null>(null)
   const [property, setProperty] = useState('')
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchData();
     subscribeToChanges();
+    subscribeToVerificationStatusChanges();
   }, []); 
 
   async function fetchData() {
-    await getUserProfile();
-    await fetchAvatar();
-    await getProperty()
+    try {
+      setLoading(true)
+
+      await Promise.all([
+        getUserProfile(),
+        fetchAvatar(),
+        getProperty(),
+        ownerStatus(user?.id)
+      ])
+    } catch (error) {
+      console.log("Error fetching data: ", error.message)
+    } finally {
+      setLoading(false)
+    }
+   
   }
 
+  async function ownerStatus(userID) {
+    try {
+      const {data, error} = await supabase
+      .from('owners')
+      .select('*')
+      .eq('owner_id', userID)
+      .single()
+      
+      if (data) {
+       setOwner(data)
+      }
+    } catch (error) {
+      
+    }
+  }
 
   async function getProperty() {
     try {
@@ -53,6 +82,24 @@ export default function Account() {
         console.log("Error fetching owner", error.message);
         throw error;
     }
+  }
+
+  async function subscribeToVerificationStatusChanges() {
+    const channels = supabase
+      .channel('profile-update')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'owners' },
+        (payload) => {
+          console.log('Change received!', payload);
+          fetchData()
+        }
+      )
+      .subscribe();
+  
+    return () => {
+      channels.unsubscribe();
+    };
   }
 
   async function subscribeToChanges() {
@@ -87,7 +134,7 @@ export default function Account() {
     } catch (error) {
       console.error('Error loading avatar:', error.message);
     } finally {
-      setLoading(false)
+     
     }
   };
 
@@ -145,10 +192,47 @@ export default function Account() {
           </View>
 
           <View className='ml-4'>
-            <Text className='font-medium italic'>Owner</Text>
-            <Text className='font-semibold text-xl'>{userProfile?.first_name} {userProfile?.last_name}</Text>
-            <Text className='text-xs'>{userProfile?.gender}</Text>
-            <Text className='text-xs'>{userProfile?.age}</Text>
+            <View className='flex-row items-center gap-x-2'>
+              <Text className='font-medium italic'>Owner</Text>
+              {loading ? (
+                <View className='h-3 bg-gray-200 w-20 rounded-md'/>
+                
+              ) : (
+                <>
+                  {owner?.status === 'Unverified' ? (
+                    <TouchableOpacity
+                    onPress={() => router.push("/(owner)/(verification)/VerificationPage")}>
+                      <Text className='text-xs text-blue-700'>{`(${owner?.status})`}</Text>
+                    </TouchableOpacity>
+                  ) : owner?.status  === 'Pending Verification' ? (
+                    <View>
+                      <Text className='text-xs text-blue-700 ml-2'>{`(${owner?.status})`}</Text>
+                    </View>
+                  ) : (
+                    <View className='flex-row items-center ml-2'>
+                      <Ionicons name='shield-checkmark' color={'blue'}/>
+                      <Text className='text-xs text-blue-700 ml-1'>{owner?.status}</Text>
+                    </View>
+                  )}
+                 
+                </>
+
+              )}
+            </View>
+
+            {loading ? (
+              <>
+                <View className='h-3 bg-gray-200 w-20 rounded-md mt-2'/>
+                <View className='h-2 bg-gray-200 w-10 rounded-md mt-1'/>
+                <View className='h-2 bg-gray-200 w-10 rounded-md mt-1'/>
+              </>
+            ) : (
+              <>
+                <Text className='font-semibold text-xl'>{userProfile?.first_name} {userProfile?.last_name}</Text>
+                <Text className='text-xs'>{userProfile?.gender}</Text>
+                <Text className='text-xs'>{userProfile?.age}</Text>
+              </>
+            )}           
           </View>
         </View>
 
@@ -170,10 +254,15 @@ export default function Account() {
             </View>
 
             <View>
-              <TextInput 
+              {loading ? (
+                <View className='h-3 bg-gray-200 w-40 rounded-md mt-2'/>
+              ) : (
+                <TextInput 
                 editable={false}
                 className='text-xs text-right'
                 placeholder={user?.email}/>
+              )}
+              
             </View>
           </View>
 
@@ -183,12 +272,14 @@ export default function Account() {
               <Text className='font-semibold'>Phone</Text>
             </View>
 
-            <View className='relative w-40'>
+            {loading ? (
+                <View className='h-3 bg-gray-200 w-40 rounded-md mt-2'/>
+              ) : (
               <TextInput 
               editable={false} 
               value={userProfile?.phone_number?.toString()}
               className='text-right text-xs'/>
-            </View>
+            )}
           </View>
 
           <View className='flex-row justify-between rounded-md p-3'>
@@ -197,12 +288,14 @@ export default function Account() {
               <Text className='font-semibold'>Location</Text>
             </View>
 
-            <View>
+            {loading ? (
+                <View className='h-3 bg-gray-200 w-40 rounded-md mt-2'/>
+              ) : (
               <TextInput 
               editable={false}
               value={userProfile?.address}
               className='text-right text-xs'/>
-            </View>
+              )}
           </View>
           
         </View>
@@ -282,7 +375,6 @@ export default function Account() {
         </View>
 
         
-        {/* MODAL AREA */}
         <Modal
           animationType="none"
           transparent={true}

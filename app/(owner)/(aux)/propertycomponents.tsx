@@ -59,16 +59,27 @@ export const AmenitiesSelection = () => {
   );
 }
 
-export const DashboardComponents = ({id, properties, tenants, bookings}) => {
+export const DashboardComponents = ({id, properties, tenants, bookings, ownerStatus}) => {
   const propertyID = properties && properties.length > 0 ? properties[0]?.property_id : null;
+
+  async function createProperty() {
+    if (ownerStatus === 'Unverified') {
+      router.push("/(owner)/(verification)/VerificationPage")
+    } else if (ownerStatus === 'Pending Verification') {
+      router.push("/(owner)/(verification)/Confirmation")
+    } else {
+      router.push("/(owner)/(screens)/PropertyCreation")
+    }
+  }
+
   return (
   <View>
 
     <View className='overflow-hidden rounded-md mt-3'>
       <Pressable 
         onPress={() => router.push({pathname: "/two", params: {property: properties}})} 
-      android_ripple={{color: "#444"}}
-      className='p-4 h-32 bg-gray-50 rounded-md border border-gray-700'>
+        android_ripple={{color: "#444"}}
+        className='p-4 h-32 bg-gray-50 rounded-md border border-gray-700'>
         <View className='flex-row items-center gap-x-2'>
           <Ionicons name='storefront' size={18} color={"#444"}/>
           <Text className='font-semibold text-xs'>Property</Text>
@@ -79,7 +90,7 @@ export const DashboardComponents = ({id, properties, tenants, bookings}) => {
             <Text>{properties[0].name}</Text>   
           ) : (
             <TouchableOpacity 
-            onPress={() => router.push("/(owner)/(screens)/PropertyCreation")}
+            onPress={createProperty}
             className='items-center flex-1 '>
               <Ionicons name='add-circle-outline' size={32}/>
               <Text className='mt-3'>Add a Property</Text>

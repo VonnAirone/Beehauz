@@ -165,8 +165,8 @@ const handleSubmission = async () => {
           } else {
             setEmail('');
             setPassword('');
-            router.push("/ConfirmEmail");
-            Alert.alert('Account created successfully!');
+            // router.push("/(auth)/ConfirmEmail");
+            Alert.alert('Account created successfully. Please check your email for confirmation.');
           }
         } else {
           const { error } = await supabase.auth.signInWithPassword({
@@ -255,7 +255,7 @@ return (
 
           <View className='absolute -bottom-2 w-80'>
             {!isNotRegistered ? (
-              <Pressable onPress={() => router.push("/SendResetPasswordLink")}>
+              <Pressable onPress={() => router.push("/(auth)/SendResetPasswordLink")}>
                   <Text className='text-right text-xs right-1'>Forgot Password?</Text>
               </Pressable>
             ) : (

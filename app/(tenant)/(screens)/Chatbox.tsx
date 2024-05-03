@@ -152,14 +152,20 @@ const Chatbox = () => {
           />
         </View>
         
-        
-        <View className="flex-row items-center justify-between absolute bottom-0 p-4 w-screen">
-          <TextInput
-            className="w-64 bg-white py-2 px-5 rounded-md border border-gray-200"
-            placeholder="Enter your message"
-            value={message}
-            onChangeText={(value) => setMessage(value)}
-          />
+         
+        <View className="flex-row items-center justify-between absolute bottom-0 p-4 w-screen bg-white">
+          <View className=" flex-row items-center justify-between w-64 bg-white py-2 px-5 rounded-md border border-gray-200">
+            <TextInput
+              placeholder="Enter your message"
+              value={message}
+              maxLength={30}
+              onChangeText={(value) => setMessage(value)}
+            />
+            <Text className="text-xs opacity-50">
+              {message.length} / 30
+            </Text>
+          </View>
+         
           <Pressable
           android_ripple={{color: "white"}} 
           onPress={sendMessage}

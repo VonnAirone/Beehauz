@@ -68,8 +68,10 @@ export default function Searchpage() {
             } else {
                 const fetchedData = await fetchPropertyListData();
                 const filtered = fetchedData.filter((item) =>
-                    item.name.toLowerCase().includes(query.toLowerCase())
+                    item.name.toLowerCase().includes(query.toLowerCase()) ||
+                    item.address.toLowerCase().includes(query.toLowerCase())
                 );
+                console.log(filtered)
                 setSearchResults(filtered);
             }
         } catch (error) {

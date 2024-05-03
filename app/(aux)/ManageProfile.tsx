@@ -8,6 +8,7 @@ import { getProfile } from '@/api/DataFetching'
 import { uploadAvatar } from '@/api/ImageFetching'
 import { supabase } from '@/utils/supabase'
 import { router } from 'expo-router'
+import { Dropdown } from 'react-native-element-dropdown'
 
 export default function ManageProfile() {
   const user = useAuth()?.session?.user;
@@ -15,6 +16,20 @@ export default function ManageProfile() {
   const [userData, setUserData] = useState<UserData | null>(null)
   const [loading, setLoading] = useState(false)
   const [avatar, setAvatar] = useState(null);
+  const [gender, setGender] = useState(null);
+
+  const genderOptions = [
+    { label: 'Male', value: 'Male' },
+    { label: 'Female', value: 'Female' },
+    { label: 'Do not specify', value: 'Not specified' }
+  ];
+
+
+  const handleGenderPress = (selectedGender) => {
+    setGender(selectedGender);
+    handleChangeText('gender', selectedGender);
+  };
+  
 
   useEffect(() => {
     // if (!hasFetched.current) {
@@ -239,6 +254,7 @@ export default function ManageProfile() {
           <View className="w-28">
             <Text className="mb-1 font-semibold">Age</Text>
             <TextInput
+              inputMode='numeric'
               editable={allowEdit}
               clearTextOnFocus
               value={userData?.age?.toString()}
@@ -249,21 +265,36 @@ export default function ManageProfile() {
 
           <View className='grow ml-5'>
             <Text className="mb-1 font-semibold">Gender</Text>
-            <TextInput
-              editable={allowEdit}
-              clearTextOnFocus
-              value={userData?.gender}
-              onChangeText={(text) => handleChangeText('gender', text)}
-              className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
+            <View className='bg-gray-200 rounded-md'>
+            <Dropdown
+
+              disable={true}
+              style={{padding: 4}}
+              data={genderOptions} 
+              labelField='label' 
+              valueField='value' 
+              selectedTextStyle={{fontSize: 12, left: 10}}  
+              placeholderStyle={{fontSize: 12, left: 10}}
+              value={gender}
+              placeholder={userData?.gender}
+              itemTextStyle={{fontSize: 13}}
+              itemContainerStyle={{backgroundColor: '#F3F4F6', borderColor: 'none'}}
+              onChange={item => (
+                handleGenderPress(item.value)
+              )} 
             />
+            </View>
   
           </View>
         </View>
         
         <View className='gap-y-2 mt-2'>
           <Text className='font-semibold'>Phone Number</Text>
-          <TextInput className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
+          <TextInput 
+          inputMode='numeric'
+          className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
           onChangeText={(text) => handleChangeText('phone_number', text)} 
+          maxLength={11}
           editable={allowEdit}
           value={userData?.phone_number?.toString()}/>
         </View>

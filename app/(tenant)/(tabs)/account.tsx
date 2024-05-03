@@ -78,13 +78,13 @@ export default function Account() {
 
   async function subscribeToChanges() {
     const channels = supabase
-      .channel('profile-update')
+      .channel('profile-updatesss')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'profiles' },
         (payload) => {
           console.log('Change received!', payload);
-          fetchData()
+          getUserProfile()
         }
       )
       .subscribe();

@@ -256,3 +256,48 @@ export async function uploadImage(propertyID) {
     }
   }
 }
+
+export async function uploadID(userID, imageSource) {
+  try {
+    // const result = await ImagePicker.launchImageLibraryAsync({
+    //   mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    //   allowsMultipleSelection: false,
+    //   allowsEditing: true,
+    //   quality: 1,
+    //   exif: false,
+    // });
+
+    // if (result.canceled || !result.assets || result.assets.length === 0) {
+    //   console.log('User cancelled image picker.');
+    //   return;
+    // }
+
+    const image = imageSource;
+    // if (!image.uri) {
+    //   throw new Error('No image uri!');
+    // }
+
+    const arraybuffer = await fetch(image).then((res) => res.arrayBuffer());
+
+    const fileExt = image?.split('.').pop()?.toLowerCase() ?? 'jpeg';
+    const newPath = `${Date.now()}.${fileExt}`;
+
+    const { data, error: uploadError } = await supabase.storage
+      .from('images')
+      .upload(`identificationCards/${userID}/${newPath}`, arraybuffer, {
+        contentType: image.mimeType ?? 'image/jpeg',
+      });
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    console.log("Image uploaded successfully. Path:", newPath);
+  } catch (error) {
+    if (error instanceof Error) {
+      Alert.alert(error.message);
+    } else {
+      throw error;
+    }
+  }
+}

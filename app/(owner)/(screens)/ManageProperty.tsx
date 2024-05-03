@@ -21,28 +21,26 @@ export default function BHDetails() {
   const propertyID = params?.propertyID?.toString()
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const hasFetched = useRef(false);
   const [amenities, setAmenities] = useState([]);
-  const [showModal, setShowModal] = useState(false);
   const [allowEdit, setAllowEdit] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [typedAmenity, setTypedAmenity] = useState('')
 
-  const handleAddAmenity = () => {
-    if (typedAmenity) {
-      setAmenities(prevAmenities => [...prevAmenities, typedAmenity]);
-      setTypedAmenity('')
-    } else {
-      Alert.alert("Please type in the amenity you want to add.")
-    }
+  // const handleAddAmenity = () => {
+  //   if (typedAmenity) {
+  //     setAmenities(prevAmenities => [...prevAmenities, typedAmenity]);
+  //     setTypedAmenity('')
+  //   } else {
+  //     Alert.alert("Please type in the amenity you want to add.")
+  //   }
    
-  };
+  // };
 
-  const handleRemoveAmenity = (index) => {
-    const newAmenities = [...amenities];
-    newAmenities.splice(index, 1);
-    setAmenities(newAmenities);
-  };
+  // const handleRemoveAmenity = (index) => {
+  //   const newAmenities = [...amenities];
+  //   newAmenities.splice(index, 1);
+  //   setAmenities(newAmenities);
+  // };
   
   const handleChangeText = (key, value) => {
     setData(prevData => ({
@@ -327,7 +325,7 @@ export default function BHDetails() {
           </View>
           
 
-          <View className='gap-y-2 mt-2'>
+          {/* <View className='gap-y-2 mt-2'>
             <View className='flex-row items-end gap-x-1'>
               <Text className='font-semibold'>Amenities</Text>
               <Pressable onPress={() => setShowModal(true)}>
@@ -385,7 +383,7 @@ export default function BHDetails() {
                 size={20}
                 color={'white'}/>
               </Pressable>
-            </View>
+            </View> */}
 
             <View className='pt-10'>
               <Pressable 
@@ -398,7 +396,6 @@ export default function BHDetails() {
             </View>
 
             <View className='h-10'></View>
-          </View>
         </ScrollView>
         )}
       </SafeAreaView>

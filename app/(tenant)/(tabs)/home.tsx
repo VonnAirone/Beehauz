@@ -7,12 +7,10 @@ import { View, Text, TextInput, ScrollView, Pressable, TouchableOpacity, Image, 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchCheapProperties, fetchNearbyMe } from '../(aux)/Filters';
 import * as Location from 'expo-location';
-import { usePushNotifications } from '@/api/usePushNotification';
 import { useAuth } from '@/utils/AuthProvider';
 
 export default function HomePage() {
   const userID = useAuth()?.session?.user?.id;
-  let expoPushToken = usePushNotifications(userID);
   const [PopularList, setPopularList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [NearbyProperties, setNearbyProperties] = useState([])

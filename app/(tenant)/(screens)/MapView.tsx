@@ -46,10 +46,10 @@ export default function PropertyLocationView() {
   const [location, setLocation] = useState<LocationData | null>(null);
   const [address, setAddress] = useState('');
   const [markerPosition, setMarkerPosition] = useState({ latitude: 10.7198499, longitude: 122.5616936 });
-  const { latitude , longitude } = useLocalSearchParams()
+  const params = useLocalSearchParams()
 
-  const latitudeFloat = parseFloat(latitude.toString());
-  const longitudeFloat = parseFloat(longitude.toString());
+  const latitudeFloat = parseFloat(params.latitude.toString());
+  const longitudeFloat = parseFloat(params.longitude.toString());
 
   async function fetchProperties() {
     try {
@@ -63,6 +63,7 @@ export default function PropertyLocationView() {
   }
 
   useEffect(() => {
+    console.log(params)
     getPermissions();
     fetchProperties();
   }, []);
@@ -84,14 +85,13 @@ export default function PropertyLocationView() {
 
   const handleMarkerDrag = (e) => {
     setMarkerPosition(e.nativeEvent.coordinate);
-    console.log(markerPosition)
   };
 
   return (
     <SafeAreaView className='flex-1'>
       {location ? (
         <View>
-          <View className='absolute z-10'>
+          <View className='absolute z-10 left-5 top-5'>
             <BackButton/>
           </View>
           
@@ -112,9 +112,19 @@ export default function PropertyLocationView() {
               <MarkerAnimated 
               onPress={() => ZoomIn}
               key={property?.property_id} coordinate={{latitude: property?.latitude, longitude: property?.longitude}}>
-                <View className='h-20 w-20 p-2 bg-white rounded-md'>
-                  <SingleImageDisplay propertyID={property.property_id}/>
-                </View>
+                <View className='justify-center items-center'>
+                    <View 
+                    style={{backgroundColor: "#444"}}
+                    className='rounded-md p-2'>
+                      <Text className='text-center text-white text-xs'>{property.name}</Text>
+                    </View>
+                   
+                    <View className='h-12 w-12'>
+                      <Image 
+                      style={{width: '100%', height: "100%"}}
+                      source={require("@/assets/custom-pin.png")}/>
+                    </View>
+                  </View>
 
                 <PropertyCallout property={property} />
               </MarkerAnimated>
@@ -130,7 +140,10 @@ export default function PropertyLocationView() {
 
           </View>
       ) : (
-        <Text>Loading...</Text>
+        <View className='flex-1 items-center justify-center'>
+          <Text>Loading...</Text>
+        </View>
+        
       )}
     </SafeAreaView>
   );

@@ -63,6 +63,29 @@ export default BookingItem;
 
 
 export const Appointments = ({ item, profile, formatDate, onApprove, onReject }) => {
+  const time = item.appointment_time
+  const formattedTime = convertTo12HourFormat(time)
+
+  function convertTo12HourFormat(timeString) {
+    // Split the time string into hours, minutes, and seconds
+    const [hours, minutes, seconds] = timeString.split(':').map(Number);
+    
+    // Determine if the time is AM or PM
+    const period = hours >= 12 ? 'PM' : 'AM';
+    
+    // Convert the 24-hour hour value to a 12-hour format
+    let hour12 = hours % 12;
+    
+    // Handle the case where hour12 is zero (12 AM/PM)
+    if (hour12 === 0) {
+        hour12 = 12;
+    }
+
+    
+    // Format the time into a string with 12-hour format and AM/PM
+    return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
+  }
+
   return (
     <View className='bg-gray-50 rounded-md p-5'>
 
@@ -83,7 +106,7 @@ export const Appointments = ({ item, profile, formatDate, onApprove, onReject })
       <View>
         <Text className='font-semibold'>Appointment details:</Text>
         <Text>{formatDate(item.appointment_date)}</Text>
-        <Text>{item.appointment_time}</Text>
+        <Text>{formattedTime}</Text>
       </View>
       <Text className='mt-4 text-center'>Update appointment status:</Text>
       <View className='overflow-hidden rounded-md mt-2'>
@@ -153,12 +176,12 @@ export const History = ({ item, profile, formatDate}) => {
           <Text>{item.status}</Text>
         </View>
 
-        <Pressable 
+        {/* <Pressable 
         onPress={() => router.push({pathname: "/(owner)/(screens)/TenantProfile", params: {tenant_id : profile?.id}})}
         className='flex-row items-center top-10'>
           <Text className='text-xs mr-1'>View Tenant Profile</Text>
           <Ionicons name='chevron-forward'/>
-        </Pressable>
+        </Pressable> */}
       </View>
      
     </View>

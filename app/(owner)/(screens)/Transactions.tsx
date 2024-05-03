@@ -168,7 +168,7 @@ export default function Transactions() {
                 data={transactions}
                 keyExtractor={item => item.appointment_id || item.rental_id}
                 renderItem={({ item, index }) => {
-                  const tenantName = profiles && profiles[index] ? profiles[index].first_name : 'Unknown User';
+                  const tenantName = profiles && profiles[index] ? [profiles[index].first_name ,' ', profiles[index].last_name ] : 'Unknown User';
                 
                   if (item.type === 'Visit') {
                     if (item.status === 'Approved') {
@@ -178,7 +178,7 @@ export default function Transactions() {
                           <Text className='font-semibold text-green-700'>Status: {item.status}</Text>
                           <Text className='text-xs mb-4'>Requested last {formatDate(item.created_at)}</Text>
                           
-                          <Text className='mb-1'>You have approved {tenantName}'s request to visit your property on {formatDate(item.appointment_date)} at {formatTime(item.appointment_time)}.</Text>
+                          <Text className='mb-1'>You have approved <Text className='font-medium'>{tenantName}</Text>'s request to visit your property on {formatDate(item.appointment_date)} at {formatTime(item.appointment_time)}.</Text>
                           <View className='flex-row items-center gap-x-4'>
                             <Text className='text-xs'>
                               Date of Visit: <Text className='font-semibold'>{formatDate(item.appointment_date)}</Text>
@@ -198,7 +198,7 @@ export default function Transactions() {
                           <Text className='font-semibold text-red-700'>Status: {item.status}</Text>
                           <Text className='text-xs mb-4'>Requested last {formatDate(item.created_at)}</Text>
   
-                          <Text className='mb-1'>You have rejected {tenantName}'s request to visit your property.</Text>
+                          <Text className='mb-1'>You have rejected <Text className='font-medium'>{tenantName}</Text>'s request to visit your property.</Text>
                           <View className='flex-row items-center gap-x-4'>
                             <Text className='text-xs'>
                               Date of Visit: <Text className='font-semibold'>{formatDate(item.appointment_date)}</Text>
@@ -218,7 +218,7 @@ export default function Transactions() {
                           <Text className='font-semibold text-green-700'>Status: {item.status}</Text>
                           <Text className='text-xs mb-4'>Requested last {formatDate(item.created_at)}</Text>
   
-                          <Text className='mb-1'>{tenantName}'s visit to your property was finished.</Text>
+                          <Text className='mb-1'><Text className='font-medium'>{tenantName}</Text>'s visit to your property was finished.</Text>
                           <View className='flex-row items-center gap-x-4'>
                             <Text className='text-xs'>
                               Date of Visit: <Text className='font-semibold'>{formatDate(item.appointment_date)}</Text>
@@ -238,7 +238,7 @@ export default function Transactions() {
                           <Text className='font-semibold'>Status: {item.status}</Text>
                           <Text className='text-xs mb-4'>Requested last {formatDate(item.created_at)}</Text>
   
-                          <Text className='mb-1'>{tenantName} has requested a visit to your property.</Text>
+                          <Text className='mb-1'><Text className='font-medium'>{tenantName}</Text> has requested a visit to your property.</Text>
                           <View className='flex-row items-center gap-x-4'>
                             <Text className='text-xs'>
                               Date of Visit: <Text className='font-semibold'>{formatDate(item.appointment_date)}</Text>
@@ -260,7 +260,7 @@ export default function Transactions() {
                           <Text className='font-semibold text-red-700'>Status: {item.status}</Text>
                           <Text className='text-xs mb-4'>Requested last {formatDate(item.created_at)}</Text>
   
-                          <Text className='mb-1'>A reservation request from {tenantName} for your property is pending approval.</Text>
+                          <Text className='mb-1'>A reservation request from <Text className='font-medium'>{tenantName}</Text> for your property is pending approval.</Text>
                           <Text className='mt-2 text-xs'>
                             Please consider making a different request or contacting the property owner for more information.
                           </Text>
@@ -270,7 +270,7 @@ export default function Transactions() {
                       return (
                         <View className='bg-gray-200 p-4 rounded-md mt-4'>
                           <Text className='mb-2 font-semibold text-green-700'>Status: {item.status}</Text>
-                          <Text className='mb-1'>You have approved the reservation request of {tenantName}.</Text>
+                          <Text className='mb-1'>You have approved the reservation request of <Text className='font-medium'>{tenantName}</Text>.</Text>
                           <Text className='mt-2 text-xs'>
                             Awaiting payment completion before the deadline.
                           </Text>
@@ -280,7 +280,7 @@ export default function Transactions() {
                       return (
                         <Pressable className='bg-gray-200 p-4 rounded-md mt-4'>
                           <Text className='mb-2 font-semibold text-green-700'>Status: {item.status}</Text>
-                          <Text className='mb-1'>{tenantName} has completed the payment for their reservation on your property.</Text>
+                          <Text className='mb-1'><Text className='font-medium'>{tenantName}</Text> has completed the payment for their reservation on your property.</Text>
                           <Text className='mt-2 text-xs'>
                             You can now prepare the room for their stay.
                           </Text>
@@ -290,7 +290,7 @@ export default function Transactions() {
                       return (
                         <View className='bg-gray-200 p-4 rounded-md mt-4'>
                           <Text className='mb-2 font-semibold'>Status: {item.status}</Text>
-                          <Text className='mb-1'>A reservation request from {tenantName} for your property. The check in date is on {item?.check_in_date}</Text>
+                          <Text className='mb-1'>A reservation request from <Text className='font-medium'>{tenantName}</Text> for your property. The check in date is on {item?.check_in_date}</Text>
                           <Text className='mt-2 text-xs'>
                             Please review the details and confirm or decline the reservation.
                           </Text>

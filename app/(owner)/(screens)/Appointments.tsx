@@ -1,13 +1,12 @@
   import React, { useEffect, useState } from 'react';
-  import { View, Text, FlatList, ScrollView, Pressable } from 'react-native';
-  import { SafeAreaView } from 'react-native-safe-area-context';
-  import { supabase } from '@/utils/supabase';
-  import { useLocalSearchParams } from 'expo-router';
-  import { getProfile } from '@/api/DataFetching';
-  import BookingItem, { Appointments, History } from '../(aux)/bookingcomponents';
-  import BackButton from '@/components/back-button';
-  import { BookingSkeleton } from '../(aux)/SkeletonComponents';
-  import LoadingComponent from '@/components/LoadingComponent';
+import { View, Text, FlatList, ScrollView, Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { supabase } from '@/utils/supabase';
+import { useLocalSearchParams } from 'expo-router';
+import { getProfile } from '@/api/DataFetching';
+import BookingItem, { Appointments, History } from '../(aux)/bookingcomponents';
+import BackButton from '@/components/back-button';
+import { addToNotif, sendPushNotification } from '@/api/usePushNotification';
 
   export default function Bookings() {
     const [bookings, setBookings] = useState(null);
@@ -97,7 +96,6 @@
           .from("appointments")
           .update({ status: status })
           .eq('appointment_id', appointment_id);
-    
         if (error) {
           console.log("Error updating appointment status: ", error.message);
         } else {
@@ -160,8 +158,17 @@
                             item={item} 
                             profile={profile}
                             formatDate={formatDate} 
-                            onApprove={(appointment_id) => updateAppointmentStatus('Approved', appointment_id)}
-                            onReject={(appointment_id) => updateAppointmentStatus('Rejected', appointment_id)}
+                            onApprove={(appointment_id) => {
+                              updateAppointmentStatus('Approved', appointment_id)
+                              addToNotif(profile?.id, 'Your request to visit the property has been approved.')
+                              sendPushNotification(profile?.expo_push_token, 'Your request to visit the property has been approved.')
+                            }}
+
+                            onReject={(appointment_id) => {
+                              updateAppointmentStatus('Rejected', appointment_id)
+                              addToNotif(profile?.id, 'Your request to visit the property has been rejected.')
+                              sendPushNotification(profile?.expo_push_token, 'Your request to visit the property has been rejected.')
+                            }}
                         />
                     );
                 }}
@@ -189,8 +196,16 @@
                       item={item} 
                       profile={profile} 
                       formatDate={formatDate} 
-                      onApprove={(appointment_id) => updateAppointmentStatus('Finished', appointment_id)}
-                      onReject={(appointment_id) => updateAppointmentStatus('Cancelled', appointment_id)}
+                      onApprove={(appointment_id) => {
+                        updateAppointmentStatus('Finished', appointment_id)
+                        addToNotif(profile?.id, 'You have successfully finished your appointment.')
+                        sendPushNotification(profile?.expo_push_token, 'You have successfully finished your appointment.')
+                      }}
+                      onReject={(appointment_id) => {
+                        updateAppointmentStatus('Cancelled', appointment_id)
+                        addToNotif(profile?.id, 'The owner has cancelled your visit. For more details, contact the property owner.')
+                        sendPushNotification(profile?.expo_push_token, 'The owner has cancelled your visit. For more details, contact the property owner.')
+                      }}
                     />
                     )
                   }}
