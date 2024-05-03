@@ -77,7 +77,7 @@
           pathname: "/(tenant)/(screens)/Chatbox", 
           params: { sender_id: user?.id, receiver_id: receiverID, username }
         })}>
-          <View className="p-2 rounded-md flex-row items-center gap-x-2">
+          <View className="p-2 rounded-md flex-row items-center gap-x-2 h-14 mb-5">
             <View className="h-14 w-14 bg-white overflow-hidden rounded-full">
               <AvatarImage userID={receiverID}/>
             </View>

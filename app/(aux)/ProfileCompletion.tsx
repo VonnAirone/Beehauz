@@ -7,6 +7,7 @@ import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
 import BackButton from '@/components/back-button';
 import { Dropdown } from 'react-native-element-dropdown';
+import { addToNotif, usePushNotifications } from '@/api/usePushNotification';
 
 export default function TenantRegistration() {
   const { usertype } = useLocalSearchParams();
@@ -18,6 +19,7 @@ export default function TenantRegistration() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [gender, setGender] = useState(null);
   const currentDate = new Date().toISOString();
+  let expoPushToken = usePushNotifications(user?.id);
 
   const handleFirstNameChange = (text) => { setFirstName(text); };
   const handleLastNameChange = (text) => { setLastName(text); };
@@ -70,6 +72,7 @@ export default function TenantRegistration() {
         }
       });
       updateUserInformation();
+      addToNotif(user?.id, 'Welcome to Beehauz! The ultimate boarding house portal.')
       Alert.alert("Successfully completed personal information.");
     } catch (error) {
       Alert.alert("Error updating metadata:", error.message);
@@ -153,6 +156,7 @@ export default function TenantRegistration() {
                   <TextInput
                     clearTextOnFocus
                     value={age}
+                    inputMode='numeric'
                     placeholder={'Age'}
                     onChangeText={handleAgeChange}
                     className='p-2 pl-5 bg-gray-200 focus:border-gray-400 rounded-md text-xs'
@@ -185,6 +189,7 @@ export default function TenantRegistration() {
                   <Text className="mb-1 font-semibold">Phone Number</Text>
                   <TextInput
                     clearTextOnFocus
+                    inputMode='numeric'
                     placeholder='+63 -'
                     value={phoneNumber}
                     onChangeText={handlePhoneNumberChange}

@@ -13,7 +13,7 @@ export default function MessageComponent({ item, user }) {
   return (
     <View className={`${isSender ? 'items-end' : 'items-start'} py-2`}>
       {isSender ? (
-        <View className="flex-row gap-x-2 items-center">
+        <View className="flex-row gap-x-2 justify-end w-72">
           <View className="px-3 py-1 rounded-md bg-white">
             <Text className="min-w-max">{item.message_content}</Text>
           </View>

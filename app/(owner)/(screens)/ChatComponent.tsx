@@ -8,7 +8,7 @@ import { getUsername } from "@/app/(tenant)/(aux)/usercomponent";
 import AvatarImage from "@/app/(tenant)/(aux)/avatar";
 
   const ChatComponent = ({ item }) => {
-    const user = useAuth()?.session.user;
+    const user = useAuth()?.session?.user;
     const [lastMessage, setLastMessage] = useState(null);
     const [username, setUsername] = useState()
     const [receiverID, setReceiverID] = useState()

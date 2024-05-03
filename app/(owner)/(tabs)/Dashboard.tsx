@@ -1,21 +1,18 @@
-import { Pressable, ScrollView, Text, View, Image } from 'react-native'
+import { ScrollView, Text, View, Image } from 'react-native'
 import React, { useEffect, useMemo, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import Logo from '@/components/logo'
 import { useAuth } from '@/utils/AuthProvider'
 import { getProfile } from '@/api/DataFetching'
-import { PropertyData, ReviewData, TenantsData, UserData } from '@/api/Properties'
+import { PropertyData, TenantsData, UserData } from '@/api/Properties'
 import { supabase } from '@/utils/supabase'
 import { DashboardComponents } from '../(aux)/propertycomponents'
-import { Ionicons } from '@expo/vector-icons'
 import MapView, { Callout, MarkerAnimated } from 'react-native-maps'
 import { usePushNotifications } from '@/api/usePushNotification'
-import { router } from 'expo-router'
 
 export default function Dashboard() {
   const session = useAuth()
   const user = session?.session?.user?.id;
-  const { expoPushToken } = usePushNotifications(user)
+  let expoPushToken = usePushNotifications(user);
   const [userProfile, setUserProfile] = useState<UserData | null>(null)
   const [properties, setProperties] = useState<PropertyData[] | null>(null);
   const [tenants, setTenants] = useState<TenantsData[] | null>(null);
@@ -24,9 +21,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [latitude, setLatitude] = useState(() => undefined);
   const [longitude, setLongitude] = useState(() => undefined);
-  const [notificationsViewed, setNotificationsViewed] = useState(false);
+  const [ownerStatus, setOwnerStatus] = useState(false)
 
- 
   async function subscribeToBookingChanges() {
     const channels = supabase
       .channel('realtime-booking-channel')
@@ -43,22 +39,35 @@ export default function Dashboard() {
       channels.unsubscribe();
     };
   }
+
+  async function getStatus() {
+    try {
+      const {data, error} = await supabase
+      .from('owners')
+      .select('*')
+      .eq('owner_id', user)
+      .single();
+
+      if (data) {
+        setOwnerStatus(data?.status)
+      }
+    } catch (error) {
+      console.log("Error fetching owner status: ", error.message)
+    }
+  }
   
-  const memoizedProperties = useMemo(() => properties, [properties]);
 
   useEffect(() => {
-    console.log(latitude)
       async function fetchData() {
           try {
-              usePushNotifications(user)
               setLoading(true);
-              await getUserProfile(user);
-              await getProperties();
-
-              if (propertyID !== null) {
-                  await getTenants();
-                  await fetchBookings();
-              }
+              await Promise.all([
+                getUserProfile(user),
+                getProperties(),
+                getTenants(),
+                fetchBookings(),
+                getStatus()
+              ])
           } catch (error) {
               console.log("Error fetching data: ", error.message);
           } finally {
@@ -198,7 +207,7 @@ async function subscribeToPropertyChanges() {
               <Text className='text-xs'>This is what we have for you today.</Text>
             </View>
 
-            <DashboardComponents id={user} properties={properties} tenants={tenants} bookings={bookings}/>
+            <DashboardComponents ownerStatus={ownerStatus} id={user} properties={properties} tenants={tenants} bookings={bookings}/>
 
             {/* <View className='mt-10 mb-2'>
               <Text className='font-semibold'>{properties ? properties[0]?.name : 'No property created'}</Text>
@@ -214,7 +223,7 @@ async function subscribeToPropertyChanges() {
           
               <View className='rounded-md'>
                 <MapView 
-                scrollEnabled={false}
+                scrollEnabled={true}
                 className='h-48 w-full'
                 initialRegion={{
                   latitude: latitude,

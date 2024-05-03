@@ -27,7 +27,6 @@ export default function BHDetails() {
   const [showAmenitiesModal, setShowAmenitiesModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false)
   const [selectedImage, setSelectedImage] = useState(null)
-  const hasFetched = useRef(false);
   const [ratings, setRatings] = useState(0)
   const [propertyReviews, setPropertyReviews] = useState<ReviewData[] | null>(null);
   const [ownerData, setOwnerData] = useState<OwnerData | null>(null);
@@ -52,7 +51,7 @@ export default function BHDetails() {
     try {
       const tenantStatus = await fetchTenantStatus(user?.id)
       setTenantStatus(tenantStatus[0])
-      const fetchedData = await fetchPropertyDetailsData(propertyID.toString());
+      const fetchedData = await fetchPropertyDetailsData(propertyID?.toString());
       setData(fetchedData);
       await checkBookmarkStatus(propertyID, user?.id, setBookmarkStatus);
       await loadImages(propertyID, setImages);
@@ -165,7 +164,7 @@ export default function BHDetails() {
               horizontal
               showsHorizontalScrollIndicator={false}
                 data={images}
-                keyExtractor={(item, index) => index.toString()}
+                keyExtractor={(item, index) => index?.toString()}
                 renderItem={({ item }) => 
                 <View className='w-screen h-60'> 
                   <Pressable onPress={() => openImage(item)}>
@@ -199,7 +198,7 @@ export default function BHDetails() {
             
             <View>
               <TouchableOpacity 
-              onPress={() => router.push({pathname: "/MapView", params: {latitude: data.latitude, longitude: data.longitude}})}
+              onPress={() => router.push({pathname: "/(tenant)/(screens)/MapView", params: {latitude: data.latitude, longitude: data.longitude}})}
               className='flex-row items-center gap-x-1'>
                 <Ionicons name='location' size={15} color={"#444"}/>
                 <Text className='text-base'>Catungan 1, Sibalom, Antique</Text>
@@ -353,6 +352,7 @@ export default function BHDetails() {
         
       </ScrollView>
       <BottomBar 
+      ownerPushToken={ownerData?.expo_push_token}
       userID={user?.id}
       ownerID={ownerData?.id}
       tenantStatus={tenantStatus}

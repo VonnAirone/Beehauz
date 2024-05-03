@@ -9,10 +9,6 @@
       "output": "static"
     },
     "plugins": [
-      // ["expo-router", {
-      //   "asyncRoutes": "p"
-      // }
-      // ],
       [
         "expo-image-picker",
         {
@@ -22,6 +18,22 @@
         "expo-location",
         {
           "locationAlwaysAndWhenInUsePermission": "Allow Beehauz to use your location."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Beehauz to access your photos.",
+          "savePhotosPermission": "Allow Beehauz to save photos.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "Beehauz needs access to your Camera.",
+          // "enableMicrophonePermission": true,
+          // "microphonePermissionText": "Beehauz needs access to your Microphone."
         }
       ]
     ],

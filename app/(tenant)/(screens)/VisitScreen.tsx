@@ -9,6 +9,7 @@ import { supabase } from '@/utils/supabase'
 import { router, useLocalSearchParams } from 'expo-router'
 import { UserData } from '@/api/Properties'
 import { Calendar } from 'react-native-calendars'
+import { sendPushNotification } from '@/api/usePushNotification'
 
 export default function PayAVisit() {
     const session = useAuth()?.session;
@@ -48,11 +49,19 @@ export default function PayAVisit() {
         setSelectedDateInWords('');
     }
 
+    const validateTime = (time) => {
+      // Regular expression for HH:MM format
+      const timePattern = /^(0?[1-9]|1[0-2]):[0-5][0-9] ([AaPp][Mm])$/;
+      return timePattern.test(time);
+  }
+
     const handleSubmission = async () => {
 
-        if (!date || !time) {
-            Alert.alert("Missing information", "Please select both time and date of your visit.")
-        } else {
+      if (!date || !time) {
+        Alert.alert("Missing information", "Please select both time and date of your visit.")
+      } else if (!validateTime(time)) {
+          Alert.alert("Invalid time format", "Please enter time in HH:MM AM/PM format.")
+      } else {
           const { data, error } = await supabase
           .from('appointments')
           .insert({
@@ -69,6 +78,8 @@ export default function PayAVisit() {
               console.error('Error submitting visit request:', error);
           } else {
             setModalVisible(false)
+            sendPushNotification(params.ownerPushToken.toString(), 'A potential tenant has requested a visit appointment.')
+            router.push("/(tenant)/(screens)/VisitConfirmation")
             console.log("Successfully booked a visit.")
           }
         }  
@@ -134,7 +145,8 @@ export default function PayAVisit() {
                       [date]: {selected: true, disableTouchEvent: false}
                   }}
                   className='border border-gray-300 rounded-md'
-                  current={currentDate}/>
+                  current={currentDate}
+                  minDate={currentDate}/>
               </View>
               <View className='absolute -bottom-12 z-10 right-0 rounded-md overflow-hidden'>
                   <Pressable

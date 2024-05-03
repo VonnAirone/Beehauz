@@ -1,6 +1,5 @@
-import { View, Text, TextInput, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Pressable, Alert, ScrollView, Modal } from 'react-native'
+import { View, Text, TextInput, KeyboardAvoidingView, TouchableWithoutFeedback, Keyboard, Pressable, Alert, Modal } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import LottieView from 'lottie-react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import BackButton from '@/components/back-button'
@@ -8,7 +7,7 @@ import { supabase } from '@/utils/supabase'
 import * as Location from "expo-location"
 import { router } from 'expo-router'
 import { useAuth } from '@/utils/AuthProvider'
-import { LocationData, PropertyData } from '@/api/Properties'
+import { LocationData } from '@/api/Properties'
 import MapView, { Marker } from 'react-native-maps'
 import LoadingComponent from '@/components/LoadingComponent'
 

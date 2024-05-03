@@ -2,8 +2,8 @@ import { View, Text, Pressable, KeyboardAvoidingView, ScrollView, Alert, Modal }
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
-import { fetchPropertyDetailsData, getProfile } from '@/api/DataFetching';
-import { OwnerData, PropertyData, UserData } from '@/api/Properties';
+import { fetchPropertyDetailsData, getProfile, getPropertyReviews } from '@/api/DataFetching';
+import { OwnerData, PropertyData, ReviewData, UserData } from '@/api/Properties';
 import { Ionicons } from '@expo/vector-icons';
 import { SingleImageDisplay } from '../(aux)/homecomponents';
 import moment from 'moment';
@@ -13,6 +13,7 @@ import { useAuth } from '@/utils/AuthProvider';
 import { supabase } from '@/utils/supabase';
 import { sendPushNotification } from '@/api/usePushNotification';
 import LoadingComponent from '@/components/LoadingComponent';
+import { PropertyReviews } from '@/app/(owner)/(aux)/propertycomponents';
 
 export default function TenantProperty() {
   const userID = useAuth()?.session.user.id;
@@ -29,10 +30,12 @@ export default function TenantProperty() {
   const [reviewContentIsEmpty, setReviewContentIsEmpty] = useState(false)
   const [owner, setOwner] = useState<OwnerData | null>(null)
   const [user, setUser] = useState<UserData | null>(null)
-
+  const [propertyReviews, setPropertyReviews] = useState<ReviewData[] | null>(null);
+  const [ratings, setRatings] = useState(0)
   const handleRating = (value) => {
     setRating(value);
   };
+  const [hasReviewed, setHasReviewed] = useState(false);
 
   const handleReviewText = (text) => { setReviewContent(text), setReviewContentIsEmpty(false)}
 
@@ -44,16 +47,33 @@ export default function TenantProperty() {
   async function fetchPropertyData () {
     try {
       const data = await fetchPropertyDetailsData(id)
-
       if (data) {
         const owner = await getProfile(data.owner_id)
         setOwner(owner)
         setPropertyData(data)
+        await fetchPropertyReviews(data.property_id)
       }
+
+      
     } catch (error) {
       console.log("Error fetching property data: ", error.message)
     }
   }
+
+  const fetchPropertyReviews = async (propertyID) => {
+    try {
+      const reviews = await getPropertyReviews(propertyID);
+      setPropertyReviews(reviews);
+      setHasReviewed(reviews.some(review => review.tenant_id === userID));
+      const allRatings = reviews?.map((review) => review?.rating);
+      const totalRating = allRatings?.reduce((acc, rating) => acc + rating, 0);
+      const averageRating = totalRating / allRatings?.length;
+      setRatings(averageRating);
+    } catch (error) {
+      console.error('Error fetching property reviews:', error);
+      setPropertyReviews(null);
+    }
+  };
 
   async function submitReview() {
     // const oneWeekInMilliseconds = 7 * 24 * 60 * 60 * 1000;
@@ -71,6 +91,12 @@ export default function TenantProperty() {
 
   
     // If it has been a week, proceed with submitting the review
+
+    if (hasReviewed) {
+      Alert.alert("You have already submitted a review for this property.");
+      return;
+    }
+
     if (reviewContent.trim() === '') {
       setReviewContentIsEmpty(true)
     } else {
@@ -146,6 +172,24 @@ export default function TenantProperty() {
           { event: '*', schema: 'public', table: 'tenants' },
           (payload) => {
             console.log('Change received!', payload);
+            fetchData()
+          }
+        )
+        .subscribe();
+    
+      return () => {
+        channels.unsubscribe();
+      };
+    }
+
+    async function subscribeToRentalChanges() {
+      const channels = supabase
+        .channel('tenant-status-update')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'rentals' },
+          (payload) => {
+            console.log('Change received!', payload);
             getTenantStatus()
           }
         )
@@ -155,6 +199,7 @@ export default function TenantProperty() {
         channels.unsubscribe();
       };
     }
+
 
     fetchData()
     subscribeToChanges()
@@ -218,76 +263,85 @@ export default function TenantProperty() {
                 </Text>
               </View>
 
-            
-              <View className='p-5 bg-gray-200 rounded-md mt-5'>
-
-              {showModal && (
-                <View className='absolute z-20 top-10 self-center bg-white p-3 rounded-md border border-gray-300'>
-                  <Text>Beehauz provides tenants with the opportunity to share their stay experiences, thereby aiding property owners in identifying areas for improvement. Additionally, this feature assists potential tenants in making well-informed decisions.</Text>
-                </View>
-              )}
-
-                <View className='flex-row items-center gap-x-2'>
-                  <Text>How's your experience so far?</Text>
-                  <Pressable onPress={() => setShowModal(!showModal)}>
-                    <Ionicons name='help-circle-outline' size={15}/>
-                  </Pressable>
-                </View>
-                
-                <View className='mt-4'>
-                  <Text className='font-medium'>Leave a Review</Text>
-                  
-                  <View className='mt-2'>
-                    <TextInput
-                    value={reviewContent}
-                    onChangeText={(text) => handleReviewText(text)}
-                    placeholder='Share your experience'
-                    className={`bg-white rounded-md p-3 text-xs ${reviewContentIsEmpty ? 'border border-red-300' : ''}`}/>
-                  </View>
-
-                  {reviewContentIsEmpty && (
-                    <Text className='text-xs text-gray-700 mt-1'>Do not leave the field empty.</Text>
-                  )}
-
-                  <View className='flex-row items-center justify-evenly my-4'>
-                    {[1, 2, 3, 4, 5].map((index) => (
-                      <Pressable
-                        key={index}
-                        onPress={() => handleRating(index)}
-                      >
-                        <Ionicons
-                          name={index <= rating ? 'star' : 'star-outline'}
-                          size={30}
-                          color={index <= rating ? '#444' : 'gray'}
-                        />
-                      </Pressable>
-                    ))}
-                  </View>
-                
-                <View className='flex-row items-center gap-x-2 self-end'>
-                  <View className='overflow-hidden rounded-sm'>
-                    <Pressable
-                    onPress={onPress}
-                    android_ripple={{color: 'white'}} 
-                    className='p-2 rounded-sm border border-gray-300 bg-white'>
-                      <Text>Clear Reviews</Text>
-                    </Pressable>
-                  </View>
-
-                  <View className='overflow-hidden rounded-sm'>
-                    <Pressable
-                    onPress={submitReview}
-                    android_ripple={{color: 'white'}} 
-                    style={{backgroundColor: "#444"}}
-                    className='p-2 rounded-sm'>
-                      <Text className='text-white'>Submit</Text>
-                    </Pressable>
-                  </View>
-                </View>
-                </View>
-
-                
+              <View className='mt-2'>
+                  <Text className='font-semibold'>Reviews</Text>
               </View>
+
+              <PropertyReviews reviews={propertyReviews}/>
+
+            
+
+
+                {hasReviewed === true && (
+                  <View className='p-5 bg-gray-200 rounded-md mt-5'>
+
+                  {showModal && (
+                    <View className='absolute z-20 top-10 self-center bg-white p-3 rounded-md border border-gray-300'>
+                      <Text>Beehauz provides tenants with the opportunity to share their stay experiences, thereby aiding property owners in identifying areas for improvement. Additionally, this feature assists potential tenants in making well-informed decisions.</Text>
+                    </View>
+                  )}
+    
+                    <View className='flex-row items-center gap-x-2'>
+                      <Text>How's your experience so far?</Text>
+                      <Pressable onPress={() => setShowModal(!showModal)}>
+                        <Ionicons name='help-circle-outline' size={15}/>
+                      </Pressable>
+                    </View>
+                  <View className='mt-4'>
+                    <Text className='font-medium'>Leave a Review</Text>
+                    
+                    <View className='mt-2'>
+                      <TextInput
+                      value={reviewContent}
+                      onChangeText={(text) => handleReviewText(text)}
+                      placeholder='Share your experience'
+                      className={`bg-white rounded-md p-3 text-xs ${reviewContentIsEmpty ? 'border border-red-300' : ''}`}/>
+                    </View>
+
+                    {reviewContentIsEmpty && (
+                      <Text className='text-xs text-gray-700 mt-1'>Do not leave the field empty.</Text>
+                    )}
+
+                    <View className='flex-row items-center justify-evenly my-4'>
+                      {[1, 2, 3, 4, 5].map((index) => (
+                        <Pressable
+                          key={index}
+                          onPress={() => handleRating(index)}
+                        >
+                          <Ionicons
+                            name={index <= rating ? 'star' : 'star-outline'}
+                            size={30}
+                            color={index <= rating ? '#444' : 'gray'}
+                          />
+                        </Pressable>
+                      ))}
+                    </View>
+
+                    <View className='flex-row items-center gap-x-2 self-end'>
+                    <View className='overflow-hidden rounded-sm'>
+                      <Pressable
+                      onPress={onPress}
+                      android_ripple={{color: 'white'}} 
+                      className='p-2 rounded-sm border border-gray-300 bg-white'>
+                        <Text>Clear Reviews</Text>
+                      </Pressable>
+                    </View>
+
+                    <View className='overflow-hidden rounded-sm'>
+                      <Pressable
+                      onPress={submitReview}
+                      android_ripple={{color: 'white'}} 
+                      style={{backgroundColor: "#444"}}
+                      className='p-2 rounded-sm'>
+                        <Text className='text-white'>Submit</Text>
+                      </Pressable>
+                    </View>
+                    </View>
+                  </View>
+                </View>
+                )}
+                  
+              
 
                 <View className='mt-4'>
                   <Pressable
@@ -313,7 +367,7 @@ export default function TenantProperty() {
                     <Text>Your request to leave the property has been sent for approval.</Text>
                   </Pressable>
                 </Modal>
-              {/* <View className='h-20'></View> */}
+              <View className='h-20'></View>
           </ScrollView>
           )}
           

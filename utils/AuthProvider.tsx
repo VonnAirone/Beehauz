@@ -33,9 +33,9 @@ export function AuthProvider({ children }: Props) {
     const inAuthGroup = segments[0] === '(auth)';
     const isUserSignedIn = session?.user;
     
-    if (!session) {
-      router.replace('/(auth)/');
-    }
+    // if (!session) {
+    //   router.replace('/(auth)/');
+    // }
 
     if (!isUserSignedIn && !inAuthGroup) {
       router.replace('/(auth)/');

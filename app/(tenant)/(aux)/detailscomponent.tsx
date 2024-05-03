@@ -45,12 +45,12 @@ export async function hasExistingCommitment(userId) {
     .from('appointments')
     .select('*')
     .eq('tenant_id', userId)
-    .eq('status', 'Pending');
+    .in('status', ['Pending', 'Approved']);
   const { data: rentals, error: rentalError } = await supabase
     .from('rentals')
     .select('*')
     .eq('tenant_id', userId)
-    .eq('status', 'Pending');
+    .in('status', ['Pending', 'Pending Payment', 'Payment Successful',]);
 
   if (appointmentError || rentalError) {
     console.error('Error checking existing commitments:', appointmentError || rentalError);
@@ -60,7 +60,7 @@ export async function hasExistingCommitment(userId) {
 }
 
 
-export function BottomBar({ userID, price, propertyID, propertyName, tenantStatus, ownerID }) {
+export function BottomBar({ userID, price, propertyID, propertyName, tenantStatus, ownerID, ownerPushToken }) {
   const [showModal, setShowModal] = useState(false);
 
   
@@ -72,7 +72,7 @@ export function BottomBar({ userID, price, propertyID, propertyName, tenantStatu
       if (hasCommitment) {
         setShowModal(true);
       } else {
-        router.push({ pathname: "/VisitScreen", params: { propertyID, propertyName, ownerID } });
+        router.push({ pathname: "/(tenant)/(screens)/VisitScreen", params: { propertyID, propertyName, ownerID, ownerPushToken } });
       }
     }
   }

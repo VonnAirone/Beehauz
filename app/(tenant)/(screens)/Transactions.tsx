@@ -8,6 +8,7 @@ import { AppointmentData, PropertyData } from '@/api/Properties';
 import { fetchPropertyDetailsData } from '@/api/DataFetching';
 import { router } from 'expo-router';
 import LoadingComponent from '@/components/LoadingComponent';
+import { usePushNotifications } from '@/api/usePushNotification';
 
 export default function Transactions() {
   const user = useAuth()?.session.user;
@@ -32,6 +33,16 @@ export default function Transactions() {
     }
   }
 
+  async function cancelVisit(status) {
+    try {
+      const {data, error} = await supabase
+      .from('appointments')
+      .update({status: status})
+      .eq('tenant_id', user?.id)
+    } catch (error) {
+      
+    }
+  }
   
   async function fetchTransactions() {
     try {
@@ -85,7 +96,6 @@ export default function Transactions() {
       });
 
       const resolvedProperties = await Promise.all(propertyData);
-      console.log(resolvedProperties)
       setProperties(resolvedProperties);
     }
   }
@@ -109,7 +119,7 @@ export default function Transactions() {
 
   async function subscribeToVisitChanges() {
     const channels = supabase
-      .channel('realtime-booking-channel')
+      .channel('realtime-appointment-channel')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'appointments' },
@@ -162,7 +172,7 @@ export default function Transactions() {
           </View>
           ) : (
             <View>
-            {transactions && (
+            {transactions && transactions.length > 0 ? (
               <FlatList
                 scrollEnabled={false}
                 data={transactions}
@@ -174,7 +184,7 @@ export default function Transactions() {
                     // Handling 'Visit' appointments
                     if (item.status === 'Approved') {
                       return (
-                        <View className='bg-gray-200 p-4 rounded-md mt-4'>
+                        <View key={index} className='bg-gray-200 p-4 rounded-md mt-4'>
   
                           <Text className='font-semibold text-green-700'>Status: {item.status}</Text>
                           <Text className='text-xs mb-4'>Requested last {formatDate(item.created_at)}</Text>
@@ -195,7 +205,7 @@ export default function Transactions() {
                       );
                     } else if (item.status === 'Rejected') {
                       return (
-                        <View className='bg-gray-200 p-4 rounded-md mt-4'>
+                        <View key={index}  className='bg-gray-200 p-4 rounded-md mt-4'>
                           <Text className='font-semibold text-red-700'>Status: {item.status}</Text>
                           <Text className='text-xs mb-4'>Requested last {formatDate(item.created_at)}</Text>
   
@@ -215,7 +225,7 @@ export default function Transactions() {
                       );
                     } else {
                       return (
-                        <View className='bg-gray-200 p-4 rounded-md mt-4'>
+                        <View key={index}  className='bg-gray-200 p-4 rounded-md mt-4'>
                           <Text className='font-semibold'>Status: {item.status}</Text>
                           <Text className='text-xs mb-4'>Requested last {formatDate(item.created_at)}</Text>
   
@@ -237,7 +247,7 @@ export default function Transactions() {
                   } else if (item.type === 'Rental') {
                     if (item.status === 'Rejected') {
                       return (
-                        <View className='bg-gray-200 p-4 rounded-md mt-4'>
+                        <View key={index}  className='bg-gray-200 p-4 rounded-md mt-4'>
                           <Text className='font-semibold text-red-700'>Status: {item.status}</Text>
                           <Text className='text-xs mb-4'>Requested last {formatDate(item.created_at)}</Text>
   
@@ -249,7 +259,7 @@ export default function Transactions() {
                       );
                     } else if (item.status === 'Approved') {
                       return (
-                        <Pressable className='bg-gray-200 p-4 rounded-md mt-4'>
+                        <Pressable key={index}  className='bg-gray-200 p-4 rounded-md mt-4'>
                           <Text className='mb-2 font-semibold text-green-700'>Status: {item.status}</Text>
                           <Text className='mb-1'>Your rental request at {propertyName} has been approved!</Text>
                           <Text className='mt-2 text-xs'>
@@ -260,7 +270,7 @@ export default function Transactions() {
                     } else if (item.status === 'Pending Payment') {
                       if (item.payment_method === 'Cash on Hand') {
                         return (
-                          <View className='bg-gray-200 p-4 rounded-md mt-4'>
+                          <View key={index}  className='bg-gray-200 p-4 rounded-md mt-4'>
                             <Text className='mb-2 font-semibold text-green-700'>Status: {item.status}</Text>
                             <Text className='mb-1'>Your rental request at {propertyName} has been approved!</Text>
                             <Text className='mt-2 text-xs'>
@@ -272,7 +282,7 @@ export default function Transactions() {
                         )
                       } else {
                       return (
-                        <View className='bg-gray-200 p-4 rounded-md mt-4'>
+                        <View key={index}  className='bg-gray-200 p-4 rounded-md mt-4'>
                           <Text className='mb-2 font-semibold text-green-700'>Status: {item.status}</Text>
                           <Text className='mb-1'>Your rental request at {propertyName} has been approved!</Text>
                           <Text className='mt-2 text-xs'>
@@ -296,7 +306,7 @@ export default function Transactions() {
                     }
                     } else if (item.status === 'Payment Successful') {
                       return (
-                        <Pressable className='bg-gray-200 p-4 rounded-md mt-4'>
+                        <Pressable key={index}  className='bg-gray-200 p-4 rounded-md mt-4'>
                           <Text className='mb-2 font-semibold text-green-700'>Status: {item.status}</Text>
                           <Text className='mb-1'>Congratulations! You have paid your reservation in {propertyName}</Text>
                           <Text className='mt-2 text-xs'>
@@ -306,7 +316,7 @@ export default function Transactions() {
                       );
                     } else {
                       return (
-                        <View className='bg-gray-200 p-4 rounded-md mt-4'>
+                        <View key={index}  className='bg-gray-200 p-4 rounded-md mt-4'>
                           <Text className='mb-2 font-semibold'>Status: {item.status}</Text>
                           <Text className='mb-1'>Your rental request at {propertyName} is being processed.</Text>
                           <Text className='mt-2 text-xs'>
@@ -318,12 +328,16 @@ export default function Transactions() {
                   } else {
                     // Fallback rendering if data type is not recognized
                     return (
-                      <View className='bg-gray-200 p-4 rounded-md mt-4'>
+                      <View key={index}  className='bg-gray-200 p-4 rounded-md mt-4'>
                         <Text>Status not recognized</Text>
                       </View>
                     );
                   }
                 }}/>
+              ) : (
+                <View className='flex-1 justify-center items-center mt-80'>
+                  <Text>No transactions as of the moment.</Text>
+                </View>
               )}
           </View>
           )}
