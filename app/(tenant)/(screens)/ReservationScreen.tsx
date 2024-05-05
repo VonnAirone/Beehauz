@@ -127,6 +127,7 @@ export default function PayAVisit() {
                 markedDates={{
                     [date]: {selected: true, disableTouchEvent: false}
                 }}
+                minDate={currentDate}
                 className='border border-gray-300 rounded-md'
                 current={currentDate}/>
             </View>
