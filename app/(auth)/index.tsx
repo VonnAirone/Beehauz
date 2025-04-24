@@ -10,6 +10,7 @@ import { makeRedirectUri } from 'expo-auth-session';
 import * as QueryParams from "expo-auth-session/build/QueryParams";
 import * as WebBrowser from "expo-web-browser";
 import { sendPushNotification } from '@/api/Test';
+import { Input } from 'react-native-elements/dist/input/Input';
 
 export default function Login() {
 const [email, setEmail] = useState('');
@@ -195,7 +196,7 @@ const handleSubmission = async () => {
 
 async function fetchUsers() {
   try {
-    const { data, error } = await supabase.from('profiles').select('*');
+    const { data, error } = await supabase.from('Users').select('*');
 
     if (error) {
       console.log("Error retrieving users: ", error.message);

@@ -7,6 +7,8 @@ import { useFonts } from 'expo-font';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { supabase } from '@/utils/supabase';
+import ManageProfile from './(aux)/ManageProfile';
+import ProfileCompletion from './(aux)/ProfileCompletion';
 
 const queryClient = new QueryClient();
 
@@ -51,7 +53,8 @@ function RootLayoutNav() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <SafeAreaProvider>
-        <Stack screenOptions={{headerShown: false}}/>
+        {/* <Stack screenOptions={{headerShown: false}}/> */}
+        <ProfileCompletion/>
       </SafeAreaProvider>
     </ThemeProvider>
   );

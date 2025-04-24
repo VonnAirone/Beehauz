@@ -79,7 +79,7 @@ export async function fetchFilteredProperties(filterCriteria) {
 
 export async function getProfile(userID: string) {
   const query = supabase
-    .from('profiles')
+    .from('users')
     .select('*')
     .eq('id', userID)
     .single();

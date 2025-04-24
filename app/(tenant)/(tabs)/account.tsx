@@ -25,9 +25,9 @@ export default function Account() {
 
   async function fetchData() {
     try {
-      await getUserProfile();
+      // await getUserProfile();
       await fetchAvatar();
-      await fetchProperty();
+      // await fetchProperty();
     } catch (error) {
       console.log("Error fetching data: ", error.message)
     }
@@ -42,39 +42,39 @@ export default function Account() {
     }
   } 
 
-  async function fetchProperty() {
-    try {
-      const { data, error } = await supabase
-        .from("tenants")
-        .select('*')
-        .eq('tenant_id', user?.id.toString());
+  // async function fetchProperty() {
+  //   try {
+  //     const { data, error } = await supabase
+  //       .from("tenants")
+  //       .select('*')
+  //       .eq('tenant_id', user?.id.toString());
 
-      if (data[0]?.property_id) {
-        const property = await fetchPropertyDetailsData(data[0]?.property_id)
-        setProperty(property)
-        setDateJoined(data[0].date_joined)
-      } else {
-        console.log("No property found for the user.");
-      }
+  //     if (data[0]?.property_id) {
+  //       const property = await fetchPropertyDetailsData(data[0]?.property_id)
+  //       setProperty(property)
+  //       setDateJoined(data[0].date_joined)
+  //     } else {
+  //       console.log("No property found for the user.");
+  //     }
   
-      if (error) {
-        console.log("Error fetching property: ", error.message);
-      }
-    } catch (error) {
-      console.log("An error occurred while fetching property: ", error.message);
-    }
-  }
+  //     if (error) {
+  //       console.log("Error fetching property: ", error.message);
+  //     }
+  //   } catch (error) {
+  //     console.log("An error occurred while fetching property: ", error.message);
+  //   }
+  // }
   
 
-  async function getUserProfile() {
-    try {
-        const data = await getProfile(user?.id);
-        setUserProfile(data);
-    } catch (error) {
-        console.log("Error fetching owner", error.message);
-        throw error;
-    }
-  }
+  // async function getUserProfile() {
+  //   try {
+  //       const data = await getProfile(user?.id);
+  //       setUserProfile(data);
+  //   } catch (error) {
+  //       console.log("Error fetching owner", error.message);
+  //       throw error;
+  //   }
+  // }
 
   async function subscribeToChanges() {
     const channels = supabase
@@ -84,7 +84,7 @@ export default function Account() {
         { event: '*', schema: 'public', table: 'profiles' },
         (payload) => {
           console.log('Change received!', payload);
-          getUserProfile()
+          // getUserProfile()
         }
       )
       .subscribe();
@@ -237,7 +237,7 @@ export default function Account() {
               <Text className='font-semibold'>Property</Text>
             </View>
 
-            <View>
+            {/* <View>
             {property ? (
               <TouchableOpacity 
               onPress={() => router.push({pathname: "/(tenant)/(screens)/TenantProperty", params: {propertyID: property?.property_id,
@@ -249,7 +249,7 @@ export default function Account() {
             ) : (
               <Text>{property === null ? "Not boarding" : ""}</Text>
             )}
-            </View>
+            </View> */}
           </View>
           
         </View>

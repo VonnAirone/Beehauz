@@ -27,7 +27,7 @@ export function TextInputField({ label, value, placeholder, isPassword, isReveal
           value={value}
           placeholder={placeholder}
           placeholderTextColor={feedbackText ? 'red' : 'gray'}
-          className={`p-2 text-xs pl-5 border border-gray-200 focus:border-gray-400 rounded-md w-80 ${
+          className={`p-2 text-sm pl-5 border border-gray-200 focus:border-gray-400 rounded-md w-80 ${
             feedbackText ? 'border-red-500' : value.trim() === '' ? '' : 'border-gray-400'
           }`}
           onChangeText={onChangeText}

@@ -20,13 +20,15 @@ export default function Usertype() {
     async function updateUsertype () {
         setLoading(true)
         setUsertype(usertype)
-        const {data, error} = await supabase
-        .from("profiles")
-        .update({"user_type": usertype})
-        .eq('id', user?.id)
+        const { data, error } = await supabase
+        .from("users")
+        .update({ "usertype": usertype })
+        .eq("id", user?.id);
+      
 
         if (error) {
             Alert.alert("Error updating user type", error.message)
+            console.log(error.details)
         } else {
             setShowModal(false)
             router.push({pathname: "/ProfileCompletion", params: {usertype}})
