@@ -1,14 +1,14 @@
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import BackButton from '@/components/back-button'
+import BackButton from '@/app/components/back-button'
 import { supabase } from '@/utils/supabase'
-import { TenantsData, UserData } from '@/api/Properties'
-import { getProfile } from '@/api/DataFetching'
+import { TenantsData, UserData } from '@/app/api/Properties'
+import { getProfile } from '@/app/api/DataFetching'
 import { Ionicons } from '@expo/vector-icons'
-import AvatarImage from '@/app/(tenant)/(aux)/avatar'
 import { router, useLocalSearchParams } from 'expo-router'
 import debounce from 'debounce'
+import AvatarImage from '../../(tenant)/(aux)/avatar'
 
 export default function TenantsList() {
   const params = useLocalSearchParams();

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Logo } from '../(tenant)/(aux)/logincomponent'
 import { Ionicons } from '@expo/vector-icons'
-import BackButton from '@/components/back-button'
+import BackButton from '@/app/components/back-button'
 import { supabase } from '@/utils/supabase'
 
 export default function SendResetPasswordLink() {

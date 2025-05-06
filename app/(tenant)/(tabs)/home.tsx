@@ -1,4 +1,4 @@
-import { fetchPopularNowList } from '@/api/DataFetching';
+import { fetchPopularNowList, fetchPropertyListData } from '@/app/api/DataFetching';
 import { PopularNow, PropertyList } from '@/app/(tenant)/(aux)/homecomponents';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -65,9 +65,10 @@ export default function HomePage() {
 
   async function fetchData() {
     try {
-      const PopularList = await fetchPopularNowList();
+      const PopularList = await fetchPropertyListData();
       setPopularList(PopularList);
-      await fetchCheapProperties(setCheapProperties)
+      
+      // await fetchCheapProperties(setCheapProperties)
 
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -76,7 +77,7 @@ export default function HomePage() {
       } else {
         let currentLocation = await (await Location.getCurrentPositionAsync()).coords;
         await reverseGeocode(currentLocation.latitude, currentLocation?.longitude)
-        await fetchNearbyMe(currentLocation.latitude, currentLocation?.longitude, setNearbyProperties)
+        // await fetchNearbyMe(currentLocation.latitude, currentLocation?.longitude, setNearbyProperties)
       }
       
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -114,40 +115,34 @@ export default function HomePage() {
     ) : (  
     <> 
       <View>
-        <View
-        style={{backgroundColor: "#444"}}
-        className='py-5'>
-          <View          
-          className='h-18 justify-center p-4'>
-            <View className='flex-row items-center'>
-              <Image className='w-10 h-10' source={require("@/assets/images/icon.png")}/>
-              <Text className='font-semibold text-2xl text-white'>BEEHAUZ</Text>
-            </View>
-          </View>
 
-          <View className='flex-row items-center px-5'>
-            <Pressable 
-            className='grow'
-            onPress={() => router.push("/(tenant)/(screens)/Searchpage")}>    
-              <View className='flex-row items-center bg-white rounded-md p-2'>
-                <View className='mx-2'>
-                  <Ionicons 
-                  color={"#444"}
-                  name='search' 
-                  size={20}/>
-                </View>
-                <TextInput
-                editable={false} 
-                placeholder='Search for a place'/>
-              </View>
-            </Pressable>
-            <View className='ml-3'>
-              <TouchableOpacity onPress={() => router.push("/Bookmarked")}>
-                <Ionicons name='bookmark' size={36} color={"white"}/>
-              </TouchableOpacity>
-            </View>
+        <View className='flex flex-row justify-between p-5 items-center'>
+          <View className='w-60'>
+            <Text className='text-2xl'>Find the boarding house that fits your needs.</Text>
+          </View>
+          
+          <View className='ml-3'>
+            <TouchableOpacity onPress={() => router.push("/Bookmarked")}>
+              <Ionicons name='bookmark' size={30} color={"#ff8b00"}/>
+            </TouchableOpacity>
           </View>
         </View>
+
+        <Pressable 
+          className='grow px-5'
+          onPress={() => router.push("/(tenant)/(screens)/Searchpage")}>    
+          <View className='flex-row items-center p-2 border border-gray-200 focus:border-gray-400 rounded-md'>
+            <View className='mx-2'>
+              <Ionicons 
+              color={"#ff8b00"}
+              name='search' 
+              size={20}/>
+            </View>
+            <TextInput
+            editable={false} 
+            placeholder='Search by name or location'/>
+          </View>
+        </Pressable>
         
 
         <View className='p-5'>
@@ -159,11 +154,16 @@ export default function HomePage() {
             </View>
           </View>
 
-          <View className='my-5'>
-            <View className='border rounded-md'>
-              <Image
-              className='h-48 w-80 rounded-md'
-              source={require("@/assets/images/Map Illustration.jpg")}/>
+          <View className='mt-5'>
+            <View className='border rounded-sm'>
+              <View className='h-48 w-72 rounded-md'>
+                <Image
+                  className='w-full h-full'
+                  resizeMode='contain'
+                  source={require("@/assets/images/Map Illustration.jpg")}
+                />
+              </View>
+
               <View className='absolute overflow-hidden rounded-md bottom-4 left-3'>
                 <Pressable 
                 onPress={() => router.replace("/(tenant)/(tabs)/map")}
@@ -194,7 +194,8 @@ export default function HomePage() {
                   <Text>No Properties Nearby</Text>
                 </View>
               ) : (
-                <PropertyList data={NearbyProperties}/>
+                <></>
+                // <PropertyList data={NearbyProperties}/>
               )}
             </View>
           </View>

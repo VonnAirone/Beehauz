@@ -2,14 +2,14 @@ import { View, Text, TextInput, KeyboardAvoidingView, TouchableWithoutFeedback, 
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import BackButton from '@/components/back-button'
+import BackButton from '@/app/components/back-button'
 import { supabase } from '@/utils/supabase'
 import * as Location from "expo-location"
 import { router } from 'expo-router'
 import { useAuth } from '@/utils/AuthProvider'
-import { LocationData } from '@/api/Properties'
+import { LocationData } from '@/app/api/Properties'
 import MapView, { Marker } from 'react-native-maps'
-import LoadingComponent from '@/components/LoadingComponent'
+import LoadingComponent from '@/app/components/LoadingComponent'
 
 export default function PropertyCreation() {
   const user = useAuth()?.session.user;

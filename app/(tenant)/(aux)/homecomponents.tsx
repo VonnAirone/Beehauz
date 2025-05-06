@@ -1,10 +1,12 @@
-import { downloadImage, loadImages } from "@/api/ImageFetching";
-import { handlePropertyClick } from "@/api/ViewCount";
+import { downloadImage, loadImages } from "@/app/api/ImageFetching";
+import { handlePropertyClick } from "@/app/api/ViewCount";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { memo, useEffect, useRef, useState } from "react";
 import { FlatList as RNFlatList, Pressable, View, Text, Image, FlatList, TouchableOpacity } from "react-native";
-import { PropertyData } from "@/api/Properties";
+import { PropertyData
+  
+ } from "@/models/IProperty";
 import { useQuery } from "react-query";
 
 
@@ -118,19 +120,28 @@ import { useQuery } from "react-query";
     const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
         <TouchableOpacity
         className="mr-4"
-        onPress={() => handleCardPress(item.property_id)}>
+        onPress={() => handleCardPress(item.Id)}>
           <View>
-            <View className="h-40 w-40">
-              <SingleImageDisplay propertyID={item?.property_id}/>
+            <View className="h-32 w-40 bg-gray-50 rounded-sm">
+              {/* <SingleImageDisplay propertyID={item?.Id}/> */}
             </View>
   
             <View className='mt-2'>
-              <Text className="font-bold text-base">{item.name}</Text>
-              <View className="flex-row items-center gap-x-1">
-                <Ionicons name="bed-outline"/>
+              <Text className="font-bold text-base uppercase">{item.Name}</Text>
+              {/* <View className="flex-row items-center gap-x-1">
+                <Ionicons name="bed"/>
                 <Text className="text-xs">{item.available_beds} Beds</Text>
+              </View> */}
+              
+              <View className="flex-row items-center">
+                <Ionicons name="location" color={'#FF8B00'}/>
+                <Text>{item.Address}</Text>
               </View>
-              <Text className="font-semibold">{item.price} / month</Text>
+
+              <View className="mt-1">
+                <Text className="text-xs opacity-50">starts at</Text>
+                <Text>{item.RentalFee} / month</Text>
+              </View>
             </View>
           </View>
         </TouchableOpacity>
@@ -176,15 +187,15 @@ import { useQuery } from "react-query";
     const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
         <View key={index} className="mr-4">
           <TouchableOpacity 
-          onPress={() => handleCardPress(item.property_id)}>
+          onPress={() => handleCardPress(item.Id)}>
             <View className='h-40 w-72'>
-              <SingleImageDisplay propertyID={item.property_id}/>
+              <SingleImageDisplay propertyID={item.Id}/>
             </View>
               
             <View className='mt-2'>
               <View className="flex-row items-center justify-between">
-                <Text className="font-bold text-base">{item.name}</Text>
-                <Text className="font-semibold">{item.price} / month</Text>
+                <Text className="font-bold text-base">{item.Name}</Text>
+                <Text className="font-semibold">{item.RentalFee} / month</Text>
               </View>
              
               <View className="flex-row items-center gap-x-1">
@@ -197,7 +208,7 @@ import { useQuery } from "react-query";
                   <Ionicons name="location"/>
                 </View>
                 
-                <Text className="text-xs">{item.address}</Text>
+                <Text className="text-xs">{item.Address}</Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -240,17 +251,17 @@ import { useQuery } from "react-query";
       <View key={index} className='overflow-hidden mr-4'>
         <View>
           <Pressable 
-          onPress={() => handleCardPress(item.property_id)}>
+          onPress={() => handleCardPress(item.Id)}>
             <View className='h-40 w-72'>
-              <SingleImageDisplay propertyID={item.property_id}/>
+              <SingleImageDisplay propertyID={item.Id}/>
             </View>
               
               <View className="mt-2">
-                <Text className='font-semibold text-xl'>{item.name}</Text>
-                <Text>{item.price}</Text>
+                <Text className='font-semibold text-xl'>{item.Name}</Text>
+                <Text>{item.RentalFee}</Text>
                 <View className="flex-row items-center">
                   <Ionicons name="location-outline" color={'#FFA233'}/>
-                  <Text className="text-yellow">{item.address}</Text>
+                  <Text className="text-yellow">{item.Address}</Text>
                 </View>
                 
               </View>
@@ -359,22 +370,22 @@ import { useQuery } from "react-query";
     const renderItem = ({ item, index }: { item: PropertyData; index: number }) => (
       <Pressable
         key={index}
-        onPress={() => handleCardPress(item.property_id)} 
+        onPress={() => handleCardPress(item.Id)} 
         className='overflow-hidden'>
         <View>
           <View className='h-40 w-80'>
-            <SingleImageDisplay propertyID={item.property_id}/>
+            <SingleImageDisplay propertyID={item.Id}/>
           </View>
             
           <View className="mt-2">
             <View className="flex-row items-end justify-between">
-              <Text className='font-semibold text-xl'>{item.name}</Text>
-              <Text className="font-semibold">{item.price} / month</Text>
+              <Text className='font-semibold text-xl'>{item.Name}</Text>
+              <Text className="font-semibold">{item.RentalFee} / month</Text>
             </View>
             
             <View className="flex-row items-center">
               <Ionicons name="location" color={'#444'}/>
-              <Text>{item.address}</Text>
+              <Text>{item.Address}</Text>
             </View>
   
             <View className="flex-row items-center gap-x-1">

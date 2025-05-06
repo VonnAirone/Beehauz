@@ -1,14 +1,13 @@
 import { AuthProvider, useAuth } from '@/utils/AuthProvider';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
 import { AppState, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useFonts } from 'expo-font';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { supabase } from '@/utils/supabase';
-import ManageProfile from './(aux)/ManageProfile';
-import ProfileCompletion from './(aux)/ProfileCompletion';
+import Login from './(auth)';
+import { Stack } from 'expo-router';
 
 const queryClient = new QueryClient();
 
@@ -53,8 +52,7 @@ function RootLayoutNav() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <SafeAreaProvider>
-        {/* <Stack screenOptions={{headerShown: false}}/> */}
-        <ProfileCompletion/>
+        <Stack screenOptions={{headerShown: false}}/>
       </SafeAreaProvider>
     </ThemeProvider>
   );

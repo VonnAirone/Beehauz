@@ -1,17 +1,19 @@
 import { Pressable, Text, View, ScrollView, ActivityIndicator, TouchableOpacity, Image } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import BackButton from '@/components/back-button'
+import BackButton from '@/app/components/back-button'
 import { Ionicons } from '@expo/vector-icons'
-import { fetchPropertyData, getProfile } from '@/api/DataFetching'
+import { fetchPropertyData, getProfile } from '@/app/api/DataFetching'
 import { SingleImageDisplay } from '../(aux)/homecomponents'
 import { supabase } from '@/utils/supabase'
 import StarRatingComponent from '../(aux)/starrating'
 import { Link, router, useLocalSearchParams } from 'expo-router'
 import AvatarImage from '../(aux)/avatar'
-import { PropertyData, ReviewData, UserData } from '@/api/Properties'
-import LoadingComponent from '@/components/LoadingComponent'
+import { ReviewData } from '@/app/api/Properties'
+import LoadingComponent from '@/app/components/LoadingComponent'
 import { useAuth } from '@/utils/AuthProvider'
+import { PropertyData } from '@/models/IProperty'
+import { UserData } from '@/models/IUsers'
 
 
 export default function OwnerProfile() {
@@ -169,7 +171,7 @@ export default function OwnerProfile() {
           <View>
             <View className='items-center mt-5'>
               <Text className='text-2xl font-semibold'>{ownerData?.first_name} {ownerData?.last_name}</Text>
-              <Text>Owner of {propertyList[0]?.name}</Text>
+              <Text>Owner of {propertyList[0]?.Name}</Text>
             </View>
 
             {/* <View className='items-center mt-10'>
@@ -222,20 +224,20 @@ export default function OwnerProfile() {
                           <View className='flex-row items-center'>
                             <View className='h-24 w-24'>
                               {!hasFetched.current && (
-                                <SingleImageDisplay propertyID={item.property_id} />
+                                <SingleImageDisplay propertyID={item.Id} />
                               )} 
                             </View>
 
                             <View className='p-2 gap-y-1'>
-                              <Text className='font-semibold'>{item.name}</Text>
+                              <Text className='font-semibold'>{item.Name}</Text>
                               <View className="flex-row items-center gap-x-1">
                                 <Ionicons name="bed-outline"/>
                                 <Text className="text-xs">{item.available_beds} Beds</Text>
                               </View>
-                              <Text className="font-semibold">{item.price} / month</Text>
+                              <Text className="font-semibold">{item.RentalFee} / month</Text>
                               <View className="flex-row items-center">
                                 <Ionicons name="location" color={'#FFA233'}/>
-                                <Text className='text-xs'>{item.address}</Text>
+                                <Text className='text-xs'>{item.Address}</Text>
                               </View>
                             </View>
                           </View>

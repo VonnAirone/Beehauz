@@ -1,13 +1,13 @@
 import { View, Text, Pressable } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import BackButton from '@/components/back-button';
+import BackButton from '@/app/components/back-button';
 import { supabase } from '@/utils/supabase';
 import { useLocalSearchParams } from 'expo-router';
-import { getProfile } from '@/api/DataFetching';
+import { getProfile } from '@/app/api/DataFetching';
 import { FlatList } from 'react-native-gesture-handler';
 import moment from 'moment';
-import { sendPushNotification } from '@/api/usePushNotification';
+import { sendPushNotification } from '@/app/api/usePushNotification';
 
 export default function Reservations() {
   const params = useLocalSearchParams();

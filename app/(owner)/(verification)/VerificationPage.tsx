@@ -2,7 +2,7 @@ import { View, Text, Pressable, TouchableOpacity, Alert, Image } from 'react-nat
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import BackButton from '@/components/back-button';
+import BackButton from '@/app/components/back-button';
 import { router } from 'expo-router';
 
 export default function VerificationPage() {

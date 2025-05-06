@@ -1,13 +1,13 @@
 import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import BackButton from '@/components/back-button';
+import BackButton from '@/app/components/back-button';
 import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
-import { AppointmentData, PropertyData, UserData } from '@/api/Properties';
-import { fetchPropertyDetailsData, getProfile } from '@/api/DataFetching';
-import { router, useLocalSearchParams } from 'expo-router';
-import LoadingComponent from '@/components/LoadingComponent';
+import { PropertyData, UserData } from '@/app/api/Properties';
+import { getProfile } from '@/app/api/DataFetching';
+import { useLocalSearchParams } from 'expo-router';
+import LoadingComponent from '@/app/components/LoadingComponent';
 
 export default function Transactions() {
   const user = useAuth()?.session.user;

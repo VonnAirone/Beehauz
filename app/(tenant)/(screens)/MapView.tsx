@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from "expo-location";
 import MapView, { Callout, Marker, MarkerAnimated } from 'react-native-maps';
-import { fetchPropertyListData } from '@/api/DataFetching';
+import { fetchPropertyListData } from '@/app/api/DataFetching';
 import { Images, SingleImageDisplay } from '../(aux)/homecomponents';
 import { ZoomIn } from 'react-native-reanimated';
-import BackButton from '@/components/back-button';
+import BackButton from '@/app/components/back-button';
 import { useLocalSearchParams } from 'expo-router';
 
 type LocationData = {

@@ -1,7 +1,7 @@
 import { View, Text, Image, Pressable} from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import LoadingComponent from '@/components/LoadingComponent'
+import LoadingComponent from '@/app/components/LoadingComponent'
 import LottieView from 'lottie-react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'

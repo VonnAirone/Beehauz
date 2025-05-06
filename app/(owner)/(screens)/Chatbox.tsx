@@ -2,16 +2,13 @@ import { useAuth } from "@/utils/AuthProvider";
 import { supabase } from "@/utils/supabase";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState, useEffect } from "react";
-import { View, FlatList, TouchableOpacity, TextInput, ActivityIndicator, Text, Pressable } from "react-native";
-import { Icon } from "react-native-elements";
+import { View, FlatList, TouchableOpacity, TextInput, Text, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { fetchPropertyData } from "@/api/DataFetching";
-import LoadingComponent from "@/components/LoadingComponent";
-import MessageComponent from "@/app/(tenant)/(aux)/MessageChip";
-import { getUsername } from "@/app/(tenant)/(aux)/usercomponent";
-import { fetchRoomID } from "@/app/(tenant)/(aux)/messagecomponent";
-
+import LoadingComponent from "@/app/components/LoadingComponent";
+import MessageComponent from "../../(tenant)/(aux)/MessageChip";
+import { fetchRoomID } from "../../(tenant)/(aux)/messagecomponent";
+import { getUsername } from "../../(tenant)/(aux)/usercomponent";
 
 const Chatbox = () => {
   const roomData = useLocalSearchParams();

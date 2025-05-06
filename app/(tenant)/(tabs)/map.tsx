@@ -3,10 +3,10 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from "expo-location";
 import MapView, { Callout, MarkerAnimated } from 'react-native-maps';
-import { fetchPropertyListData } from '@/api/DataFetching';
+import { fetchPropertyListData } from '@/app/api/DataFetching';
 import { SingleImageDisplay } from '../(aux)/homecomponents';
 import { ZoomIn } from 'react-native-reanimated';
-import LoadingComponent from '@/components/LoadingComponent';
+import LoadingComponent from '@/app/components/LoadingComponent';
 import BottomSheet, { BottomSheetModalProvider, BottomSheetView } from '@gorhom/bottom-sheet';
 import { Ionicons } from '@expo/vector-icons';
 import { FlatList } from 'react-native-gesture-handler';

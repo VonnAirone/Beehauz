@@ -1,6 +1,6 @@
 import React, { memo, useState, useEffect, useRef } from 'react';
 import { View, Image } from 'react-native';
-import { downloadAvatar, loadAvatar } from '@/api/ImageFetching';
+import { downloadAvatar, loadAvatar } from '@/app/api/ImageFetching';
 
 const Avatar = memo(({ item, userID }: { item: any, userID }) => {
   const [image, setImage] = useState<string | null>(null);

@@ -2,15 +2,14 @@ import { useAuth } from "@/utils/AuthProvider";
 import { supabase } from "@/utils/supabase";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState, useEffect } from "react";
-import { View, FlatList, TouchableOpacity, TextInput, ActivityIndicator, Text, Pressable } from "react-native";
-import { Icon } from "react-native-elements";
+import { View, FlatList, TouchableOpacity, TextInput, Text, Pressable } from "react-native";
 import MessageComponent from "../(aux)/MessageChip";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { fetchRoomID } from "../(aux)/messagecomponent";
 import { Ionicons } from "@expo/vector-icons";
-import { fetchPropertyData } from "@/api/DataFetching";
+import { fetchPropertyData } from "@/app/api/DataFetching";
 import { getUsername } from "../(aux)/usercomponent";
-import LoadingComponent from "@/components/LoadingComponent";
+import LoadingComponent from "@/app/components/LoadingComponent";
 
 
 const Chatbox = () => {

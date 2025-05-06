@@ -20,14 +20,14 @@ export function Logo () {
 export function TextInputField({ label, value, placeholder, isPassword, isRevealed, onChangeText, onPressReveal, feedbackText, isEditable, defaultFeedback }) {
   return (
     <View>
-      <Text className='p-2 font-semibold'>{label}</Text>
+      <Text className='p-2 font-semibold text-base'>{label}</Text>
       <View className='justify-center'>
         <TextInput
           editable={isEditable}
           value={value}
           placeholder={placeholder}
           placeholderTextColor={feedbackText ? 'red' : 'gray'}
-          className={`p-2 text-sm pl-5 border border-gray-200 focus:border-gray-400 rounded-md w-80 ${
+          className={`p-2 pl-5 border border-gray-200 focus:border-gray-400 rounded-md w-80 ${
             feedbackText ? 'border-red-500' : value.trim() === '' ? '' : 'border-gray-400'
           }`}
           onChangeText={onChangeText}

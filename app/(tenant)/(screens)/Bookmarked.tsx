@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Pressable, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import BackButton from '@/components/back-button';
+import BackButton from '@/app/components/back-button';
 import { useAuth } from '@/utils/AuthProvider';
 import { useQuery } from 'react-query';
-import { fetchFavorites } from '@/api/DataFetching';
+import { fetchFavorites } from '@/app/api/DataFetching';
 import { supabase } from '@/utils/supabase';
 import { Ionicons } from '@expo/vector-icons'; // Assuming you have Ionicons imported
 import { SingleImageDisplay } from '../(aux)/homecomponents';
-import LoadingComponent from '@/components/LoadingComponent';
+import LoadingComponent from '@/app/components/LoadingComponent';
 
 export default function Bookmarked() {
   const user = useAuth();

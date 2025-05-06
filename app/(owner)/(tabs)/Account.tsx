@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
-import { getProfile } from '@/api/DataFetching';
-import { OwnerData, UserData } from '@/api/Properties';
+import { getProfile } from '@/app/api/DataFetching';
+import { OwnerData, UserData } from '@/app/api/Properties';
 import { router } from 'expo-router';
 
 export default function Account() {

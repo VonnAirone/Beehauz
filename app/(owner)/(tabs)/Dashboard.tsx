@@ -2,12 +2,12 @@ import { ScrollView, Text, View, Image } from 'react-native'
 import React, { useEffect, useMemo, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useAuth } from '@/utils/AuthProvider'
-import { getProfile } from '@/api/DataFetching'
-import { PropertyData, TenantsData, UserData } from '@/api/Properties'
+import { getProfile } from '@/app/api/DataFetching'
+import { PropertyData, TenantsData, UserData } from '@/app/api/Properties'
 import { supabase } from '@/utils/supabase'
 import { DashboardComponents } from '../(aux)/propertycomponents'
 import MapView, { Callout, MarkerAnimated } from 'react-native-maps'
-import { usePushNotifications } from '@/api/usePushNotification'
+import { usePushNotifications } from '@/app/api/usePushNotification'
 
 export default function Dashboard() {
   const session = useAuth()

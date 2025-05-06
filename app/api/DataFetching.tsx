@@ -16,15 +16,15 @@ async function fetchData(query: any) {
 }
 
 export async function fetchPropertyListData() {
-  const query = supabase.from('property').select('*').limit(5);
+  const query = supabase.from('Properties').select('*').limit(5);
   return fetchData(query);
 }
 
 export async function fetchPopularNowList() {
   const query = supabase
-    .from('property')
+    .from('Properties')
     .select('*')
-    .gte('view_count', 50)
+    .gte('ViewCount', 50)
 
   return fetchData(query);
 }
@@ -32,26 +32,26 @@ export async function fetchPopularNowList() {
 
 export async function fetchPropertyDetailsData(propertyID: string) {
   const query = supabase
-    .from('property')
+    .from('Properties')
     .select('*')
-    .eq('property_id', propertyID)
+    .eq('Id', propertyID)
     .single();
   return fetchData(query);
 }
 
 export async function fetchPropertyData(ownerID: string) {
   const query = supabase
-    .from('property')
+    .from('Properties')
     .select('*')
-    .eq('owner_id', ownerID)
+    .eq('OwnerId', ownerID)
   return fetchData(query);
 }
 
 export async function fetchFavorites(propertyID: string) {
   const query = supabase
-    .from('property')
+    .from('Properties')
     .select('*')
-    .eq('property_id', propertyID)
+    .eq('id', propertyID)
   return fetchData(query);
 }
 
@@ -60,7 +60,7 @@ export async function fetchFilteredProperties(filterCriteria) {
 
   try {
     const { data, error } = await supabase
-      .from('property')
+      .from('Properties')
       .select('*')
       .eq('price', prices)
 
@@ -91,9 +91,9 @@ export async function getProperties(id, setLoading, setProperties) {
   try {
     setLoading(true)
     const { data, error } = await supabase
-      .from("property")
+      .from("Properties")
       .select()
-      .eq("owner_id", id)
+      .eq("OwnerId", id)
       .limit(1)
     
     if (error) {
@@ -116,9 +116,9 @@ export async function getProperties(id, setLoading, setProperties) {
 export async function getPropertyReviews(propertyID) {
   try {
       const { data, error } = await supabase
-          .from("property_reviews")
+          .from("PropertyRR")
           .select("*")
-          .eq('property_id', propertyID);
+          .eq('PropertyId', propertyID);
 
       if (error) {
           console.log("Error fetching property reviews: ", error.message);
@@ -152,16 +152,17 @@ export const fetchAmenities = async (propertyID, setAmenities) => {
 export async function fetchPropertyTerms(propertyID, setPropertyTerms) {
   try {
     const { data, error } = await supabase
-    .from('property_terms')
+    .schema('beehauz')
+    .from('PropertyConfig')
     .select()
-    .eq('property_id', propertyID.toString())
+    .eq('PropertyId', propertyID.toString())
 
-    if (data) {
-      setPropertyTerms(data[0])
-    } else {
-      console.log("Error fetching property terms: ", error.message)
+    if (!data || data.length === 0) {
+      throw new Error("Data not found")
     }
-  } catch (error) {
+
+    setPropertyTerms(data[0])
+  } catch (error: any) {
     console.log("Error fetching property terms: ", error.message)
   }
 }

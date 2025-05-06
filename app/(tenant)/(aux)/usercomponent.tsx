@@ -1,4 +1,4 @@
-import { getProfile } from "@/api/DataFetching"
+import { getProfile } from "@/app/api/DataFetching"
 
 export const getUsername = async (userID, setUsername) => {
     try {

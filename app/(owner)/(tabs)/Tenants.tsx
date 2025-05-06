@@ -2,14 +2,14 @@ import { Alert, FlatList, Keyboard, Pressable, Text, TextInput, View, TouchableW
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '@/utils/supabase';
-import { TenantsData, UserData } from '@/api/Properties';
-import { getProfile } from '@/api/DataFetching';
+import { TenantsData, UserData } from '@/app/api/Properties';
+import { getProfile } from '@/app/api/DataFetching';
 import { useAuth } from '@/utils/AuthProvider';
 import { Ionicons } from '@expo/vector-icons';
 import debounce from 'lodash/debounce';
-import AvatarImage from '@/app/(tenant)/(aux)/avatar';
 import { router } from 'expo-router';
 import moment from 'moment';
+import AvatarImage from '../../(tenant)/(aux)/avatar';
 
 export default function Tenants() {
   const user = useAuth();

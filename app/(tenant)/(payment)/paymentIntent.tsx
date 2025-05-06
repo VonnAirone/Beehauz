@@ -4,11 +4,11 @@ import { useLocalSearchParams } from 'expo-router'; // Import useRouter and useS
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
-import { fetchPropertyDetailsData, getProfile } from '@/api/DataFetching';
+import { fetchPropertyDetailsData, getProfile } from '@/app/api/DataFetching';
 import { SingleImageDisplay } from '../(aux)/homecomponents';
 import { Dropdown } from 'react-native-element-dropdown';
-import { UserData } from '@/api/Properties';
-import BackButton from '@/components/back-button';
+import BackButton from '@/app/components/back-button';
+import { UserData } from '@/models/IUsers';
 
 export default function PaymentIntent() {
   const user = useAuth()?.session.user;

@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { TextInput } from 'react-native-gesture-handler';
 import { Ionicons } from '@expo/vector-icons';
 import { Camera, useCameraDevice, useCameraFormat } from 'react-native-vision-camera';
-import { uploadID } from '@/api/ImageFetching';
+import { uploadID } from '@/app/api/ImageFetching';
 import { useAuth } from '@/utils/AuthProvider';
 import { router } from 'expo-router';
 import { supabase } from '@/utils/supabase';

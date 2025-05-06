@@ -2,18 +2,20 @@ import { View, Text, Pressable, KeyboardAvoidingView, ScrollView, Alert, Modal }
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
-import { fetchPropertyDetailsData, getProfile, getPropertyReviews } from '@/api/DataFetching';
-import { OwnerData, PropertyData, ReviewData, UserData } from '@/api/Properties';
+import { fetchPropertyDetailsData, getProfile, getPropertyReviews } from '@/app/api/DataFetching';
+import { OwnerData, ReviewData } from '@/app/api/Properties';
 import { Ionicons } from '@expo/vector-icons';
 import { SingleImageDisplay } from '../(aux)/homecomponents';
 import moment from 'moment';
 import { TextInput, TouchableWithoutFeedback } from 'react-native-gesture-handler';
-import BackButton from '@/components/back-button';
+import BackButton from '@/app/components/back-button';
 import { useAuth } from '@/utils/AuthProvider';
 import { supabase } from '@/utils/supabase';
-import { sendPushNotification } from '@/api/usePushNotification';
-import LoadingComponent from '@/components/LoadingComponent';
+import { sendPushNotification } from '@/app/api/usePushNotification';
+import LoadingComponent from '@/app/components/LoadingComponent';
 import { PropertyReviews } from '@/app/(owner)/(aux)/propertycomponents';
+import { PropertyData } from '@/models/IProperty';
+import { UserData } from '@/models/IUsers';
 
 export default function TenantProperty() {
   const userID = useAuth()?.session.user.id;
@@ -102,7 +104,7 @@ export default function TenantProperty() {
     } else {
       const ReviewData = {
         created_at: new Date(),
-        property_id: propertyData?.property_id,
+        property_id: propertyData?.Id,
         tenant_id: userID,
         review_content: reviewContent
       };
@@ -228,16 +230,16 @@ export default function TenantProperty() {
               </View>
 
               <View className='w-full h-40 mt-4'>
-                <SingleImageDisplay propertyID={propertyData?.property_id}/>
+                <SingleImageDisplay propertyID={propertyData?.Id}/>
               </View>
               
               <View className='mt-3'>
-                <Text className='text-lg font-medium'>{propertyData?.name}</Text>
+                <Text className='text-lg font-medium'>{propertyData?.Name}</Text>
               </View>
 
               <View className='flex-row items-center gap-x-1'>
                 <Ionicons name='location' size={15} color={"#444"}/>
-                <Text>{propertyData?.address}</Text>
+                <Text>{propertyData?.Address}</Text>
               </View>
 
               <View className='mt-3'>
@@ -245,9 +247,9 @@ export default function TenantProperty() {
                   <Text className='font-semibold'>Description</Text>
                 </View>
                 <View>
-                  {propertyData?.description ? (
+                  {propertyData?.Slogan ? (
                     <Text className='text-xs'>
-                      {propertyData?.description}
+                      {propertyData?.Slogan}
                     </Text>
                   ): (
                     <Text>

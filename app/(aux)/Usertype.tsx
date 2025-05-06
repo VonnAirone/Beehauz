@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { router } from 'expo-router'
 import { useAuth } from '@/utils/AuthProvider'
 import { supabase } from '@/utils/supabase'
-import BackButton from '@/components/back-button'
+import BackButton from '@/app/components/back-button'
 
 export default function Usertype() {
     const user = useAuth().session?.user
@@ -21,9 +21,9 @@ export default function Usertype() {
         setLoading(true)
         setUsertype(usertype)
         const { data, error } = await supabase
-        .from("users")
-        .update({ "usertype": usertype })
-        .eq("id", user?.id);
+        .from("Users")
+        .update({ "UserType": usertype })
+        .eq("Id", user?.id);
       
 
         if (error) {

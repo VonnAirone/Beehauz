@@ -2,16 +2,16 @@ import { View, Text, Pressable, ActivityIndicator, Alert, TextInput, FlatList, K
 import React, { useEffect, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import BackButton from '@/components/back-button';
+import BackButton from '@/app/components/back-button';
 import AvatarImage from '@/app/(tenant)/(aux)/avatar';
-import { fetchPropertyDetailsData, getProfile } from '@/api/DataFetching';
-import { PropertyData, UserData } from '@/api/Properties';
+import { fetchPropertyDetailsData, getProfile } from '@/app/api/DataFetching';
+import { PropertyData, UserData } from '@/app/api/Properties';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
-import LoadingComponent from '@/components/LoadingComponent';
+import LoadingComponent from '@/app/components/LoadingComponent';
 import { TenantReviews } from '../(aux)/propertycomponents';
-import { sendPushNotification } from '@/api/usePushNotification';
+import { sendPushNotification } from '@/app/api/usePushNotification';
 
 export default function TenantProfile() {
   const ownerID = useAuth()?.session?.user?.id

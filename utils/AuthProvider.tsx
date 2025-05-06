@@ -38,7 +38,7 @@ export function AuthProvider({ children }: Props) {
     // }
 
     if (!isUserSignedIn && !inAuthGroup) {
-      router.replace('/(auth)/');
+      router.replace("/(auth)");
     } else if (isUserSignedIn && inAuthGroup) {
       if (session?.user.user_metadata.profileCompleted === false) {
         router.replace('/Usertype');

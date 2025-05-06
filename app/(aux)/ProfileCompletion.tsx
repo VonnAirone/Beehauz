@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { Alert, Keyboard, ScrollView, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Button from 'components/button';
+import Button from '@/app/components/button';
 import { router, useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
-import BackButton from '@/components/back-button';
+import BackButton from '@/app/components/back-button';
 import { Dropdown } from 'react-native-element-dropdown';
-import { addToNotif, usePushNotifications } from '@/api/usePushNotification';
+import { addToNotif, usePushNotifications } from '@/app/api/usePushNotification';
 
 export default function ProfileCompletion() {
   const { usertype } = useLocalSearchParams();
   const user = useAuth().session?.user;
   const [firstName, setFirstName] = useState('');
+  const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [address, setAddress] = useState('');
   const [age, setAge] = useState('');
@@ -22,6 +23,7 @@ export default function ProfileCompletion() {
   let expoPushToken = usePushNotifications(user?.id);
 
   const handleFirstNameChange = (text) => { setFirstName(text); };
+  const handleMiddleName = (text) => { setMiddleName(text); };
   const handleLastNameChange = (text) => { setLastName(text); };
   const handleAddressChange = (text) => setAddress(text);
   const handleAgeChange = (num) => setAge(num);
@@ -29,22 +31,24 @@ export default function ProfileCompletion() {
 
   const updateUserInformation = async () => {
     try {
-      const { data, error } = await supabase.from('users')
-        .update({
-          firstname: firstName,
-          lastname: lastName,
-          age: age,
-          address: address,
-          phonenumber: phoneNumber,
-          gender: gender,
-          createdate: new Date(),
+      const { data, error } = await supabase.from('Users')
+        .insert({
+          Id: user?.id,
+          FirstName: firstName,
+          MiddleName: middleName,
+          LastName: lastName,
+          UserType: usertype,
+          Age: age,
+          Address: address,
+          Phone: phoneNumber,
+          Gender: gender,
+          CreatedAt: new Date(),
         })
-        .eq("id", user?.id);
   
       console.log("Update result:", data, error);
   
       if (error) {
-        Alert.alert("Error updating user information:", error.message);
+        Alert.alert("Error inserting user information:", error.message);
         return;
       }
   
@@ -121,9 +125,9 @@ export default function ProfileCompletion() {
         showsVerticalScrollIndicator={false}
         className="flex-1 p-5">
           <BackButton/>
-          <View className="mt-10">
+          <View className='mt-5'>
             <View>
-              <Text className="text-xl font-semibold mb-2">COMPLETE YOUR PROFILE INFORMATION</Text>
+              <Text className="text-xl font-semibold mb-2" style={{color: "#ff8b00"}}>COMPLETE YOUR PROFILE INFORMATION</Text>
               <Text className='text-base'>To enhance your user experience, kindly fill in the form below.</Text>
             </View>
 
@@ -134,7 +138,7 @@ export default function ProfileCompletion() {
                     clearTextOnFocus
                     value={firstName}
                     onChangeText={handleFirstNameChange}
-                    className='p-2 pl-5 bg-gray-100 focus:border-gray-400 focus:border rounded-md'
+                    className='p-2 pl-5 bg-gray-50 focus:border-gray-400 focus:border rounded-md'
                   />
               </View>
 
@@ -142,9 +146,9 @@ export default function ProfileCompletion() {
                 <Text className="mb-1 font-semibold text-base">Middle Name</Text>
                   <TextInput
                     clearTextOnFocus
-                    value={lastName}
-                    onChangeText={handleLastNameChange}
-                    className='p-2 pl-5 bg-gray-100 focus:border-gray-400 focus:border rounded-md'
+                    value={middleName}
+                    onChangeText={handleMiddleName}
+                    className='p-2 pl-5 bg-gray-50 focus:border-gray-400 focus:border rounded-md'
                   />
               </View>
               <View className='grow mt-4'>
@@ -153,7 +157,7 @@ export default function ProfileCompletion() {
                     clearTextOnFocus
                     value={lastName}
                     onChangeText={handleLastNameChange}
-                    className='p-2 pl-5 bg-gray-100 focus:border-gray-400 focus:border rounded-md'
+                    className='p-2 pl-5 bg-gray-50 focus:border-gray-400 focus:border rounded-md'
                   />
               </View>
 
@@ -163,7 +167,7 @@ export default function ProfileCompletion() {
                     clearTextOnFocus
                     value={user?.email}
                     editable={false}
-                    className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md'
+                    className='p-2 pl-5 bg-gray-50 focus:border-gray-400 rounded-md'
                   />
               </View>
 
@@ -174,7 +178,7 @@ export default function ProfileCompletion() {
                     value={address}
                     placeholder={'(ex. Barangay, Municipality, Province)'}
                     onChangeText={handleAddressChange}
-                    className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md'
+                    className='p-2 pl-5 bg-gray-50 focus:border-gray-400 rounded-md'
                   />
               </View>
 
@@ -187,13 +191,13 @@ export default function ProfileCompletion() {
                     inputMode='numeric'
                     placeholder={'Age'}
                     onChangeText={handleAgeChange}
-                    className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+                    className='p-2 pl-5 bg-gray-50 focus:border-gray-400 rounded-md text-xs'
                   />
                 </View>
 
                 <View className='grow ml-5'>
                   <Text className="mb-1 font-semibold text-base">Gender</Text>
-                  <View className='bg-gray-100 rounded-md'>
+                  <View className='bg-gray-50 rounded-md'>
                     <Dropdown 
                       style={{padding: 4}}
                       data={genderOptions} 
@@ -221,7 +225,7 @@ export default function ProfileCompletion() {
                     placeholder='+63 -'
                     value={phoneNumber}
                     onChangeText={handlePhoneNumberChange}
-                    className='p-2 pl-5 bg-gray-100 focus:border-gray-400 rounded-md text-xs'
+                    className='p-2 pl-5 bg-gray-50 focus:border-gray-400 rounded-md text-xs'
                   />
               </View>
               

@@ -1,7 +1,7 @@
 import { StyleSheet, View, Image, Text, ImageBackground} from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import Button from '@/components/button'
+import Button from '@/app/components/button'
 
 export default function OnboardPage() {
   return (

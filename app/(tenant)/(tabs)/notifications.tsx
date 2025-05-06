@@ -1,10 +1,10 @@
-import { ListRenderItemInfo, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
-import { formatDate, formatTime } from '@/components/dateandtimeformat';
+import { formatDate } from '@/app/components/dateandtimeformat';
 import { FlatList } from 'react-native-gesture-handler';
 
 export default function Notifications() {

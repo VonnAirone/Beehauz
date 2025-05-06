@@ -3,14 +3,14 @@ import { Text, View, Alert, TextInput, Pressable, FlatList, ScrollView, Activity
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/utils/AuthProvider';
 import { supabase } from '@/utils/supabase';
-import { loadImages, uploadImage } from '@/api/ImageFetching';
-import { fetchAmenities, fetchPropertyDetailsData, fetchPropertyTerms } from '@/api/DataFetching';
-import { PropertyData, PropertyTerms } from '@/api/Properties';
+import { loadImages, uploadImage } from '@/app/api/ImageFetching';
+import { fetchAmenities, fetchPropertyDetailsData, fetchPropertyTerms } from '@/app/api/DataFetching';
+import { PropertyData, PropertyTerms } from '@/app/api/Properties';
 import { Ionicons } from '@expo/vector-icons';
-import { Images } from '@/app/(tenant)/(aux)/homecomponents';
-import BackButton from '@/components/back-button';
+import BackButton from '@/app/components/back-button';
 import { useLocalSearchParams } from 'expo-router';
-import LoadingComponent from '@/components/LoadingComponent';
+import LoadingComponent from '@/app/components/LoadingComponent';
+import { Images } from '../../(tenant)/(aux)/homecomponents';
 
 
 export default function BHDetails() {

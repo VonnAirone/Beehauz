@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Keyboard, TextInput, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { fetchPopularNowList, fetchPropertyListData } from '@/api/DataFetching';
+import { fetchPopularNowList, fetchPropertyListData } from '@/app/api/DataFetching';
 import { PopularNow, PropertyList } from '../(aux)/homecomponents';
 import debounce from 'lodash.debounce';
 import { Ionicons } from '@expo/vector-icons';
-import BackButton from '@/components/back-button';
-import { LocationData } from '@/api/Properties';
-import { getPermissions } from '@/api/Location';
+import BackButton from '@/app/components/back-button';
+import { LocationData } from '@/app/api/Properties';
+import { getPermissions } from '@/app/api/Location';
 import { fetchNearbySAC, fetchNearbyUA, locationsData, pricesData, ratingsData, fetchPropertiesByAverageRating, fetchPropertiesByPriceRange } from '../(aux)/Filters';
 import { Dropdown } from 'react-native-element-dropdown';
 

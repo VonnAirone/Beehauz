@@ -6,10 +6,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ChatComponent from "../(aux)/ChatComponent";
 import { BottomSheetModal, BottomSheetModalProvider, BottomSheetView } from '@gorhom/bottom-sheet';
-import { OwnerData, PropertyData } from "@/api/Properties";
+import { OwnerData } from "@/app/api/Properties";
 import { supabase } from "@/utils/supabase";
-import { ContactOwner } from "@/api/ContactOwner";
-import { getProfile } from "@/api/DataFetching";
+import { ContactOwner } from "@/app/api/ContactOwner";
+import { getProfile } from "@/app/api/DataFetching";
+import { PropertyData } from "@/models/IProperty";
 
 export default function Messages() {
   const session = useAuth();
@@ -186,7 +187,7 @@ export default function Messages() {
                   className="p-3 bg-gray-100 flex-row items-center justify-between rounded-md">
                     <View className="rounded-md">
                       <Text className="font-semibold">{item.first_name} {item.last_name}</Text>
-                      <Text className="text-xs">Owner of {ownerProperty[index]?.name}</Text> 
+                      <Text className="text-xs">Owner of {ownerProperty[index]?.Name}</Text> 
                     </View>
 
                     <View>

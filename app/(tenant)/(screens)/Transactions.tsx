@@ -1,14 +1,15 @@
 import { FlatList, Pressable, ScrollView, Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import BackButton from '@/components/back-button';
+import BackButton from '@/app/components/back-button';
 import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
-import { AppointmentData, PropertyData } from '@/api/Properties';
-import { fetchPropertyDetailsData } from '@/api/DataFetching';
+import { AppointmentData } from '@/app/api/Properties';
+import { fetchPropertyDetailsData } from '@/app/api/DataFetching';
 import { router } from 'expo-router';
-import LoadingComponent from '@/components/LoadingComponent';
-import { usePushNotifications } from '@/api/usePushNotification';
+import LoadingComponent from '@/app/components/LoadingComponent';
+import { usePushNotifications } from '@/app/api/usePushNotification';
+import { PropertyData } from '@/models/IProperty';
 
 export default function Transactions() {
   const user = useAuth()?.session.user;
@@ -178,7 +179,7 @@ export default function Transactions() {
                 data={transactions}
                 keyExtractor={item => item.appointment_id || item.rental_id}
                 renderItem={({ item, index }) => {
-                  const propertyName = properties && properties[index] ? properties[index].name : 'Unknown Property';
+                  const propertyName = properties && properties[index] ? properties[index].Name : 'Unknown Property';
                 
                   if (item.type === 'Visit') {
                     // Handling 'Visit' appointments

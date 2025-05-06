@@ -1,16 +1,17 @@
 import { Text, View, Pressable, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import Button from 'components/button';
+import Button from '@/app/components/button';
 import { supabase } from 'utils/supabase';
 import TermsAndPolicies from '../(aux)/Terms and Policies';
 import { Ionicons } from '@expo/vector-icons';
-import { Logo, TextInputField } from '../(tenant)/(aux)/logincomponent';
 import { router } from 'expo-router';
 import { makeRedirectUri } from 'expo-auth-session';
 import * as QueryParams from "expo-auth-session/build/QueryParams";
 import * as WebBrowser from "expo-web-browser";
-import { sendPushNotification } from '@/api/Test';
+import { sendPushNotification } from '@/app/api/Test';
 import { Input } from 'react-native-elements/dist/input/Input';
+import Logo from '@/app/components/logo';
+import { TextInputField } from '../(tenant)/(aux)/logincomponent';
 
 export default function Login() {
 const [email, setEmail] = useState('');
@@ -237,7 +238,7 @@ return (
               onChangeText={handleEmailChange}
               onPressReveal={() => { } }
               feedbackText={isEmailInvalid ? 'Must be a valid email account.' :
-                isEmailEmpty ? 'Your email is required for signing in.' : ''} defaultFeedback={undefined}/>
+              isEmailEmpty ? 'Your email is required for signing in.' : ''} defaultFeedback={undefined}/>
                     
         </View>
 
@@ -257,7 +258,7 @@ return (
           <View className='absolute -bottom-2 w-80'>
             {!isNotRegistered ? (
               <Pressable onPress={() => router.push("/(auth)/SendResetPasswordLink")}>
-                  <Text className='text-right text-xs right-1'>Forgot Password?</Text>
+                  <Text className='text-right right-1'>Forgot Password?</Text>
               </Pressable>
             ) : (
               <Text className='text-right bottom- right-1'></Text>
@@ -273,7 +274,7 @@ return (
           <Button onPress={handleSubmission} text={isNotRegistered ? 'CREATE ACCOUNT' : loading ? 'LOADING' : 'LOGIN'} />
         </View>
 
-        {isNotRegistered === false && (
+        {/* {isNotRegistered === false && (
         <>
           <View className='my-4'>
             <Text>or log in using</Text>
@@ -314,13 +315,13 @@ return (
           </View>
         </>
         )}
-        
+         */}
 
         <View className='items-center relative top-20'>
           <Pressable 
           onPress={Register}
           >
-            <Text className='text-xs'>
+            <Text className='text-sm'>
               {!isNotRegistered ? "Don't have an account?" : "Already have an account?"}{''}
               <Text className='text-blue-500'> Press here.</Text>
             </Text>

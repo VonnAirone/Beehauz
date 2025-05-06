@@ -2,13 +2,13 @@ import { Pressable, Text, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getProfile } from '@/api/DataFetching';
+import { getProfile } from '@/app/api/DataFetching';
 import { useLocalSearchParams } from 'expo-router';
 import { supabase } from '@/utils/supabase';
 import moment from 'moment';
-import BackButton from '@/components/back-button';
+import BackButton from '@/app/components/back-button';
 import { FlatList } from 'react-native-gesture-handler';
-import { convertTo12HourFormat } from '@/components/convertToTimeFormat';
+import { convertTo12HourFormat } from '@/app/components/convertToTimeFormat';
 
 export default function Notifications() {
   const [loading, setLoading] = useState(true)

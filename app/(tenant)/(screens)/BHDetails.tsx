@@ -2,18 +2,20 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Text, View, Image, FlatList, Dimensions, ScrollView, Pressable, Modal, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { fetchPropertyDetailsData, fetchPropertyTerms, fetchTenantStatus, getOwnerData, getPropertyReviews } from '@/api/DataFetching';
-import { loadImages } from '@/api/ImageFetching';
-import BackButton from '@/components/back-button';
+import { fetchPropertyDetailsData, fetchPropertyTerms, fetchTenantStatus, getOwnerData, getPropertyReviews } from '@/app/api/DataFetching';
+import { loadImages } from '@/app/api/ImageFetching';
+import BackButton from '@/app/components/back-button';
 import { Ionicons } from '@expo/vector-icons';
 import { BottomBar } from '../(aux)/detailscomponent';
 import { Images, SingleImageDisplay } from '../(aux)/homecomponents';
-import { PropertyData, ReviewData, OwnerData, PropertyTerms } from '@/api/Properties';
+import { ReviewData, OwnerData } from '@/app/api/Properties';
 import { PropertyReviews } from '@/app/(owner)/(aux)/propertycomponents';
-import LoadingComponent from '@/components/LoadingComponent';
-import { checkBookmarkStatus, toggleBookmark } from '@/components/bookmarks-button';
+import LoadingComponent from '@/app/components/LoadingComponent';
+import { checkBookmarkStatus, toggleBookmark } from '@/app/components/bookmarks-button';
 import { useAuth } from '@/utils/AuthProvider';
 import moment from 'moment';
+import { PropertyData } from '@/models/IProperty';
+import { PropertyTerms } from '@/models/IPropertyTerms';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -49,14 +51,14 @@ export default function BHDetails() {
   async function fetchData() {
     setLoading(true);
     try {
-      const tenantStatus = await fetchTenantStatus(user?.id)
-      setTenantStatus(tenantStatus[0])
+      // const tenantStatus = await fetchTenantStatus(user?.id)
+      // setTenantStatus(tenantStatus[0])
       const fetchedData = await fetchPropertyDetailsData(propertyID?.toString());
       setData(fetchedData);
-      await checkBookmarkStatus(propertyID, user?.id, setBookmarkStatus);
-      await loadImages(propertyID, setImages);
-      await fetchPropertyReviews();
-      await getOwnerData(fetchedData?.owner_id, setOwnerData);
+      // await checkBookmarkStatus(propertyID, user?.id, setBookmarkStatus);
+      // await loadImages(propertyID, setImages);
+      // await fetchPropertyReviews();
+      // await getOwnerData(fetchedData?.owner_id, setOwnerData);
       await fetchPropertyTerms(propertyID, setTerms);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -191,43 +193,40 @@ export default function BHDetails() {
 
           
           <View className='p-5'>
-            <View className='mt-2'>
-              <Text className='text-xl font-semibold'>{data?.name}</Text>
+
+            
+            <View className='flex-row items-center'>
+              <Text className='text-base'>Secure your slot for only</Text>
+              <Text className='text-base font-semibold italic' style={{color: "#ff8b00"}}> PHP {terms?.ReservationFee}!</Text>
+            </View>
+
+            <View className='mt-4'>
+              <Text className='text-xl font-semibold uppercase' style={{color: "#ff8b00"}}>{data?.Name}</Text>
             </View>
             
             
             <View>
               <TouchableOpacity 
-              onPress={() => router.push({pathname: "/(tenant)/(screens)/MapView", params: {latitude: data.latitude, longitude: data.longitude}})}
+              onPress={() => router.push({pathname: "/(tenant)/(screens)/MapView", params: {latitude: data.Lat, longitude: data.Long}})}
               className='flex-row items-center gap-x-1'>
-                <Ionicons name='location' size={15} color={"#444"}/>
+                <Ionicons name='location' size={15}/>
                 <Text className='text-base'>Catungan 1, Sibalom, Antique</Text>
               </TouchableOpacity>
             </View>
 
             <View className='flex-row items-center gap-x-1'>
-              <Ionicons name='star' size={15} color={"#444"}/>
-              <Text> <Text className='font-semibold'>{ratings ? ratings : '0'}</Text> stars / <Text className='font-semibold'>{propertyReviews?.length}</Text> {propertyReviews?.length > 0 ? 'review' : 'reviews'}</Text>
-            </View>
-
-            <View className='flex-row items-center gap-x-1'>
-              <Ionicons name='bed' color={"#444"} size={15}/>
-              <Text><Text className='font-medium'>{data?.available_beds} </Text>beds available</Text>
-            </View>
-
-            <View className='mt-5 flex-row items-center'>
-              <Text className='font-medium'>Reservation Fee:</Text>
-              <Text> {data?.reservation_fee}</Text>
+              <Ionicons name='bed' size={15}/>
+              <Text><Text className='font-medium'>{data?.available_beds !== 0 ? 0 : data?.available_beds } </Text>beds available</Text>
             </View>
  
             <View className='mt-5'>
               <View className='flex-row items-center gap-x-1'>
-                <Text className='font-semibold'>Description</Text>
+                <Text className='font-semibold text-sm'>Description</Text>
               </View>
-              <View className='mt-2'>
-                {data?.description ? (
+              <View className='mt-1 text-sm'>
+                {data?.Slogan ? (
                   <Text>
-                    {data?.description}
+                    {data?.Slogan}
                   </Text>
                 ): (
                   <Text>
@@ -240,24 +239,38 @@ export default function BHDetails() {
             <View className='mt-5'>
               <Text className='font-semibold'>Payment Terms</Text>
               
-              <View className='flex-row items-end mt-1'>
-                <Text className='text-xs'>Advance Payment: </Text>
-                <Text className='font-semibold text-xs'>{terms ? terms?.advance_payment : 'Not specified'}</Text>
+              <View className='flex-row items-end mt-1 gap-x-1'>
+                <Ionicons size={15} name='cash-outline'/>
+                <Text className='text-sm'>Advance Payment: </Text>
+                <Text className='font-semibold text-sm'>{terms ? terms?.AdvancePayment : 'Not specified'}</Text>
               </View>
 
-              <View className='flex-row items-end mt-1'>
-                <Text className='text-xs'>Security Deposit: </Text>
-                <Text className='font-semibold text-xs'>{terms ? terms?.security_deposit : 'Not specified'}</Text>
+              <View className='flex-row items-end mt-1 gap-x-1'>
+                <Ionicons size={15} name='lock-closed'/>
+                <Text className='text-sm'>Security Deposit: </Text>
+                <Text className='font-semibold text-sm'>{terms ? terms?.SecurityDeposit : 'Not specified'}</Text>
               </View>
 
-              <View className='flex-row items-end mt-1'>
-                <Text className='text-xs'>Electricity Bill: </Text>
-                <Text className='font-semibold text-xs'>{terms ? terms?.electricity_bill : 'Not specified'}</Text>
+              <View className='flex-row items-end mt-1 gap-x-1'>
+                <Ionicons name='battery-charging' size={15}/>
+                <Text>
+                  {terms
+                    ? terms.IsElectricityWithSubmeter
+                      ? 'Electricity bill is included'
+                      : 'Electricity bill is not included'
+                    : 'Not specified'}
+                </Text>
               </View>
 
-              <View className='flex-row items-end mt-1'>
-                <Text className='text-xs'>Water Bill: </Text>
-                <Text className='font-semibold text-xs'>{terms ? terms?.water_bills : 'Not specified'}</Text>
+              <View className='flex-row items-end mt-1 gap-x-1'>
+                <Ionicons name='water' size={15}/>
+                <Text className='text-text-sm'>
+                  {terms
+                    ? terms.IsWaterWithSubmeter
+                      ? 'Water is included'
+                      : 'Water is not included'
+                    : 'Not specified'}
+                </Text>
               </View>
             </View>
 
@@ -273,16 +286,20 @@ export default function BHDetails() {
 
               <FlatList 
               data={data?.amenities} 
-              renderItem={({item,index}) =>
-              <View className='mr-2 mt-2'>
-              <View key={index} className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
-                  <Text className='text-center text-xs'>{item}</Text>
-              </View>
-              </View>} showsHorizontalScrollIndicator={false} horizontal={true} />
+              showsHorizontalScrollIndicator={false} 
+              horizontal={true}
+              renderItem={({item,index}) => (              
+                <View className='mr-2 mt-2'>
+                  <View key={index} className='relative grid select-none items-center whitespace-nowrap rounded-lg border border-gray-500 py-1.5 px-3 text-xs font-bold uppercase text-white'>
+                      <Text className='text-center text-xs'>{item}</Text>
+                  </View>
+                </View>
+                )
+              } />
             </View>
 
             <View className='mt-5'>
-              <Pressable onPress={() => router.push({pathname: "/OwnerProfile", params: {owner_id : data?.owner_id}})}>
+              <Pressable onPress={() => router.push({pathname: "/OwnerProfile", params: {owner_id : data?.OwnerId}})}>
               <View className='mt-3 bg-gray-50 p-3 rounded-md'>
                   <View className='flex-row items-center gap-x-3 justify-between'>
                     <View className='gap-y-1'>
@@ -301,7 +318,7 @@ export default function BHDetails() {
                     style={{backgroundColor: "#444"}}
                     className='p-2 rounded-md flex-row items-center'
                     android_ripple={{color: "white"}}
-                    onPress={() => router.push({pathname: "/(tenant)/(screens)/OwnerProfile", params: {owner_id : data?.owner_id}})}>
+                    onPress={() => router.push({pathname: "/(tenant)/(screens)/OwnerProfile", params: {owner_id : data?.OwnerId}})}>
                       <Text className='text-white'>View Owner details</Text>
                       <Ionicons name='chevron-forward-outline' size={20} color={"white"}/>
                     </Pressable>
@@ -311,7 +328,7 @@ export default function BHDetails() {
             </View>
 
             <View className='mt-5'>
-              <Text className='font-semibold'>Reviews ({propertyReviews?.length})</Text>
+              <Text className='font-semibold'>Reviews {propertyReviews?.length ? (propertyReviews.length) : ''}</Text>
               <Text className='italic text-xs mt-1'>Note: Only previous tenants and currently boarding are allowed to leave reviews for the property.</Text>
 
               <View className='mt-2'>
@@ -356,9 +373,9 @@ export default function BHDetails() {
       userID={user?.id}
       ownerID={ownerData?.id}
       tenantStatus={tenantStatus}
-      price={data?.price} 
+      price={data?.RentalFee} 
       propertyID={propertyID} 
-      propertyName={data?.name}/>
+      propertyName={data?.Name}/>
       </View>
       )}
 

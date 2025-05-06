@@ -1,16 +1,4 @@
-export interface UserData {
-    id: string;
-    first_name: string;
-    last_name: string;
-    address: string;
-    email: string;
-    gender: string;
-    phone_number: number;
-    age: string;
-    description: string;
-    date_joined: string;
-    expo_push_token: string;
-}
+
 
 // export type PropertyData = {
 //     property_id: string;
@@ -60,30 +48,6 @@ export type TenantsData = {
   property_id: string;
   tenant_id: string;
   status: "Boarding" | "Request To Leave" | "Left"
-}
-
-export type PropertyData = {
-  property_id: string;
-  name: string;
-  price: number;
-  view_count: number;
-  description: string;
-  owner_id: string;
-  latitude: number,
-  longitude: number,
-  address: string,
-  available_beds: number,
-  reservation_fee: number,
-  amenities: []
-}
-
-export type PropertyTerms = {
-  property_id: string;
-  advance_payment: string;
-  security_deposit: string;
-  minimum_stay: string;
-  electricity_bill: string;
-  water_bills: string;
 }
 
 

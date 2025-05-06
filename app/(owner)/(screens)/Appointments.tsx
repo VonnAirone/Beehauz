@@ -3,10 +3,10 @@ import { View, Text, FlatList, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '@/utils/supabase';
 import { useLocalSearchParams } from 'expo-router';
-import { getProfile } from '@/api/DataFetching';
+import { getProfile } from '@/app/api/DataFetching';
 import BookingItem, { Appointments, History } from '../(aux)/bookingcomponents';
-import BackButton from '@/components/back-button';
-import { addToNotif, sendPushNotification } from '@/api/usePushNotification';
+import BackButton from '@/app/components/back-button';
+import { addToNotif, sendPushNotification } from '@/app/api/usePushNotification';
 
   export default function Bookings() {
     const [bookings, setBookings] = useState(null);

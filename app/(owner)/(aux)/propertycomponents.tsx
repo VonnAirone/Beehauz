@@ -1,9 +1,9 @@
-import { getProfile } from '@/api/DataFetching';
-import StarRatingComponent from '@/app/(tenant)/(aux)/starrating';
+import { getProfile } from '@/app/api/DataFetching';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Text, View, Pressable, TouchableOpacity, FlatList } from 'react-native';
+import StarRatingComponent from '../../(tenant)/(aux)/starrating';
 
 export const AmenitiesSelection = () => {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
@@ -64,7 +64,7 @@ export const DashboardComponents = ({id, properties, tenants, bookings, ownerSta
 
   async function createProperty() {
     if (ownerStatus === 'Unverified') {
-      router.push("/(owner)/(verification)/VerificationPage")
+      router.push("/pages/VerificationPage")
     } else if (ownerStatus === 'Pending Verification') {
       router.push("/(owner)/(verification)/Confirmation")
     } else {

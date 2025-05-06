@@ -2,10 +2,10 @@ import { supabase } from "@/utils/supabase"
 
 export async function checkBookmarkStatus(propertyID, tenantID, setBookmarkStatus) {
   const { data, error } = await supabase
-    .from('favorites')
+    .from('UserBookmarks')
     .select('*')
-    .eq('property_id', propertyID)
-    .eq('tenant_id', tenantID)
+    .eq('PropertyId', propertyID)
+    .eq('UserId', tenantID)
 
   if (data && data.length > 0) {
     setBookmarkStatus(true)
@@ -23,8 +23,8 @@ export async function checkBookmarkStatus(propertyID, tenantID, setBookmarkStatu
   export async function addToFavorites(propertyID, tenantID, setBookmarkStatus) {
     setBookmarkStatus(true)
     const { data, error } = await supabase
-      .from('favorites')
-      .upsert({ property_id: propertyID, tenant_id: tenantID })
+      .from('UserBookmarks')
+      .upsert({ PropertyId: propertyID, UserId: tenantID })
 
     if (error) {
       console.log("Error adding to favorites:", error.message)
@@ -35,10 +35,10 @@ export async function checkBookmarkStatus(propertyID, tenantID, setBookmarkStatu
 
   export async function removeFromFavorites(propertyID, tenantID, setBookmarkStatus) {
     setBookmarkStatus(false)
-    const { data, error } = await supabase.from('favorites')
+    const { data, error } = await supabase.from('UserBookmarks')
       .delete()
-      .eq('property_id', propertyID)
-      .eq('tenant_id', tenantID)
+      .eq('PropertyId', propertyID)
+      .eq('UserId', tenantID)
 
     if (error) {
       console.log("Error removing from favorites:", error.message)

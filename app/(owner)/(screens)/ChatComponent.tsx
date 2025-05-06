@@ -3,9 +3,9 @@
   import { supabase } from "@/utils/supabase";
   import { useAuth } from "@/utils/AuthProvider";
   import { router } from "expo-router";
-import { fetchLastMessage, subscribeToRealTimeMessages } from "@/app/(tenant)/(aux)/messagecomponent";
-import { getUsername } from "@/app/(tenant)/(aux)/usercomponent";
-import AvatarImage from "@/app/(tenant)/(aux)/avatar";
+import AvatarImage from "../../(tenant)/(aux)/avatar";
+import { subscribeToRealTimeMessages, fetchLastMessage } from "../../(tenant)/(aux)/messagecomponent";
+import { getUsername } from "../../(tenant)/(aux)/usercomponent";
 
   const ChatComponent = ({ item }) => {
     const user = useAuth()?.session?.user;

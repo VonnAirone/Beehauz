@@ -1,16 +1,16 @@
 import { Alert, Keyboard, Modal, Pressable, Text, TextInput, TouchableWithoutFeedback, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import BackButton from '@/components/back-button'
+import BackButton from '@/app/components/back-button'
 import { Ionicons } from '@expo/vector-icons'
 import { format } from 'date-fns'
 import { useAuth } from '@/utils/AuthProvider'
 import { supabase } from '@/utils/supabase'
 import { router, useLocalSearchParams } from 'expo-router'
-import { UserData } from '@/api/Properties'
 import { Calendar } from 'react-native-calendars'
-import { getProfile } from '@/api/DataFetching'
-import { sendPushNotification } from '@/api/usePushNotification'
+import { getProfile } from '@/app/api/DataFetching'
+import { sendPushNotification } from '@/app/api/usePushNotification'
+import { UserData } from '@/models/IUsers'
 
 export default function PayAVisit() {
     const session = useAuth()?.session;

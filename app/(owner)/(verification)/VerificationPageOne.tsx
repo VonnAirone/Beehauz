@@ -1,7 +1,7 @@
 import { View, Text, Image, Pressable } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import BackButton from '@/components/back-button'
+import BackButton from '@/app/components/back-button'
 import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 

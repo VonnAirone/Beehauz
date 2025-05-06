@@ -2,7 +2,7 @@ import { View, Text, Pressable, Linking } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
-import Logo from '@/components/logo'
+import Logo from '@/app/components/logo'
 
 export default function ConfirmEmail() {
 

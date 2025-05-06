@@ -91,7 +91,7 @@ export function BottomBar({ userID, price, propertyID, propertyName, tenantStatu
   }
 
   return (
-    <View style={{ backgroundColor: "#444" }} className="absolute bottom-0 left-0 z-50 w-full h-16 py-2 px-6 flex-row items-center justify-between">
+    <View style={{ backgroundColor: "#ff8b00" }} className="absolute bottom-0 left-0 z-50 w-full h-16 py-2 px-6 flex-row items-center justify-between">
       <Modal
       className="flex-1 items-center justify-center"
       transparent={true}

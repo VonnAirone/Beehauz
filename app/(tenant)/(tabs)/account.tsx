@@ -3,10 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/utils/supabase';
 import { useAuth } from '@/utils/AuthProvider';
-import { fetchPropertyDetailsData, getProfile } from '@/api/DataFetching';
-import { PropertyData, UserData } from '@/api/Properties';
 import { router } from 'expo-router';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import { UserData } from '@/models/IUsers';
+import { PropertyData } from '@/models/IProperty';
 
 export default function Account() {
   const auth = useAuth();

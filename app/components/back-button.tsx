@@ -10,8 +10,8 @@ export default function BackButton() {
          className='w-14'
         onPress={() => router.back()}>
             <View className='flex-row items-center '>
-                <Ionicons name='chevron-back-outline' size={20}/>
-                <Text>Back</Text>
+                <Ionicons name='chevron-back-outline' color={'#ff8b00'} size={20}/>
+                <Text style={{color: '#ff8b00'}}>Back</Text>
             </View>
         </Pressable>
     </View>

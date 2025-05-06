@@ -1,4 +1,4 @@
-import { downloadAvatar } from '@/api/ImageFetching';
+import { downloadAvatar } from '@/app/api/ImageFetching';
 import React, { useState, useEffect, memo } from 'react';
 import { View, Image } from 'react-native';
 

@@ -4,13 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/utils/AuthProvider';
 import { supabase } from '@/utils/supabase';
-import { PropertyData, PropertyTerms, ReviewData } from '@/api/Properties';
+import { PropertyData, PropertyTerms, ReviewData } from '@/app/api/Properties';
 import { Images } from '@/app/(tenant)/(aux)/homecomponents';
-import { loadImages } from '@/api/ImageFetching';
-import { fetchAmenities, fetchPropertyTerms, getPropertyReviews } from '@/api/DataFetching';
+import { loadImages } from '@/app/api/ImageFetching';
+import { fetchAmenities, fetchPropertyTerms, getPropertyReviews } from '@/app/api/DataFetching';
 import { PropertyReviews } from '../(aux)/propertycomponents';
 import { router } from 'expo-router';
-import LoadingComponent from '@/components/LoadingComponent';
+import LoadingComponent from '@/app/components/LoadingComponent';
 
 
 export default function BHDetails() {

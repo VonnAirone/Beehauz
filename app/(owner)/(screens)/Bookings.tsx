@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, FlatList, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '@/utils/supabase';
 import { useLocalSearchParams } from 'expo-router';
-import { getProfile } from '@/api/DataFetching';
+import { getProfile } from '@/app/api/DataFetching';
 import BookingItem, { Appointments, History } from '../(aux)/bookingcomponents';
-import BackButton from '@/components/back-button';
-import LottieView from 'lottie-react-native';
-import { Ionicons } from '@expo/vector-icons';
+import BackButton from '@/app/components/back-button';
 import { BookingSkeleton } from '../(aux)/SkeletonComponents';
 
 export default function Bookings() {

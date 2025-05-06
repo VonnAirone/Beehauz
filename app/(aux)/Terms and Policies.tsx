@@ -4,8 +4,8 @@ import { Link } from 'expo-router'
 
 export default function TermsAndPolicies() {
   return (
-      <View className='w-60 items-center mt-3'>
-        <Text className='text-center text-xs'>By signing up, you agree to our
+      <View className='w-72 items-center mt-3'>
+        <Text className='text-center text-sm'>By signing up, you agree to our
           <Link href={'/(aux)/Terms and Policies'} className='font-bold'> Terms and Policies </Link>
 
           as well the

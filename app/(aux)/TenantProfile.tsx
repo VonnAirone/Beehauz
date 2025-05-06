@@ -2,12 +2,12 @@ import { View, Text, Pressable, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useGlobalSearchParams, useLocalSearchParams } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import BackButton from '@/components/back-button';
-import AvatarImage from '@/app/(tenant)/(aux)/avatar';
-import { fetchPropertyDetailsData, getProfile } from '@/api/DataFetching';
-import { PropertyData, UserData } from '@/api/Properties';
+import BackButton from '@/app/components/back-button';
+import { fetchPropertyDetailsData, getProfile } from '@/app/api/DataFetching';
+import { PropertyData, UserData } from '@/app/api/Properties';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/utils/supabase';
+import AvatarImage from '../(tenant)/(aux)/avatar';
 
 export default function TenantProfile() {
   let { tenant_id} = useLocalSearchParams()
